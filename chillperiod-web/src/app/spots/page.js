@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import MobileNav from '@/components/MobileNav';
+import { useState, useEffect } from 'react';
 
 const demoSpots = [
   { _id: '1', name: 'Bhagya Vihar Internet Cafe', description: 'Internet cafe near campus, good for quick browsing and printing', category: 'cafe', vibe: 'quiet', budget: 'cheap', distance: '10 min walk', address: 'Mangal Bazar Rd, Bhagya Vihar', upvotes: 12 },
@@ -15,7 +16,62 @@ const demoSpots = [
 const categoryEmojis = { cafe: '☕', restaurant: '🍕', park: '🌳', library: '📚', arcade: '🎮', mall: '🛍️', other: '📍' };
 
 export default function SpotsPage() {
-  const [spots] = useState(demoSpots);
+  const [spots, setSpots] = useState([]);
+  const [demoSpots] = useState([
+    { _id: '1', name: 'Bhagya Vihar Internet Cafe', description: 'Internet cafe near campus, good for quick browsing and printing', category: 'cafe', vibe: 'quiet', budget: 'cheap', distance: '10 min walk', address: 'Mangal Bazar Rd, Bhagya Vihar', upvotes: 12 },
+    { _id: '2', name: 'Sector 17/18 Park', description: 'Large park on Chhotu Ram Marg, good for groups', category: 'park', vibe: 'social', budget: 'free', distance: '3 min walk', address: 'Chhotu Ram Marg, Sector 17/18', upvotes: 25 },
+    { _id: '3', name: 'Garg Trade Centre Food Court', description: 'Multiple food options in one place, good for groups', category: 'restaurant', vibe: 'social', budget: 'moderate', distance: '12 min walk', address: 'Sector 11, Rohini', upvotes: 18 },
+  ]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newSpot, setNewSpot] = useState({
+    name: '', description: '', category: 'cafe', vibe: 'both', budget: 'moderate', 
+    address: '', googleMapsUrl: '', distance: ''
+  });
+
+  useEffect(() => {
+    fetchSpots();
+  }, []);
+
+  const fetchSpots = async () => {
+    try {
+      const res = await fetch('/api/spots');
+      if (res.ok) {
+        const data = await res.json();
+        // If no spots in DB, show demo spots, otherwise show DB spots
+        setSpots(data.length > 0 ? data : demoSpots);
+      }
+    } catch (error) {
+      console.error('Failed to fetch spots', error);
+      setSpots(demoSpots);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddSpot = async () => {
+    if (!newSpot.name || !newSpot.address) return;
+
+    try {
+      const res = await fetch('/api/spots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...newSpot, college: 'BPIT' })
+      });
+
+      if (res.ok) {
+        const addedSpot = await res.json();
+        setSpots(prev => [addedSpot, ...prev]);
+        setShowAddModal(false);
+        setNewSpot({
+          name: '', description: '', category: 'cafe', vibe: 'both', budget: 'moderate', 
+          address: '', googleMapsUrl: '', distance: ''
+        });
+      }
+    } catch (error) {
+      console.error('Failed to add spot', error);
+    }
+  };
   const [filter, setFilter] = useState({ category: 'all', vibe: 'all', budget: 'all' });
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,23 +85,9 @@ export default function SpotsPage() {
   });
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0f' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Navigation */}
-      <nav style={{ 
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-        background: 'rgba(10, 10, 15, 0.9)', backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255,255,255,0.05)'
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ fontSize: '24px', fontWeight: 'bold', background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textDecoration: 'none' }}>
-            ChillPeriod
-          </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <Link href="/spots" style={{ color: 'white', fontWeight: 500, textDecoration: 'none' }}>Spots</Link>
-            <Link href="/attendance" style={{ color: '#9ca3af', textDecoration: 'none' }}>Attendance</Link>
-          </div>
-        </div>
-      </nav>
+      <MobileNav currentPage="spots" />
 
       {/* Main Content */}
       <div style={{ paddingTop: '80px', paddingBottom: '48px' }}>
@@ -53,16 +95,16 @@ export default function SpotsPage() {
           
           {/* Header - Centered */}
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>
+            <h1 style={{ fontSize: '36px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }}>
               📍 <span style={{ background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Chill Spots</span>
             </h1>
-            <p style={{ color: '#6b7280' }}>Discover the best hangout spots near BPIT</p>
+            <p style={{ color: 'var(--text-secondary)' }}>Discover the best hangout spots near BPIT</p>
           </div>
 
           {/* Search & Filters - Centered */}
           <div style={{ 
             maxWidth: '800px', margin: '0 auto 32px auto',
-            background: '#12121a', border: '1px solid #2a2a3a', borderRadius: '16px', padding: '20px'
+            background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '20px'
           }}>
             <input
               type="text"
@@ -71,15 +113,15 @@ export default function SpotsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ 
                 width: '100%', padding: '12px 16px', marginBottom: '16px',
-                background: '#0a0a0f', border: '1px solid #2a2a3a', borderRadius: '12px',
-                color: 'white', fontSize: '14px', outline: 'none'
+                background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '12px',
+                color: 'var(--text-primary)', fontSize: '14px', outline: 'none'
               }}
             />
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div id="filters" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
               <select
                 value={filter.category}
                 onChange={(e) => setFilter(prev => ({ ...prev, category: e.target.value }))}
-                style={{ padding: '10px 16px', background: '#0a0a0f', border: '1px solid #2a2a3a', borderRadius: '10px', color: 'white', fontSize: '14px' }}
+                style={{ padding: '10px 16px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)', fontSize: '14px' }}
               >
                 <option value="all">All Categories</option>
                 <option value="cafe">☕ Cafes</option>
@@ -89,7 +131,7 @@ export default function SpotsPage() {
               <select
                 value={filter.vibe}
                 onChange={(e) => setFilter(prev => ({ ...prev, vibe: e.target.value }))}
-                style={{ padding: '10px 16px', background: '#0a0a0f', border: '1px solid #2a2a3a', borderRadius: '10px', color: 'white', fontSize: '14px' }}
+                style={{ padding: '10px 16px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)', fontSize: '14px' }}
               >
                 <option value="all">All Vibes</option>
                 <option value="quiet">🤫 Quiet</option>
@@ -99,7 +141,7 @@ export default function SpotsPage() {
               <select
                 value={filter.budget}
                 onChange={(e) => setFilter(prev => ({ ...prev, budget: e.target.value }))}
-                style={{ padding: '10px 16px', background: '#0a0a0f', border: '1px solid #2a2a3a', borderRadius: '10px', color: 'white', fontSize: '14px' }}
+                style={{ padding: '10px 16px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)', fontSize: '14px' }}
               >
                 <option value="all">All Budgets</option>
                 <option value="free">💚 Free</option>
@@ -110,12 +152,12 @@ export default function SpotsPage() {
           </div>
 
           {/* Results Count - Centered */}
-          <p style={{ textAlign: 'center', color: '#6b7280', marginBottom: '24px' }}>
-            Found <span style={{ color: 'white', fontWeight: 600 }}>{filteredSpots.length}</span> spots
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+            Found <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{filteredSpots.length}</span> spots
           </p>
 
           {/* Spots Grid - Centered */}
-          <div style={{ 
+          <div id="spots-grid" style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
             gap: '24px',
@@ -126,23 +168,23 @@ export default function SpotsPage() {
               <div 
                 key={spot._id} 
                 style={{ 
-                  background: '#12121a', border: '1px solid #2a2a3a', borderRadius: '16px', padding: '20px',
+                  background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '20px',
                   transition: 'all 0.3s', cursor: 'pointer'
                 }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#8b5cf6'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = '#2a2a3a'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.transform = 'translateY(0)'; }}
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <span style={{ fontSize: '28px' }}>{categoryEmojis[spot.category]}</span>
                     <div>
-                      <h3 style={{ fontWeight: 600, color: 'white', fontSize: '15px' }}>{spot.name}</h3>
-                      <p style={{ fontSize: '13px', color: '#6b7280' }}>{spot.distance}</p>
+                      <h3 style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '15px' }}>{spot.name}</h3>
+                      <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{spot.distance}</p>
                     </div>
                   </div>
                   <span style={{ color: '#10b981', fontSize: '14px' }}>👍 {spot.upvotes}</span>
                 </div>
-                <p style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '12px', lineHeight: 1.5 }}>{spot.description}</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '12px', lineHeight: 1.5 }}>{spot.description}</p>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
                   <span style={{ 
                     fontSize: '11px', padding: '4px 10px', borderRadius: '20px',
@@ -151,11 +193,11 @@ export default function SpotsPage() {
                   }}>
                     {spot.vibe === 'quiet' ? '🤫 Quiet' : spot.vibe === 'social' ? '🎉 Social' : '🎭 Both'}
                   </span>
-                  <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', background: '#1f2937', color: '#9ca3af' }}>
+                  <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
                     {spot.budget === 'free' ? '💚 Free' : spot.budget === 'cheap' ? '💵 Cheap' : '💵💵 Moderate'}
                   </span>
                 </div>
-                <p style={{ fontSize: '12px', color: '#4b5563' }}>📍 {spot.address}</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>📍 {spot.address}</p>
               </div>
             ))}
           </div>
@@ -167,19 +209,141 @@ export default function SpotsPage() {
             border: '1px solid rgba(139,92,246,0.2)', borderRadius: '20px', padding: '32px'
           }}>
             <h3 style={{ fontSize: '20px', fontWeight: 600, color: 'white', marginBottom: '8px' }}>Know a great chill spot?</h3>
-            <p style={{ color: '#6b7280', marginBottom: '20px' }}>
-              Use the Discord bot: <code style={{ background: '#0a0a0f', padding: '4px 8px', borderRadius: '6px', color: '#a78bfa' }}>/addspot</code>
+            <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '20px' }}>
+              Share it with the community! Add it directly here.
             </p>
-            <button style={{ 
+            <button onClick={() => setShowAddModal(true)} style={{ 
               padding: '12px 24px', background: '#8b5cf6', color: 'white', border: 'none',
               borderRadius: '12px', fontWeight: 600, cursor: 'pointer', fontSize: '14px'
             }}>
-              ➕ Add Spot via Discord
+              ➕ Add New Spot
             </button>
           </div>
 
+          {/* Add Spot Modal */}
+          {showAddModal && (
+            <div style={{ 
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+            }} onClick={() => setShowAddModal(false)}>
+              <div style={{ 
+                background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '20px', 
+                padding: '32px', maxWidth: '500px', width: '100%', maxHeight: '90vh', overflowY: 'auto'
+              }} onClick={e => e.stopPropagation()}>
+                <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px', textAlign: 'center' }}>
+                  📍 Add New Spot
+                </h3>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Spot Name *</label>
+                    <input type="text" value={newSpot.name} onChange={e => setNewSpot({ ...newSpot, name: e.target.value })}
+                      placeholder="e.g. Hidden Cafe"
+                      style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)' }}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Description</label>
+                    <textarea value={newSpot.description} onChange={e => setNewSpot({ ...newSpot, description: e.target.value })}
+                      placeholder="What makes this place special?"
+                      style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)', minHeight: '80px' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Category</label>
+                      <select value={newSpot.category} onChange={e => setNewSpot({ ...newSpot, category: e.target.value })}
+                        style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)' }}
+                      >
+                        <option value="cafe">☕ Cafe</option>
+                        <option value="restaurant">🍕 Restaurant</option>
+                        <option value="park">🌳 Park</option>
+                        <option value="library">📚 Library</option>
+                        <option value="other">📍 Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Distance</label>
+                      <input type="text" value={newSpot.distance} onChange={e => setNewSpot({ ...newSpot, distance: e.target.value })}
+                        placeholder="e.g. 10 min walk"
+                        style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Vibe</label>
+                      <select value={newSpot.vibe} onChange={e => setNewSpot({ ...newSpot, vibe: e.target.value })}
+                        style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)' }}
+                      >
+                        <option value="quiet">🤫 Quiet</option>
+                        <option value="social">🎉 Social</option>
+                        <option value="both">🎭 Both</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Budget</label>
+                      <select value={newSpot.budget} onChange={e => setNewSpot({ ...newSpot, budget: e.target.value })}
+                        style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)' }}
+                      >
+                        <option value="free">💚 Free</option>
+                        <option value="cheap">💵 Cheap</option>
+                        <option value="moderate">💵💵 Moderate</option>
+                        <option value="expensive">💰 Expensive</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Address / Location *</label>
+                    <input type="text" value={newSpot.address} onChange={e => setNewSpot({ ...newSpot, address: e.target.value })}
+                      placeholder="Street address or Area"
+                      style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Google Maps Link (Optional)</label>
+                    <input type="text" value={newSpot.googleMapsUrl} onChange={e => setNewSpot({ ...newSpot, googleMapsUrl: e.target.value })}
+                      placeholder="Paste link from Google Maps to auto-set location"
+                      style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)' }}
+                    />
+                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      Tip: Paste a Google Maps link to help others find it exactly!
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                    <button onClick={() => setShowAddModal(false)} style={{ flex: 1, padding: '12px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500 }}>Cancel</button>
+                    <button onClick={handleAddSpot} style={{ flex: 1, padding: '12px', background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500 }}>Add Spot</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
+
+      {/* Responsive Styles */}
+      <style jsx>{`
+        @media (max-width: 768px) {
+          #filters {
+            flex-direction: column !important;
+          }
+          
+          #filters select {
+            width: 100%;
+          }
+          
+          #spots-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
