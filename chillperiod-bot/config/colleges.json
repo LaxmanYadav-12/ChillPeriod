@@ -1,0 +1,114 @@
+{
+  "colleges": [
+    {
+      "id": "iit-delhi",
+      "name": "IIT Delhi",
+      "city": "New Delhi",
+      "state": "Delhi",
+      "coordinates": {
+        "lat": 28.5456,
+        "lng": 77.1926
+      }
+    },
+    {
+      "id": "iit-bombay",
+      "name": "IIT Bombay",
+      "city": "Mumbai",
+      "state": "Maharashtra",
+      "coordinates": {
+        "lat": 19.1334,
+        "lng": 72.9133
+      }
+    },
+    {
+      "id": "bits-pilani",
+      "name": "BITS Pilani",
+      "city": "Pilani",
+      "state": "Rajasthan",
+      "coordinates": {
+        "lat": 28.3639,
+        "lng": 75.5870
+      }
+    },
+    {
+      "id": "du-north",
+      "name": "Delhi University North Campus",
+      "city": "New Delhi",
+      "state": "Delhi",
+      "coordinates": {
+        "lat": 28.6889,
+        "lng": 77.2099
+      }
+    },
+    {
+      "id": "du-south",
+      "name": "Delhi University South Campus",
+      "city": "New Delhi",
+      "state": "Delhi",
+      "coordinates": {
+        "lat": 28.5645,
+        "lng": 77.2089
+      }
+    },
+    {
+      "id": "nit-trichy",
+      "name": "NIT Trichy",
+      "city": "Tiruchirappalli",
+      "state": "Tamil Nadu",
+      "coordinates": {
+        "lat": 10.7596,
+        "lng": 78.8155
+      }
+    },
+    {
+      "id": "vit-vellore",
+      "name": "VIT Vellore",
+      "city": "Vellore",
+      "state": "Tamil Nadu",
+      "coordinates": {
+        "lat": 12.9718,
+        "lng": 79.1583
+      }
+    },
+    {
+      "id": "srm-chennai",
+      "name": "SRM University Chennai",
+      "city": "Chennai",
+      "state": "Tamil Nadu",
+      "coordinates": {
+        "lat": 12.8231,
+        "lng": 80.0442
+      }
+    },
+    {
+      "id": "christ-bangalore",
+      "name": "Christ University Bangalore",
+      "city": "Bangalore",
+      "state": "Karnataka",
+      "coordinates": {
+        "lat": 12.9353,
+        "lng": 77.6051
+      }
+    },
+    {
+      "id": "manipal-udupi",
+      "name": "Manipal Institute of Technology",
+      "city": "Manipal",
+      "state": "Karnataka",
+      "coordinates": {
+        "lat": 13.3525,
+        "lng": 74.7928
+      }
+    },
+    {
+      "id": "bpit-rohini",
+      "name": "BPIT (Bhagwan Parshuram Institute Of Technology)",
+      "city": "New Delhi",
+      "state": "Delhi",
+      "coordinates": {
+        "lat": 28.7380,
+        "lng": 77.0630
+      }
+    }
+  ]
+}
