@@ -140,7 +140,10 @@ export default function Home() {
       {/* Footer */}
       <footer style={{ padding: '24px', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-          © 2024 ChillPeriod. Made with ❤️ by <a href="https://github.com/DarkModeTony" style={{ color: '#a78bfa' }}>Tony</a>.
+          © 2026 ChillPeriod. Made with ❤️ by <a href="https://github.com/DarkModeTony" target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa' }}>Tony</a>.
+        </p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+          Follow me on instagram <a href="https://www.instagram.com/twokney/" target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa' }}>@twokney</a>.
         </p>
       </footer>
 
