@@ -3,37 +3,44 @@
 import MobileNav from '@/components/MobileNav';
 import ThemeToggle from '@/components/ThemeToggle';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 export default function ProfilePage() {
-  const [userName, setUserName] = useState('Student');
-  const [userUsername, setUserUsername] = useState('');
-  const [collegeName, setCollegeName] = useState('Your College');
+  const { data: session, status } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
+  
   const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(userName);
-  const [editUsername, setEditUsername] = useState(userUsername);
-  const [editCollege, setEditCollege] = useState(collegeName);
+  const [editName, setEditName] = useState('');
+  const [editUsername, setEditUsername] = useState('');
+  const [editCollege, setEditCollege] = useState('');
   const [usernameError, setUsernameError] = useState('');
 
-  // Mock stats - in real app would come from context/storage
-  const stats = {
-    totalClasses: 58,
-    attendedClasses: 48,
-    bunksSaved: 12,
-    currentStreak: 5,
-    longestStreak: 14
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.id) {
+      fetchUserData();
+    } else if (status === 'unauthenticated') {
+      setLoading(false); // Should redirect or show login prompt really
+    }
+  }, [status, session]);
+
+  const fetchUserData = async () => {
+    try {
+      const res = await fetch(`/api/users/${session.user.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUserData(data);
+        // Initialize edit states
+        setEditName(data.name || '');
+        setEditUsername(data.username || '');
+        setEditCollege(data.college || '');
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+    setLoading(false);
   };
-
-  const attendancePercentage = Math.round((stats.attendedClasses / stats.totalClasses) * 100);
-
-  const achievements = [
-    { id: 1, emoji: '🔥', title: 'On Fire!', desc: '5-day streak', unlocked: stats.currentStreak >= 5 },
-    { id: 2, emoji: '🎯', title: 'Sharp Shooter', desc: '90%+ attendance', unlocked: attendancePercentage >= 90 },
-    { id: 3, emoji: '😎', title: 'Chill Master', desc: 'Bunked 10+ safely', unlocked: stats.bunksSaved >= 10 },
-    { id: 4, emoji: '📚', title: 'Dedicated', desc: 'Attended 50+ classes', unlocked: stats.attendedClasses >= 50 },
-    { id: 5, emoji: '⚡', title: 'Streak Legend', desc: '14-day streak', unlocked: stats.longestStreak >= 14 },
-    { id: 6, emoji: '🏆', title: 'Perfect Week', desc: 'Full week attendance', unlocked: true },
-  ];
 
   const validateUsername = (username) => {
     const regex = /^[a-z0-9_]{3,20}$/;
@@ -49,15 +56,62 @@ export default function ProfilePage() {
       return;
     }
     
-    // TODO: Check uniqueness with API
-    // const res = await fetch(`/api/users/check-username?username=${editUsername}`);
-    
-    setUserName(editName);
-    setUserUsername(editUsername);
-    setCollegeName(editCollege);
-    setIsEditing(false);
-    setUsernameError('');
+    try {
+      const res = await fetch(`/api/users/${session.user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editName,
+          username: editUsername,
+          college: editCollege
+        })
+      });
+
+      if (res.ok) {
+        const updatedUser = await res.json();
+        setUserData(updatedUser);
+        setIsEditing(false);
+        setUsernameError('');
+      } else {
+        const data = await res.json();
+        setUsernameError(data.error || 'Failed to update');
+      }
+    } catch (err) {
+      console.error(err);
+      setUsernameError('Something went wrong');
+    }
   };
+
+  if (loading || status === 'loading') {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: 'var(--text-secondary)' }}>Loading profile...</div>
+      </div>
+    );
+  }
+
+  const user = userData || {
+    name: session?.user?.name || 'User',
+    username: session?.user?.username || '',
+    college: 'Your College',
+    totalBunks: 0,
+    attendedClasses: 0,
+    totalClasses: 0,
+    attendancePercentage: 100,
+    currentStreak: 0,
+    longestStreak: 0,
+    followerCount: 0,
+    followingCount: 0
+  };
+
+  const achievements = [
+    { id: 1, emoji: '🔥', title: 'On Fire!', desc: '5-day streak', unlocked: (user.currentStreak || 0) >= 5 },
+    { id: 2, emoji: '🎯', title: 'Sharp Shooter', desc: '90%+ attendance', unlocked: (user.attendancePercentage || 0) >= 90 },
+    { id: 3, emoji: '😎', title: 'Chill Master', desc: 'Bunked 10+ safely', unlocked: (user.totalBunks || 0) >= 10 },
+    { id: 4, emoji: '📚', title: 'Dedicated', desc: 'Attended 50+ classes', unlocked: (user.attendedClasses || 0) >= 50 },
+    { id: 5, emoji: '⚡', title: 'Streak Legend', desc: '14-day streak', unlocked: (user.longestStreak || 0) >= 14 },
+    { id: 6, emoji: '🏆', title: 'Perfect Week', desc: 'Full week attendance', unlocked: false }, // Logic needs complex backend support
+  ];
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
@@ -171,44 +225,57 @@ export default function ProfilePage() {
                 width: '100%', height: '100%', borderRadius: '50%', 
                 background: 'var(--bg-primary)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '48px'
+                fontSize: '48px', overflow: 'hidden'
               }}>
-                👤
+                {user.image ? (
+                  <img src={user.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : '👤'}
               </div>
             </div>
 
             <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>
-              {userName}
+              {user.name}
             </h1>
-            {userUsername && (
+            {user.username && (
               <p style={{ color: '#a78bfa', fontSize: '15px', marginBottom: '8px' }}>
-                @{userUsername}
+                @{user.username}
               </p>
             )}
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>
-              📍 {collegeName}
+              📍 {user.college || 'No college set'}
             </p>
 
-            {/* Follower/Following Counts - Instagram Style */}
+            {/* Follower/Following Counts - Real Data */}
             <div style={{ 
               display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '20px'
             }}>
               <div style={{ textAlign: 'center', cursor: 'pointer' }}>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>127</div>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                  {user.followerCount || 0}
+                </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Followers</div>
               </div>
               <div style={{ textAlign: 'center', cursor: 'pointer' }}>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>89</div>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                  {user.followingCount || 0}
+                </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Following</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#8b5cf6' }}>12</div>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#8b5cf6' }}>
+                  {user.totalBunks || 0}
+                </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Bunks</div>
               </div>
             </div>
 
             <button 
-              onClick={() => { setEditName(userName); setEditUsername(userUsername); setEditCollege(collegeName); setIsEditing(true); }}
+              onClick={() => { 
+                setEditName(user.name); 
+                setEditUsername(user.username || ''); 
+                setEditCollege(user.college || ''); 
+                setIsEditing(true); 
+              }}
               style={{ 
                 padding: '10px 24px', background: 'rgba(139,92,246,0.1)', 
                 color: '#a78bfa', border: '1px solid rgba(139,92,246,0.3)', 
@@ -227,21 +294,21 @@ export default function ProfilePage() {
               background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
               borderRadius: '16px', padding: '20px', textAlign: 'center' 
             }}>
-              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#8b5cf6' }}>{attendancePercentage}%</div>
+              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#8b5cf6' }}>{user.attendancePercentage || 0}%</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Attendance</div>
             </div>
             <div style={{ 
               background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
               borderRadius: '16px', padding: '20px', textAlign: 'center' 
             }}>
-              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#10b981' }}>{stats.bunksSaved}</div>
+              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#10b981' }}>{user.totalBunks || 0}</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Bunks Saved</div>
             </div>
             <div style={{ 
               background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
               borderRadius: '16px', padding: '20px', textAlign: 'center' 
             }}>
-              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#f59e0b' }}>{stats.currentStreak}🔥</div>
+              <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#f59e0b' }}>{user.currentStreak || 0}🔥</div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Day Streak</div>
             </div>
           </div>
