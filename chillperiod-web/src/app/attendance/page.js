@@ -64,6 +64,8 @@ export default function AttendancePage() {
   const [calendarYear, setCalendarYear] = useState(today.getFullYear());
   const [attendanceLog, setAttendanceLog] = useState({});
   const [upvotedSpots, setUpvotedSpots] = useState(new Set());
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [showDateModal, setShowDateModal] = useState(false);
   
   const calendarDays = getCalendarDays(calendarYear, calendarMonth);
   const totalClasses = courses.reduce((sum, c) => sum + c.total, 0);
@@ -129,6 +131,87 @@ export default function AttendancePage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Navigation */}
       <MobileNav currentPage="attendance" />
+
+      {/* Date Details Modal */}
+      {showDateModal && selectedDate && (
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 100,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+        }} onClick={() => setShowDateModal(false)}>
+          <div style={{ 
+            background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '24px', 
+            padding: '32px', maxWidth: '400px', width: '100%'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>📅</div>
+              <h3 style={{ fontSize: '22px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }}>
+                {monthNames[selectedDate.month]} {selectedDate.day}, {selectedDate.year}
+              </h3>
+            </div>
+
+            {/* Classes for this day */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+              {courses.map(course => {
+                // Demo: we'll show placeholder data per course for this date
+                // In a real app, you'd store per-date attendance
+                const attended = selectedDate.log?.courses?.[course.id]?.attended || false;
+                const bunked = selectedDate.log?.courses?.[course.id]?.bunked || false;
+                const hasClass = true; // In real app, check if course has class on this day
+                
+                return (
+                  <div key={course.id} style={{ 
+                    display: 'flex', alignItems: 'center', gap: '12px', padding: '14px',
+                    background: 'var(--bg-tertiary)', borderRadius: '12px'
+                  }}>
+                    <div style={{ 
+                      width: '12px', height: '12px', borderRadius: '50%',
+                      background: attended ? '#10b981' : bunked ? '#ef4444' : 'var(--border-color)'
+                    }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>{course.name}</div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{course.code}</div>
+                    </div>
+                    <div style={{ 
+                      fontSize: '12px', padding: '4px 10px', borderRadius: '8px',
+                      background: attended ? 'rgba(16,185,129,0.2)' : bunked ? 'rgba(239,68,68,0.2)' : 'var(--bg-primary)',
+                      color: attended ? '#10b981' : bunked ? '#ef4444' : 'var(--text-muted)'
+                    }}>
+                      {attended ? '✓ Attended' : bunked ? '✗ Bunked' : '—'}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Summary */}
+            <div style={{ 
+              display: 'flex', justifyContent: 'center', gap: '24px', padding: '16px',
+              background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '16px'
+            }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#10b981' }}>
+                  {selectedDate.log?.attended || 0}
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Attended</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ef4444' }}>
+                  {selectedDate.log?.bunked || 0}
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Bunked</div>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setShowDateModal(false)}
+              style={{ 
+                width: '100%', padding: '14px', background: '#8b5cf6', color: 'white', 
+                border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 500
+              }}
+            >Close</button>
+          </div>
+        </div>
+      )}
 
       {/* Bunk Modal - Where to go? */}
       {showBunkModal && (
@@ -469,11 +552,18 @@ export default function AttendancePage() {
                   else if (log?.attended && log?.bunked) bgColor = 'rgba(245,158,11,0.2)';
                   
                   return (
-                    <div key={i} style={{ 
-                      aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      borderRadius: '8px', fontSize: '13px', color: isToday ? 'var(--text-primary)' : 'var(--text-secondary)',
-                      background: bgColor, border: isToday ? '2px solid #8b5cf6' : 'none', fontWeight: isToday ? 600 : 400
-                    }}>{day}</div>
+                    <div 
+                      key={i} 
+                      onClick={() => { setSelectedDate({ day, month: calendarMonth, year: calendarYear, dateKey, log }); setShowDateModal(true); }}
+                      style={{ 
+                        aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        borderRadius: '8px', fontSize: '13px', color: isToday ? 'var(--text-primary)' : 'var(--text-secondary)',
+                        background: bgColor, border: isToday ? '2px solid #8b5cf6' : 'none', fontWeight: isToday ? 600 : 400,
+                        cursor: 'pointer', transition: 'transform 0.1s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >{day}</div>
                   );
                 })}
               </div>

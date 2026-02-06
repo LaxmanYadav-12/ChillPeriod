@@ -40,7 +40,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Add provider info to the session
       session.user.discordId = token.discordId;
       session.user.googleId = token.googleId;
-      session.user.username = token.username;
       session.user.avatar = token.avatar;
       session.user.provider = token.provider;
       session.accessToken = token.accessToken;
@@ -63,11 +62,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             image: session.user.image,
             discordId: token.discordId,
             googleId: token.googleId,
-            username: token.username,
           });
         }
         session.user.id = dbUser._id.toString();
+        session.user.username = dbUser.username;
         session.user.totalBunks = dbUser.totalBunks;
+        session.user.hasCompletedOnboarding = dbUser.hasCompletedOnboarding || false;
+        session.user.followerCount = dbUser.followers?.length || 0;
+        session.user.followingCount = dbUser.following?.length || 0;
       } catch (error) {
         console.error('Error syncing user to database:', error);
       }

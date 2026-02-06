@@ -180,12 +180,35 @@ export default function ProfilePage() {
             <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>
               {userName}
             </h1>
+            {userUsername && (
+              <p style={{ color: '#a78bfa', fontSize: '15px', marginBottom: '8px' }}>
+                @{userUsername}
+              </p>
+            )}
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>
               📍 {collegeName}
             </p>
 
+            {/* Follower/Following Counts - Instagram Style */}
+            <div style={{ 
+              display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '20px'
+            }}>
+              <div style={{ textAlign: 'center', cursor: 'pointer' }}>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>127</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Followers</div>
+              </div>
+              <div style={{ textAlign: 'center', cursor: 'pointer' }}>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>89</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Following</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#8b5cf6' }}>12</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Bunks</div>
+              </div>
+            </div>
+
             <button 
-              onClick={() => { setEditName(userName); setEditCollege(collegeName); setIsEditing(true); }}
+              onClick={() => { setEditName(userName); setEditUsername(userUsername); setEditCollege(collegeName); setIsEditing(true); }}
               style={{ 
                 padding: '10px 24px', background: 'rgba(139,92,246,0.1)', 
                 color: '#a78bfa', border: '1px solid rgba(139,92,246,0.3)', 

@@ -33,6 +33,7 @@ const UserSchema = new mongoose.Schema({
   isPublic: { type: Boolean, default: true },
   notificationsEnabled: { type: Boolean, default: true },
   targetPercentage: { type: Number, default: 75 },
+  hasCompletedOnboarding: { type: Boolean, default: false },
   
 }, { timestamps: true });
 
