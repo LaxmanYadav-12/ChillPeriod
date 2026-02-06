@@ -51,12 +51,12 @@ export default function Home() {
 
           {/* CTA Buttons */}
           <div id="cta-buttons" style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <Link href="/attendance" style={{ 
+            <Link href="/login" style={{ 
               padding: '16px 32px', background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', 
               color: 'white', borderRadius: '14px', fontWeight: 600, fontSize: '16px',
               textDecoration: 'none', boxShadow: '0 8px 32px rgba(139,92,246,0.3)'
             }}>
-              Open Dashboard
+              Get Started
             </Link>
             <Link href="/spots" style={{ 
               padding: '16px 32px', background: 'rgba(255,255,255,0.05)', 
