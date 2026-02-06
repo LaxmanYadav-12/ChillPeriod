@@ -16,12 +16,26 @@ export default function ProfilePage() {
   const [editUsername, setEditUsername] = useState('');
   const [editCollege, setEditCollege] = useState('');
   const [usernameError, setUsernameError] = useState('');
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Safety timeout for loading state
+    const timer = setTimeout(() => {
+      if (loading || status === 'loading') {
+        setLoading(false);
+        setError('Request timed out. Please check your internet or database connection.');
+      }
+    }, 10000); // 10 seconds timeout
+
+    return () => clearTimeout(timer);
+  }, [loading, status]);
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user?.id) {
       fetchUserData();
     } else if (status === 'unauthenticated') {
-      setLoading(false); // Should redirect or show login prompt really
+      setLoading(false); 
+      // Redirect handled by middleware/other logic usually, or show login prompt
     }
   }, [status, session]);
 
@@ -91,6 +105,20 @@ export default function ProfilePage() {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ color: 'var(--text-secondary)' }}>Loading profile...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+        <div style={{ color: '#ef4444' }}>⚠️ {error}</div>
+        <button 
+          onClick={() => window.location.reload()}
+          style={{ padding: '8px 16px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)', cursor: 'pointer' }}
+        >
+          Retry
+        </button>
       </div>
     );
   }
