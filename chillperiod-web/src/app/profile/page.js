@@ -55,6 +55,11 @@ export default function ProfilePage() {
       setUsernameError(error);
       return;
     }
+
+    if (!session?.user?.id) {
+      setUsernameError("Session expired. Please login again.");
+      return;
+    }
     
     try {
       const res = await fetch(`/api/users/${session.user.id}`, {
@@ -78,7 +83,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error(err);
-      setUsernameError('Something went wrong');
+      setUsernameError(err.message || 'Something went wrong');
     }
   };
 

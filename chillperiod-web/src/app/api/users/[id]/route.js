@@ -39,9 +39,25 @@ export async function PATCH(request, { params }) {
     const { id } = await params;
     const body = await request.json();
     
+    const updates = {};
+
+    // Handle username update with uniqueness check
+    if (body.username) {
+      // Validate format
+      if (!/^[a-z0-9_]{3,20}$/.test(body.username)) {
+        return NextResponse.json({ error: 'Invalid username format' }, { status: 400 });
+      }
+
+      // Check if taken by another user
+      const existingUser = await User.findOne({ username: body.username });
+      if (existingUser && existingUser._id.toString() !== id) {
+        return NextResponse.json({ error: 'Username already taken' }, { status: 400 });
+      }
+      updates.username = body.username;
+    }
+    
     // Only allow updating certain fields
     const allowedFields = ['name', 'college', 'favoriteSpot', 'isPublic', 'notificationsEnabled', 'targetPercentage'];
-    const updates = {};
     
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
@@ -57,6 +73,9 @@ export async function PATCH(request, { params }) {
     
     return NextResponse.json(user);
   } catch (error) {
+    if (error.code === 11000) {
+      return NextResponse.json({ error: 'Username already taken' }, { status: 400 });
+    }
     console.error('Error updating user:', error);
     return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
   }
