@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import MobileNav from '@/components/MobileNav';
+import FriendsActivity from '@/components/FriendsActivity';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Navbar from '@/components/Navbar';
@@ -52,6 +53,8 @@ export default function AttendancePage() {
   const [requiredPercentage] = useState(75);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBunkModal, setShowBunkModal] = useState(false);
+  const [showMassBunkModal, setShowMassBunkModal] = useState(false);
+  const [massBunkSelection, setMassBunkSelection] = useState(new Set());
   const [bunkingCourse, setBunkingCourse] = useState(null);
   const [newCourse, setNewCourse] = useState({ name: '', code: '', total: 0, attended: 0 });
   const [chillSpots, setChillSpots] = useState(initialChillSpots);
@@ -264,6 +267,112 @@ export default function AttendancePage() {
         </div>
       )}
 
+      {/* Mass Bunk Modal */}
+      {showMassBunkModal && (
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 100,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+        }} onClick={() => setShowMassBunkModal(false)}>
+          <div style={{ 
+            background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '24px', 
+            padding: '32px', maxWidth: '450px', width: '100%'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎉</div>
+              <h3 style={{ fontSize: '22px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }}>
+                Mass Bunk Day!
+              </h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Select classes to skip today</p>
+            </div>
+
+            {/* Course Selection */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px', maxHeight: '250px', overflowY: 'auto' }}>
+              {courses.map(course => {
+                const isSelected = massBunkSelection.has(course.id);
+                const stats = getStats(course.total, course.attended, requiredPercentage);
+                return (
+                  <div 
+                    key={course.id}
+                    onClick={() => {
+                      const newSet = new Set(massBunkSelection);
+                      if (isSelected) newSet.delete(course.id);
+                      else newSet.add(course.id);
+                      setMassBunkSelection(newSet);
+                    }}
+                    style={{ 
+                      display: 'flex', alignItems: 'center', gap: '12px', padding: '14px',
+                      background: isSelected ? 'rgba(139,92,246,0.15)' : 'var(--bg-tertiary)', 
+                      border: isSelected ? '2px solid #8b5cf6' : '1px solid var(--border-color)',
+                      borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ 
+                      width: '24px', height: '24px', borderRadius: '6px',
+                      background: isSelected ? '#8b5cf6' : 'var(--bg-primary)',
+                      border: isSelected ? 'none' : '2px solid var(--border-color)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: 'white', fontSize: '14px'
+                    }}>
+                      {isSelected && '✓'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>{course.name}</div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>
+                        {stats.percentage}% • Can skip {stats.safeToBunk}
+                      </div>
+                    </div>
+                    <div style={{ 
+                      width: '8px', height: '8px', borderRadius: '50%',
+                      background: stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444'
+                    }} />
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Selected count */}
+            <div style={{ 
+              padding: '12px', background: 'rgba(139,92,246,0.1)', borderRadius: '10px',
+              textAlign: 'center', marginBottom: '16px'
+            }}>
+              <span style={{ color: '#a78bfa', fontWeight: 600 }}>
+                {massBunkSelection.size} classes selected
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={() => { setShowMassBunkModal(false); setMassBunkSelection(new Set()); }}
+                style={{ flex: 1, padding: '14px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 500 }}
+              >Cancel</button>
+              <button 
+                onClick={() => {
+                  // Bunk all selected courses
+                  setCourses(prev => prev.map(c => 
+                    massBunkSelection.has(c.id) ? { ...c, total: c.total + 1 } : c
+                  ));
+                  const dateKey = `${calendarYear}-${calendarMonth}-${today.getDate()}`;
+                  setAttendanceLog(prev => ({ 
+                    ...prev, 
+                    [dateKey]: { ...prev[dateKey], bunked: (prev[dateKey]?.bunked || 0) + massBunkSelection.size } 
+                  }));
+                  setShowMassBunkModal(false);
+                  setMassBunkSelection(new Set());
+                }}
+                disabled={massBunkSelection.size === 0}
+                style={{ 
+                  flex: 1, padding: '14px', 
+                  background: massBunkSelection.size > 0 ? 'linear-gradient(135deg, #f59e0b, #ef4444)' : 'var(--bg-tertiary)',
+                  color: massBunkSelection.size > 0 ? 'white' : 'var(--text-muted)', 
+                  border: 'none', borderRadius: '12px', cursor: massBunkSelection.size > 0 ? 'pointer' : 'not-allowed', 
+                  fontWeight: 600
+                }}
+              >🎉 Confirm Bunks</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div style={{ paddingTop: '80px', paddingBottom: '48px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px' }}>
@@ -273,6 +382,9 @@ export default function AttendancePage() {
             <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }}>Attendance Tracker</h1>
             <p style={{ color: 'var(--text-secondary)' }}>Required: {requiredPercentage}%</p>
           </div>
+
+          {/* Friends Activity */}
+          <FriendsActivity />
 
           {/* Two Column Layout */}
           <div id="attendance-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '32px' }}>
@@ -373,12 +485,18 @@ export default function AttendancePage() {
           </div>
 
           {/* Courses Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
             <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Your Subjects</h2>
-            <button onClick={() => setShowAddModal(true)} style={{ 
-              padding: '10px 20px', background: '#8b5cf6', color: 'white', 
-              border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500, fontSize:'14px'
-            }}>+ Add Subject</button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setShowMassBunkModal(true)} style={{ 
+                padding: '10px 20px', background: 'linear-gradient(135deg, #f59e0b, #ef4444)', color: 'white', 
+                border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500, fontSize:'14px'
+              }}>🎉 Mass Bunk</button>
+              <button onClick={() => setShowAddModal(true)} style={{ 
+                padding: '10px 20px', background: '#8b5cf6', color: 'white', 
+                border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500, fontSize:'14px'
+              }}>+ Add Subject</button>
+            </div>
           </div>
 
           {/* Courses List */}

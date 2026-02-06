@@ -10,18 +10,37 @@ const demoSpots = [
   { _id: '3', name: 'Garg Trade Centre Food Court', description: 'Multiple food options in one place, good for groups', category: 'restaurant', vibe: 'social', budget: 'moderate', distance: '12 min walk', address: 'Sector 11, Rohini', upvotes: 18 },
   { _id: '4', name: 'Rohini Sector 6 Park', description: 'Nice green space for relaxing between classes', category: 'park', vibe: 'quiet', budget: 'free', distance: '5 min walk', address: 'Pocket 6D, Sector 6, Rohini', upvotes: 15 },
   { _id: '5', name: 'Meer Vihar Cafe', description: 'Cozy cafe in Block A, good for study sessions with coffee', category: 'cafe', vibe: 'both', budget: 'moderate', distance: '15 min walk', address: 'Block A, Meer Vihar', upvotes: 8 },
-  { _id: '6', name: 'Twin District Centre Eatery', description: 'Near Swarn Jayanti Park, nice ambiance', category: 'restaurant', vibe: 'both', budget: 'moderate', distance: '15 min walk', address: 'Swarn Jayanti Park, Rohini', upvotes: 20 }
+  { _id: '6', name: 'Twin District Centre Eatery', description: 'Near Swarn Jayanti Park, nice ambiance', category: 'restaurant', vibe: 'both', budget: 'moderate', distance: '15 min walk', address: 'Swarn Jayanti Park, Rohini', upvotes: 20 },
+  { _id: '7', name: 'Japanese Park', description: 'Beautiful Japanese themed park, perfect for chilling', category: 'park', vibe: 'quiet', budget: 'free', distance: '8 min walk', address: 'Pocket 3, Sector 10, Rohini', upvotes: 32 },
+  { _id: '8', name: 'Unity One Mall Food Court', description: 'AC food court with lots of options, great for summers', category: 'restaurant', vibe: 'social', budget: 'moderate', distance: '20 min walk', address: 'Sector 10, Rohini', upvotes: 22 },
+  { _id: '9', name: 'Chaayos Rohini', description: 'Perfect chai and snacks, good WiFi for work', category: 'cafe', vibe: 'both', budget: 'moderate', distance: '18 min walk', address: 'M2K Corporate Park, Sector 9', upvotes: 16 },
+  { _id: '10', name: 'Dominos Near Gate', description: 'Quick pizza spot, AC and free WiFi', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '5 min walk', address: 'Sector 17, Main Road', upvotes: 14 },
+  { _id: '11', name: 'Sector 11 Central Park', description: 'Huge open ground, great for cricket bunks', category: 'park', vibe: 'social', budget: 'free', distance: '10 min walk', address: 'Central Park, Sector 11', upvotes: 28 },
+  { _id: '12', name: 'Barista Coffee', description: 'Premium coffee, perfect for solo study sessions', category: 'cafe', vibe: 'quiet', budget: 'moderate', distance: '22 min walk', address: 'Eros City Square, Sector 11', upvotes: 11 },
+  { _id: '13', name: 'Momo Corner Near Metro', description: 'Best momos in Rohini, super cheap', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '7 min walk', address: 'Near Rohini West Metro', upvotes: 35 },
+  { _id: '14', name: 'Swarn Jayanti Park', description: 'Massive park, entry fee but worth it', category: 'park', vibe: 'both', budget: 'cheap', distance: '25 min walk', address: 'Sector 10, Rohini', upvotes: 40 },
+  { _id: '15', name: 'Starbucks Unity One', description: 'Premium coffee experience, AC, charging points', category: 'cafe', vibe: 'quiet', budget: 'moderate', distance: '20 min walk', address: 'Unity One Mall, Sector 10', upvotes: 19 },
+  { _id: '16', name: 'Burger King Rohini', description: 'Fast food, AC, coupon friendly', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '18 min walk', address: 'Sector 9, Main Market', upvotes: 13 },
+  { _id: '17', name: 'Sector 7 Kids Park', description: 'Usually empty during college hours, peaceful', category: 'park', vibe: 'quiet', budget: 'free', distance: '12 min walk', address: 'E Block, Sector 7', upvotes: 9 },
+  { _id: '18', name: 'Cafe Delhi Heights', description: 'Great ambiance, rooftop seating available', category: 'cafe', vibe: 'social', budget: 'moderate', distance: '25 min walk', address: 'M2K Pitampura, Sector 7', upvotes: 21 },
+  { _id: '19', name: 'Haldiram Rohini', description: 'Desi snacks and sweets, affordable thalis', category: 'restaurant', vibe: 'both', budget: 'cheap', distance: '15 min walk', address: 'Sector 11, Main Chowk', upvotes: 24 },
+  { _id: '20', name: 'Metro Station Sitting Area', description: 'Free AC, can sit for hours pretending to wait', category: 'other', vibe: 'quiet', budget: 'free', distance: '6 min walk', address: 'Rohini West Metro Station', upvotes: 17 },
+  { _id: '21', name: 'CCD Near BPIT', description: 'Classic coffee spot, reliable WiFi', category: 'cafe', vibe: 'both', budget: 'moderate', distance: '8 min walk', address: 'Sector 17, Near BPIT Gate', upvotes: 26 },
+  { _id: '22', name: 'South Indian Corner', description: 'Cheap dosas and idlis, student budget friendly', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '10 min walk', address: 'Bhagya Vihar Market', upvotes: 18 },
+  { _id: '23', name: 'Rohini District Park', description: 'Jogging track, benches, good evening spot', category: 'park', vibe: 'both', budget: 'free', distance: '15 min walk', address: 'Sector 14, Rohini', upvotes: 14 },
+  { _id: '24', name: 'McDonald\'s Sector 11', description: 'McCafe area is chill, affordable meals', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '12 min walk', address: 'Sector 11, Main Road', upvotes: 20 },
+  { _id: '25', name: 'BPIT Back Gate Dhaba', description: 'Legendary chai and maggi spot, super cheap', category: 'cafe', vibe: 'social', budget: 'cheap', distance: '2 min walk', address: 'Behind BPIT Gate', upvotes: 45 },
+  { _id: '26', name: 'Sector 16 Sports Complex', description: 'Open ground, sometimes has events', category: 'park', vibe: 'social', budget: 'free', distance: '8 min walk', address: 'Pocket 16, Sector 16', upvotes: 11 },
+  { _id: '27', name: 'Third Wave Coffee', description: 'Hipster vibes, great cold coffee', category: 'cafe', vibe: 'quiet', budget: 'moderate', distance: '22 min walk', address: 'M2K Corporate Park', upvotes: 15 },
+  { _id: '28', name: 'Punjab Sweet House', description: 'Chole bhature heaven, heavy but worth it', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '10 min walk', address: 'Sector 11 Market', upvotes: 30 },
+  { _id: '29', name: 'MKS Public Library', description: 'Free, AC, super quiet for actual studying', category: 'library', vibe: 'quiet', budget: 'free', distance: '20 min walk', address: 'Sector 11, Near Court', upvotes: 8 },
+  { _id: '30', name: 'Bikanervala Rohini', description: 'Proper thalis, family restaurant vibes', category: 'restaurant', vibe: 'both', budget: 'moderate', distance: '18 min walk', address: 'Sector 11, Main Road', upvotes: 16 },
 ];
 
 const categoryEmojis = { cafe: '☕', restaurant: '🍕', park: '🌳', library: '📚', arcade: '🎮', mall: '🛍️', other: '📍' };
 
 export default function SpotsPage() {
-  const [spots, setSpots] = useState([]);
-  const [demoSpots] = useState([
-    { _id: '1', name: 'Bhagya Vihar Internet Cafe', description: 'Internet cafe near campus, good for quick browsing and printing', category: 'cafe', vibe: 'quiet', budget: 'cheap', distance: '10 min walk', address: 'Mangal Bazar Rd, Bhagya Vihar', upvotes: 12 },
-    { _id: '2', name: 'Sector 17/18 Park', description: 'Large park on Chhotu Ram Marg, good for groups', category: 'park', vibe: 'social', budget: 'free', distance: '3 min walk', address: 'Chhotu Ram Marg, Sector 17/18', upvotes: 25 },
-    { _id: '3', name: 'Garg Trade Centre Food Court', description: 'Multiple food options in one place, good for groups', category: 'restaurant', vibe: 'social', budget: 'moderate', distance: '12 min walk', address: 'Sector 11, Rohini', upvotes: 18 },
-  ]);
+  const [spots, setSpots] = useState(demoSpots);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newSpot, setNewSpot] = useState({
@@ -38,12 +57,14 @@ export default function SpotsPage() {
       const res = await fetch('/api/spots');
       if (res.ok) {
         const data = await res.json();
-        // If no spots in DB, show demo spots, otherwise show DB spots
-        setSpots(data.length > 0 ? data : demoSpots);
+        // If API returns spots, use them; otherwise keep demo spots
+        if (data.length > 0) {
+          setSpots(data);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch spots', error);
-      setSpots(demoSpots);
+      // Already initialized with demoSpots, so nothing to do
     } finally {
       setIsLoading(false);
     }
