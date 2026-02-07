@@ -3,8 +3,22 @@ import Discord from "next-auth/providers/discord";
 import Google from "next-auth/providers/google";
 import dbConnect from "@/lib/mongodb";
 import User from "@/lib/models/User";
+import mongoose from 'mongoose';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  debug: true,
+  trustHost: true,
+  cookies: {
+    sessionToken: {
+      name: `authjs.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: false, // Force insecure for debugging
+      },
+    },
+  },
   providers: [
     Discord({
       clientId: process.env.DISCORD_CLIENT_ID,
@@ -22,6 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, account, profile }) {
+      console.log('AUTH DEBUG: JWT Callback', { account: !!account, profile: !!profile, token });
       // Store provider-specific info in the token
       if (account && profile) {
         if (account.provider === 'discord') {
@@ -37,6 +52,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      console.log('AUTH DEBUG: Session Callback Start', { token });
       // Add provider info to the session
       session.user.discordId = token.discordId;
       session.user.googleId = token.googleId;
@@ -46,7 +62,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       
       // Get or create user in database
       try {
+        console.log('AUTH DEBUG: Connecting to DB...');
         await dbConnect();
+        console.log('AUTH DEBUG: DB Connected. Finding user...');
         let dbUser = await User.findOne({
           $or: [
             { discordId: token.discordId },
@@ -55,7 +73,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           ].filter(q => Object.values(q)[0])
         });
         
+        console.log('AUTH DEBUG: DB User found:', !!dbUser);
+
         if (!dbUser) {
+          console.log('AUTH DEBUG: Creating new user...');
           dbUser = await User.create({
             email: session.user.email,
             name: session.user.name || token.username || 'User',
@@ -63,6 +84,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             discordId: token.discordId,
             googleId: token.googleId,
           });
+          console.log('AUTH DEBUG: New user created');
         }
         session.user.id = dbUser._id.toString();
         session.user.username = dbUser.username;
@@ -71,9 +93,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.followerCount = dbUser.followers?.length || 0;
         session.user.followingCount = dbUser.following?.length || 0;
       } catch (error) {
-        console.error('Error syncing user to database:', error);
+        console.error('AUTH DEBUG: Error syncing user to database:', error);
+        session.error = error.message;
+        // Safely check mongoose connection state
+        try {
+            session.dbState = mongoose.connection.readyState;
+        } catch (e) {
+            session.dbState = 'unknown';
+        }
       }
       
+      console.log('AUTH DEBUG: Session Callback End', { session });
       return session;
     },
   },

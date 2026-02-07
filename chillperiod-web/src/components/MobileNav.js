@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { signOut, useSession } from 'next-auth/react';
 import { useState } from 'react';
 import ThemeToggle from './ThemeToggle';
 
 export default function MobileNav({ currentPage = 'home' }) {
+  const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -29,11 +31,22 @@ export default function MobileNav({ currentPage = 'home' }) {
             <Link href="/leaderboard" style={{ color: currentPage === 'leaderboard' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'leaderboard' ? 500 : 400, textDecoration: 'none' }}>🏆</Link>
             <Link href="/profile" style={{ color: currentPage === 'profile' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'profile' ? 500 : 400, textDecoration: 'none' }}>Profile</Link>
             <ThemeToggle />
-            {currentPage === 'home' && (
-              <Link href="/attendance" style={{ 
+            {status === 'authenticated' && session?.user ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(16,185,129,0.1)', borderRadius: '20px', border: '1px solid rgba(16,185,129,0.2)' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
+                <span style={{ fontSize: '12px', fontWeight: 500, color: '#10b981' }}>{session.user.name?.split(' ')[0] || 'User'}</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(239,68,68,0.1)', borderRadius: '20px', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }} />
+                <span style={{ fontSize: '12px', fontWeight: 500, color: '#ef4444' }}>Not Logged In</span>
+              </div>
+            )}
+            {currentPage === 'home' && status === 'unauthenticated' && (
+              <Link href="/login" style={{ 
                 padding: '8px 16px', background: 'var(--text-primary)', color: 'var(--bg-primary)', 
                 borderRadius: '10px', fontWeight: 500, textDecoration: 'none', fontSize: '14px'
-              }}>Get Started</Link>
+              }}>Login</Link>
             )}
           </div>
 
@@ -111,6 +124,21 @@ export default function MobileNav({ currentPage = 'home' }) {
             >
               👤 Profile
             </Link>
+            
+            <button
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              style={{ 
+                width: '100%',
+                color: '#ef4444', 
+                fontSize: '20px', fontWeight: 600, 
+                padding: '16px', background: 'rgba(239, 68, 68, 0.1)',
+                borderRadius: '12px', textAlign: 'center',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                cursor: 'pointer'
+              }}
+            >
+              🚪 Logout
+            </button>
             <Link 
               href="/attendance" 
               style={{ 

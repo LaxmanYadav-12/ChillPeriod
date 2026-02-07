@@ -4,10 +4,13 @@ import MobileNav from '@/components/MobileNav';
 import ThemeToggle from '@/components/ThemeToggle';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
+
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   
@@ -31,16 +34,23 @@ export default function ProfilePage() {
   }, [loading, status]);
 
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.id) {
-      fetchUserData();
+    console.log('ProfilePage: Session status:', status, 'User ID:', session?.user?.id);
+    if (status === 'authenticated') {
+      if (session?.user?.id) {
+        fetchUserData();
+      } else {
+        console.error('ProfilePage: Authenticated but no User ID found in session');
+        // setError('User session invalid. Please try logging out and back in.');
+        setLoading(false);
+      }
     } else if (status === 'unauthenticated') {
-      setLoading(false); 
-      // Redirect handled by middleware/other logic usually, or show login prompt
+      router.push('/login'); // Strict redirect to login
     }
-  }, [status, session]);
+  }, [status, session, router]);
 
   const fetchUserData = async () => {
     try {
+      console.log('ProfilePage: Fetching user data for ID:', session.user.id);
       const res = await fetch(`/api/users/${session.user.id}`);
       if (res.ok) {
         const data = await res.json();
@@ -49,9 +59,15 @@ export default function ProfilePage() {
         setEditName(data.name || '');
         setEditUsername(data.username || '');
         setEditCollege(data.college || '');
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('ProfilePage: API error:', res.status, errorData);
+        if (res.status === 404) setError('User profile not found.');
+        else setError(`Failed to load profile (${res.status})`);
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
+      setError('Network error. Failed to fetch profile.');
     }
     setLoading(false);
   };
@@ -101,14 +117,6 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading || status === 'loading') {
-    return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: 'var(--text-secondary)' }}>Loading profile...</div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
@@ -118,6 +126,39 @@ export default function ProfilePage() {
           style={{ padding: '8px 16px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)', cursor: 'pointer' }}
         >
           Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (loading || status === 'loading') {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+        <div style={{ color: 'var(--text-secondary)' }}>Loading profile...</div>
+        <div style={{ fontSize: '12px', color: '#6b7280', fontFamily: 'monospace', maxWidth: '300px', wordBreak: 'break-all', textAlign: 'center' }}>
+          Status: {status}<br/>
+          Has Session: {session ? 'Yes' : 'No'}<br/>
+          User ID: {session?.user?.id || 'Missing'}<br/>
+          DB Error: {session?.error || 'None'}<br/>
+          Waited: {loading ? 'Fetching Data...' : 'Initializing...'}
+        </div>
+      </div>
+    );
+  }
+
+  // Also show error if session exists but ID is missing (the "User session invalid" state)
+  if (status === 'authenticated' && !session?.user?.id) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+        <div style={{ color: '#ef4444' }}>⚠️ User session invalid (Database Sync Failed)</div>
+        <div style={{ fontSize: '12px', color: '#6b7280', fontFamily: 'monospace', maxWidth: '400px', wordBreak: 'break-all', textAlign: 'center', background: '#1f2937', padding: '12px', borderRadius: '8px' }}>
+          Error: {session?.error || 'Unknown error'}<br/>
+        </div>
+        <button 
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          style={{ padding: '8px 16px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)', cursor: 'pointer' }}
+        >
+          Logout & Retry
         </button>
       </div>
     );
@@ -433,6 +474,19 @@ export default function ProfilePage() {
                 75%
               </div>
             </div>
+
+            {/* Logout Button */}
+            <button 
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              style={{ 
+                width: '100%', padding: '16px', marginTop: '12px',
+                background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '12px', color: '#ef4444', fontWeight: 600, fontSize: '14px',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+              }}
+            >
+              🚪 Logout
+            </button>
           </div>
 
           {/* Quick Actions */}

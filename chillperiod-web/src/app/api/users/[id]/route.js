@@ -5,8 +5,9 @@ import User from '@/lib/models/User';
 // GET /api/users/[id] - Get user profile
 export async function GET(request, { params }) {
   try {
-    await dbConnect();
     const { id } = await params;
+    
+    await dbConnect();
     
     const user = await User.findById(id)
       .select('-email -googleId -discordId')

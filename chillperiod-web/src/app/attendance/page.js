@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import MobileNav from '@/components/MobileNav';
 import FriendsActivity from '@/components/FriendsActivity';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import AttendanceTrendChart from '@/components/charts/AttendanceTrendChart';
 import SubjectPieChart from '@/components/charts/SubjectPieChart';
@@ -49,6 +50,16 @@ const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 
 export default function AttendancePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Optional: You could show a toast here for guest users
+    if (status === 'unauthenticated') {
+      console.log('Running in Guest Mode');
+    }
+  }, [status]);
+
   const [courses, setCourses] = useState(initialCourses);
   const [requiredPercentage] = useState(75);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -127,10 +138,28 @@ export default function AttendancePage() {
 
   const statusColor = overallStats.status === 'danger' ? '#ef4444' : overallStats.status === 'caution' ? '#f59e0b' : '#10b981';
 
+  if (status === 'loading') {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: 'var(--text-secondary)' }}>Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Navigation */}
       <MobileNav currentPage="attendance" />
+      
+      {/* Guest Mode Banner */}
+      {status === 'unauthenticated' && (
+        <div style={{ 
+          background: '#f59e0b', color: 'black', textAlign: 'center', padding: '8px', 
+          fontWeight: 600, fontSize: '14px' 
+        }}>
+          ⚠️ Guest Mode: Data will not be saved. <Link href="/login" style={{ textDecoration: 'underline' }}>Login here</Link>
+        </div>
+      )}
 
       {/* Date Details Modal */}
       {showDateModal && selectedDate && (
