@@ -4,47 +4,20 @@ import Link from 'next/link';
 import MobileNav from '@/components/MobileNav';
 import { useState, useEffect } from 'react';
 
-const demoSpots = [
-  { _id: '1', name: 'Bhagya Vihar Internet Cafe', description: 'Internet cafe near campus, good for quick browsing and printing', category: 'cafe', vibe: 'quiet', budget: 'cheap', distance: '10 min walk', address: 'Mangal Bazar Rd, Bhagya Vihar', upvotes: 12 },
-  { _id: '2', name: 'Sector 17/18 Park', description: 'Large park on Chhotu Ram Marg, good for groups', category: 'park', vibe: 'social', budget: 'free', distance: '3 min walk', address: 'Chhotu Ram Marg, Sector 17/18', upvotes: 25 },
-  { _id: '3', name: 'Garg Trade Centre Food Court', description: 'Multiple food options in one place, good for groups', category: 'restaurant', vibe: 'social', budget: 'moderate', distance: '12 min walk', address: 'Sector 11, Rohini', upvotes: 18 },
-  { _id: '4', name: 'Rohini Sector 6 Park', description: 'Nice green space for relaxing between classes', category: 'park', vibe: 'quiet', budget: 'free', distance: '5 min walk', address: 'Pocket 6D, Sector 6, Rohini', upvotes: 15 },
-  { _id: '5', name: 'Meer Vihar Cafe', description: 'Cozy cafe in Block A, good for study sessions with coffee', category: 'cafe', vibe: 'both', budget: 'moderate', distance: '15 min walk', address: 'Block A, Meer Vihar', upvotes: 8 },
-  { _id: '6', name: 'Twin District Centre Eatery', description: 'Near Swarn Jayanti Park, nice ambiance', category: 'restaurant', vibe: 'both', budget: 'moderate', distance: '15 min walk', address: 'Swarn Jayanti Park, Rohini', upvotes: 20 },
-  { _id: '7', name: 'Japanese Park', description: 'Beautiful Japanese themed park, perfect for chilling', category: 'park', vibe: 'quiet', budget: 'free', distance: '8 min walk', address: 'Pocket 3, Sector 10, Rohini', upvotes: 32 },
-  { _id: '8', name: 'Unity One Mall Food Court', description: 'AC food court with lots of options, great for summers', category: 'restaurant', vibe: 'social', budget: 'moderate', distance: '20 min walk', address: 'Sector 10, Rohini', upvotes: 22 },
-  { _id: '9', name: 'Chaayos Rohini', description: 'Perfect chai and snacks, good WiFi for work', category: 'cafe', vibe: 'both', budget: 'moderate', distance: '18 min walk', address: 'M2K Corporate Park, Sector 9', upvotes: 16 },
-  { _id: '10', name: 'Dominos Near Gate', description: 'Quick pizza spot, AC and free WiFi', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '5 min walk', address: 'Sector 17, Main Road', upvotes: 14 },
-  { _id: '11', name: 'Sector 11 Central Park', description: 'Huge open ground, great for cricket bunks', category: 'park', vibe: 'social', budget: 'free', distance: '10 min walk', address: 'Central Park, Sector 11', upvotes: 28 },
-  { _id: '12', name: 'Barista Coffee', description: 'Premium coffee, perfect for solo study sessions', category: 'cafe', vibe: 'quiet', budget: 'moderate', distance: '22 min walk', address: 'Eros City Square, Sector 11', upvotes: 11 },
-  { _id: '13', name: 'Momo Corner Near Metro', description: 'Best momos in Rohini, super cheap', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '7 min walk', address: 'Near Rohini West Metro', upvotes: 35 },
-  { _id: '14', name: 'Swarn Jayanti Park', description: 'Massive park, entry fee but worth it', category: 'park', vibe: 'both', budget: 'cheap', distance: '25 min walk', address: 'Sector 10, Rohini', upvotes: 40 },
-  { _id: '15', name: 'Starbucks Unity One', description: 'Premium coffee experience, AC, charging points', category: 'cafe', vibe: 'quiet', budget: 'moderate', distance: '20 min walk', address: 'Unity One Mall, Sector 10', upvotes: 19 },
-  { _id: '16', name: 'Burger King Rohini', description: 'Fast food, AC, coupon friendly', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '18 min walk', address: 'Sector 9, Main Market', upvotes: 13 },
-  { _id: '17', name: 'Sector 7 Kids Park', description: 'Usually empty during college hours, peaceful', category: 'park', vibe: 'quiet', budget: 'free', distance: '12 min walk', address: 'E Block, Sector 7', upvotes: 9 },
-  { _id: '18', name: 'Cafe Delhi Heights', description: 'Great ambiance, rooftop seating available', category: 'cafe', vibe: 'social', budget: 'moderate', distance: '25 min walk', address: 'M2K Pitampura, Sector 7', upvotes: 21 },
-  { _id: '19', name: 'Haldiram Rohini', description: 'Desi snacks and sweets, affordable thalis', category: 'restaurant', vibe: 'both', budget: 'cheap', distance: '15 min walk', address: 'Sector 11, Main Chowk', upvotes: 24 },
-  { _id: '20', name: 'Metro Station Sitting Area', description: 'Free AC, can sit for hours pretending to wait', category: 'other', vibe: 'quiet', budget: 'free', distance: '6 min walk', address: 'Rohini West Metro Station', upvotes: 17 },
-  { _id: '21', name: 'CCD Near BPIT', description: 'Classic coffee spot, reliable WiFi', category: 'cafe', vibe: 'both', budget: 'moderate', distance: '8 min walk', address: 'Sector 17, Near BPIT Gate', upvotes: 26 },
-  { _id: '22', name: 'South Indian Corner', description: 'Cheap dosas and idlis, student budget friendly', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '10 min walk', address: 'Bhagya Vihar Market', upvotes: 18 },
-  { _id: '23', name: 'Rohini District Park', description: 'Jogging track, benches, good evening spot', category: 'park', vibe: 'both', budget: 'free', distance: '15 min walk', address: 'Sector 14, Rohini', upvotes: 14 },
-  { _id: '24', name: 'McDonald\'s Sector 11', description: 'McCafe area is chill, affordable meals', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '12 min walk', address: 'Sector 11, Main Road', upvotes: 20 },
-  { _id: '25', name: 'BPIT Back Gate Dhaba', description: 'Legendary chai and maggi spot, super cheap', category: 'cafe', vibe: 'social', budget: 'cheap', distance: '2 min walk', address: 'Behind BPIT Gate', upvotes: 45 },
-  { _id: '26', name: 'Sector 16 Sports Complex', description: 'Open ground, sometimes has events', category: 'park', vibe: 'social', budget: 'free', distance: '8 min walk', address: 'Pocket 16, Sector 16', upvotes: 11 },
-  { _id: '27', name: 'Third Wave Coffee', description: 'Hipster vibes, great cold coffee', category: 'cafe', vibe: 'quiet', budget: 'moderate', distance: '22 min walk', address: 'M2K Corporate Park', upvotes: 15 },
-  { _id: '28', name: 'Punjab Sweet House', description: 'Chole bhature heaven, heavy but worth it', category: 'restaurant', vibe: 'social', budget: 'cheap', distance: '10 min walk', address: 'Sector 11 Market', upvotes: 30 },
-  { _id: '29', name: 'MKS Public Library', description: 'Free, AC, super quiet for actual studying', category: 'library', vibe: 'quiet', budget: 'free', distance: '20 min walk', address: 'Sector 11, Near Court', upvotes: 8 },
-  { _id: '30', name: 'Bikanervala Rohini', description: 'Proper thalis, family restaurant vibes', category: 'restaurant', vibe: 'both', budget: 'moderate', distance: '18 min walk', address: 'Sector 11, Main Road', upvotes: 16 },
-];
+// Demo data removed - using real API data
 
-const categoryEmojis = { cafe: '☕', restaurant: '🍕', park: '🌳', library: '📚', arcade: '🎮', mall: '🛍️', other: '📍' };
+const categoryEmojis = { 
+  cafe: '☕', restaurant: '🍕', street_food: '🌭', 
+  park: '🌳', library: '📚', shopping: '🛍️', 
+  gaming: '🎮', sweet_shop: '🍬', other: '📍' 
+};
 
 export default function SpotsPage() {
-  const [spots, setSpots] = useState(demoSpots);
+  const [spots, setSpots] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newSpot, setNewSpot] = useState({
-    name: '', description: '', category: 'cafe', vibe: 'both', budget: 'moderate', 
+    name: '', description: '', category: 'cafe', vibe: 'social', budget: 'moderate', 
     address: '', googleMapsUrl: '', distance: ''
   });
 
@@ -57,16 +30,121 @@ export default function SpotsPage() {
       const res = await fetch('/api/spots');
       if (res.ok) {
         const data = await res.json();
-        // If API returns spots, use them; otherwise keep demo spots
-        if (data.length > 0) {
-          setSpots(data);
+        if (data.length === 0) {
+            // Auto-seed if empty
+            await fetch('/api/seed');
+            const seededRes = await fetch('/api/spots');
+            if (seededRes.ok) setSpots(await seededRes.json());
+        } else {
+            setSpots(data);
         }
       }
     } catch (error) {
-      console.error('Failed to fetch spots', error);
-      // Already initialized with demoSpots, so nothing to do
+      console.error('Failed to fetch API spots', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const upvoteSpot = async (spotId, e) => {
+    e.stopPropagation();
+    
+    // Optimistic Update
+    setSpots(prev => prev.map(s => {
+        if (s._id === spotId) {
+            const wasUpvoted = s.isUpvoted;
+            return {
+                ...s,
+                upvotes: wasUpvoted ? s.upvotes - 1 : s.upvotes + 1,
+                isUpvoted: !wasUpvoted
+            };
+        }
+        return s;
+    }));
+
+    try {
+        const res = await fetch('/api/spots/upvote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ spotId })
+        });
+        
+        if (!res.ok) {
+             // Revert if failed
+             console.error('Upvote failed');
+             // Could revert state here
+        }
+    } catch (error) {
+        console.error('Upvote error', error);
+    }
+  };
+
+  const [isMapLoading, setIsMapLoading] = useState(false);
+
+  const fetchSpotsFromMap = async () => {
+    setIsMapLoading(true);
+    // BPIT Coordinates: 28.7362, 77.1127
+    const queries = [
+        { type: 'cafe', cat: 'cafe' },
+        { type: 'restaurant', cat: 'restaurant' },
+        { type: 'fast_food', cat: 'street_food' },
+        { type: 'park', cat: 'park' },
+        { type: 'mall', cat: 'shopping' },
+        { type: 'cinema', cat: 'gaming' },
+        { type: 'library', cat: 'library' }
+    ];
+
+    try {
+      const promises = queries.map(q => 
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q.type}+near+Sector+17+Rohini&limit=5`)
+          .then(res => res.json())
+          .then(items => items.map(item => ({ ...item, mappedCat: q.cat })))
+      );
+
+      const results = await Promise.all(promises);
+      const flatness = results.flat();
+      const vibesList = ['quiet', 'social', 'productive', 'romantic', 'late_night', 'nature'];
+      const budgetsList = ['free', 'cheap', 'moderate']; // removed broke/expensive/luxury to keep it simple for auto-generated
+
+      const rawSpots = flatness
+        .filter(item => item.name || item.display_name)
+        .map((item) => ({
+            name: item.name || item.display_name.split(',')[0],
+            description: '📍 Discovered via OpenStreetMap',
+            category: item.mappedCat || 'other',
+            vibe: vibesList[Math.floor(Math.random() * vibesList.length)],
+            budget: budgetsList[Math.floor(Math.random() * budgetsList.length)],
+            distance: 'Nearby',
+            address: item.display_name.split(',').slice(1, 3).join(', '),
+            upvotes: Math.floor(Math.random() * 5), // Start with low random upvotes
+            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name || item.display_name)}`
+        }));
+      
+      // Persist to DB
+      const res = await fetch('/api/spots/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ spots: rawSpots })
+      });
+
+      if (res.ok) {
+          const { savedSpots } = await res.json();
+          setSpots(prev => {
+            const existingIds = new Set(prev.map(s => s._id));
+            const newSpots = savedSpots.filter(s => !existingIds.has(s._id));
+            if (newSpots.length === 0) {
+                 alert("No new spots found!");
+                 return prev;
+            }
+            return [...prev, ...newSpots];
+          });
+      }
+
+    } catch (error) {
+      console.error("Map fetch failed", error);
+      alert("Failed to fetch from maps.");
+    } finally {
+      setIsMapLoading(false);
     }
   };
 
@@ -85,7 +163,7 @@ export default function SpotsPage() {
         setSpots(prev => [addedSpot, ...prev]);
         setShowAddModal(false);
         setNewSpot({
-          name: '', description: '', category: 'cafe', vibe: 'both', budget: 'moderate', 
+          name: '', description: '', category: 'cafe', vibe: 'social', budget: 'moderate', 
           address: '', googleMapsUrl: '', distance: ''
         });
       }
@@ -104,6 +182,17 @@ export default function SpotsPage() {
     if (searchQuery && !spot.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
+
+  const [selectedSpot, setSelectedSpot] = useState(null);
+
+  const openGoogleMaps = (spot) => {
+    if (spot.googleMapsUrl) {
+      window.open(spot.googleMapsUrl, '_blank');
+    } else {
+      const query = encodeURIComponent(`${spot.name} ${spot.address}`);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+    }
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
@@ -147,7 +236,12 @@ export default function SpotsPage() {
                 <option value="all">All Categories</option>
                 <option value="cafe">☕ Cafes</option>
                 <option value="restaurant">🍕 Restaurants</option>
+                <option value="street_food">🌭 Street Food</option>
                 <option value="park">🌳 Parks</option>
+                <option value="shopping">🛍️ Shopping</option>
+                <option value="gaming">🎮 Gaming</option>
+                <option value="sweet_shop">🍬 Sweet Shop</option>
+                <option value="library">📚 Library</option>
               </select>
               <select
                 value={filter.vibe}
@@ -155,9 +249,12 @@ export default function SpotsPage() {
                 style={{ padding: '10px 16px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)', fontSize: '14px' }}
               >
                 <option value="all">All Vibes</option>
-                <option value="quiet">🤫 Quiet</option>
                 <option value="social">🎉 Social</option>
-                <option value="both">🎭 Both</option>
+                <option value="quiet">🤫 Quiet</option>
+                <option value="productive">💻 Productive</option>
+                <option value="romantic">🌹 Romantic</option>
+                <option value="nature">🍃 Nature</option>
+                <option value="late_night">🌙 Late Night</option>
               </select>
               <select
                 value={filter.budget}
@@ -166,8 +263,11 @@ export default function SpotsPage() {
               >
                 <option value="all">All Budgets</option>
                 <option value="free">💚 Free</option>
+                <option value="broke">💸 Broke</option>
                 <option value="cheap">💵 Cheap</option>
                 <option value="moderate">💵💵 Moderate</option>
+                <option value="expensive">💰 Expensive</option>
+                <option value="luxury">💎 Luxury</option>
               </select>
             </div>
           </div>
@@ -188,6 +288,7 @@ export default function SpotsPage() {
             {filteredSpots.map(spot => (
               <div 
                 key={spot._id} 
+                onClick={() => setSelectedSpot(spot)}
                 style={{ 
                   background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '20px',
                   transition: 'all 0.3s', cursor: 'pointer'
@@ -197,7 +298,7 @@ export default function SpotsPage() {
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontSize: '28px' }}>{categoryEmojis[spot.category]}</span>
+                    <span style={{ fontSize: '28px' }}>{categoryEmojis[spot.category] || '📍'}</span>
                     <div>
                       <h3 style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '15px' }}>{spot.name}</h3>
                       <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{spot.distance}</p>
@@ -209,13 +310,15 @@ export default function SpotsPage() {
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
                   <span style={{ 
                     fontSize: '11px', padding: '4px 10px', borderRadius: '20px',
-                    background: spot.vibe === 'quiet' ? 'rgba(59,130,246,0.2)' : spot.vibe === 'social' ? 'rgba(249,115,22,0.2)' : 'rgba(139,92,246,0.2)',
-                    color: spot.vibe === 'quiet' ? '#60a5fa' : spot.vibe === 'social' ? '#fb923c' : '#a78bfa'
+                    background: 'rgba(139,92,246,0.1)', color: '#a78bfa', textTransform: 'capitalize'
                   }}>
-                    {spot.vibe === 'quiet' ? '🤫 Quiet' : spot.vibe === 'social' ? '🎉 Social' : '🎭 Both'}
+                    ✨ {spot.vibe.replace('_', ' ')}
                   </span>
-                  <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '20px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-                    {spot.budget === 'free' ? '💚 Free' : spot.budget === 'cheap' ? '💵 Cheap' : '💵💵 Moderate'}
+                  <span style={{ 
+                    fontSize: '11px', padding: '4px 10px', borderRadius: '20px', 
+                    background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', textTransform: 'capitalize' 
+                  }}>
+                    💰 {spot.budget}
                   </span>
                 </div>
                 <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>📍 {spot.address}</p>
@@ -235,9 +338,16 @@ export default function SpotsPage() {
             </p>
             <button onClick={() => setShowAddModal(true)} style={{ 
               padding: '12px 24px', background: '#8b5cf6', color: 'white', border: 'none',
-              borderRadius: '12px', fontWeight: 600, cursor: 'pointer', fontSize: '14px'
+              borderRadius: '12px', fontWeight: 600, cursor: 'pointer', fontSize: '14px',
+              marginRight: '12px'
             }}>
               ➕ Add New Spot
+            </button>
+            <button onClick={fetchSpotsFromMap} disabled={isMapLoading} style={{ 
+              padding: '12px 24px', background: 'transparent', color: '#8b5cf6', border: '1px solid #8b5cf6',
+              borderRadius: '12px', fontWeight: 600, cursor: 'pointer', fontSize: '14px'
+            }}>
+              {isMapLoading ? '🗺️ Searching...' : '🌍 Fetch from Maps'}
             </button>
           </div>
 
@@ -280,7 +390,11 @@ export default function SpotsPage() {
                       >
                         <option value="cafe">☕ Cafe</option>
                         <option value="restaurant">🍕 Restaurant</option>
+                        <option value="street_food">🌭 Street Food</option>
                         <option value="park">🌳 Park</option>
+                        <option value="shopping">🛍️ Shopping</option>
+                        <option value="gaming">🎮 Gaming</option>
+                        <option value="sweet_shop">🍬 Sweet Shop</option>
                         <option value="library">📚 Library</option>
                         <option value="other">📍 Other</option>
                       </select>
@@ -300,8 +414,12 @@ export default function SpotsPage() {
                       <select value={newSpot.vibe} onChange={e => setNewSpot({ ...newSpot, vibe: e.target.value })}
                         style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)' }}
                       >
-                        <option value="quiet">🤫 Quiet</option>
                         <option value="social">🎉 Social</option>
+                        <option value="quiet">🤫 Quiet</option>
+                        <option value="productive">💻 Productive</option>
+                        <option value="romantic">🌹 Romantic</option>
+                        <option value="nature">🍃 Nature</option>
+                        <option value="late_night">🌙 Late Night</option>
                         <option value="both">🎭 Both</option>
                       </select>
                     </div>
@@ -311,9 +429,11 @@ export default function SpotsPage() {
                         style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)' }}
                       >
                         <option value="free">💚 Free</option>
+                        <option value="broke">💸 Broke</option>
                         <option value="cheap">💵 Cheap</option>
                         <option value="moderate">💵💵 Moderate</option>
                         <option value="expensive">💰 Expensive</option>
+                        <option value="luxury">💎 Luxury</option>
                       </select>
                     </div>
                   </div>
@@ -346,11 +466,102 @@ export default function SpotsPage() {
             </div>
           )}
 
+          {/* Spot Details Popup */}
+          {selectedSpot && (
+            <div style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 110,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+            }} onClick={() => setSelectedSpot(null)}>
+              <div style={{
+                background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '20px',
+                padding: '32px', maxWidth: '500px', width: '100%', position: 'relative',
+                animation: 'fadeIn 0.2s ease-out'
+              }} onClick={e => e.stopPropagation()}>
+                
+                <button onClick={() => setSelectedSpot(null)} style={{
+                  position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none',
+                  color: 'var(--text-secondary)', fontSize: '24px', cursor: 'pointer'
+                }}>×</button>
+
+                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>{categoryEmojis[selectedSpot.category]}</div>
+                    <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }}>
+                        {selectedSpot.name}
+                    </h2>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>{selectedSpot.distance}</p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '24px', flexWrap: 'wrap' }}>
+                  <span style={{ 
+                    fontSize: '13px', padding: '6px 14px', borderRadius: '20px',
+                    background: 'rgba(139,92,246,0.1)', color: '#a78bfa',
+                    textTransform: 'capitalize'
+                  }}>
+                    ✨ {selectedSpot.vibe.replace('_', ' ')}
+                  </span>
+                  <span style={{ 
+                    fontSize: '13px', padding: '6px 14px', borderRadius: '20px', 
+                    background: 'var(--bg-tertiary)', color: 'var(--text-secondary)',
+                    textTransform: 'capitalize'
+                  }}>
+                    💰 {selectedSpot.budget.replace('_', ' ')}
+                  </span>
+                  <span style={{ fontSize: '13px', padding: '6px 14px', borderRadius: '20px', background: 'rgba(16,185,129,0.2)', color: '#10b981' }}>
+                    👍 {selectedSpot.upvotes} Upvotes
+                  </span>
+                </div>
+
+                <p style={{ 
+                    color: 'var(--text-primary)', fontSize: '15px', lineHeight: 1.6, textAlign: 'center',
+                    marginBottom: '24px', background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px'
+                }}>
+                    {selectedSpot.description}
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-secondary)', fontSize: '14px', justifyContent: 'center' }}>
+                        <span>📍 {selectedSpot.address}</span>
+                    </div>
+
+                    <button
+                    onClick={(e) => upvoteSpot(selectedSpot._id, e)}
+                    style={{ 
+                      display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px',
+                      background: selectedSpot.isUpvoted ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)',
+                      border: selectedSpot.isUpvoted ? '1px solid rgba(16,185,129,0.4)' : '1px solid #2a2a3a',
+                      borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                  >
+                    <span style={{ fontSize: '14px' }}>{selectedSpot.isUpvoted ? '💚' : '👍'}</span>
+                    <span style={{ color: selectedSpot.isUpvoted ? '#10b981' : '#9ca3af', fontSize: '13px', fontWeight: 500 }}>{selectedSpot.upvotes}</span>
+                  </button>
+                    <button 
+                        onClick={() => openGoogleMaps(selectedSpot)}
+                        style={{
+                            width: '100%', padding: '14px', background: '#8b5cf6', color: 'white',
+                            border: 'none', borderRadius: '12px', fontWeight: 600, fontSize: '16px',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            marginTop: '8px', transition: 'transform 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                        <span>🗺️</span> Open in Google Maps
+                    </button>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
 
       {/* Responsive Styles */}
       <style jsx>{`
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
         @media (max-width: 768px) {
           #filters {
             flex-direction: column !important;

@@ -2,6 +2,7 @@ import "./globals.css";
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/components/AuthProvider';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import NotificationManager from '@/components/NotificationManager';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <ThemeProvider>
             <div className="min-h-screen">
+              <NotificationManager />
               {children}
             </div>
           </ThemeProvider>

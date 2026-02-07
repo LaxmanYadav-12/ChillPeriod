@@ -11,13 +11,18 @@ When you do decide to bunk, ChillPeriod suggests the best "Chill Spots" near cam
 ## 🚀 Key Features
 
 ### 📊 Smart Attendance Tracking
+- **Verified Timetables**: Official class schedules for CSE Department (4th & 6th Semesters) with accurate room numbers.
+- **Smart Notifications**: Get alerted **5 minutes before** every class based on your section.
 - **Safe-to-Bunk Calculator**: Know instantly if you're in the "Safe Zone" (Green), "Caution Zone" (Yellow), or "Danger Zone" (Red).
-- **Subject Management**: Add all your courses and track attendance individually.
 - **Visual Analytics**: Beautiful charts showing your attendance trends and monthly breakdowns.
 
 ### 😴 Strategic Bunking
 - **Mass Bunk Coordination**: Plan skips with your entire class group.
-- **Chill Spots**: Discover and upvote the best hangout spots near campus (cafes, parks, malls) with real-time "vibe" checks.
+- **15+ Chill Spots**: Discover and upvote the best hangout spots near campus (cafes, parks, malls) with real-time "vibe" checks.
+
+### 🤖 Discord Bot Integration
+- **Server Invite**: Add the ChillPeriod bot directly to your Discord server from the homepage.
+- **Seamless Auth**: Link your Discord account for a unified experience.
 
 ### 🤝 Social & Leaderboard
 - **Friend Activity**: See what your friends are up to (attending or chilling).
@@ -71,6 +76,9 @@ When you do decide to bunk, ChillPeriod suggests the best "Chill Spots" near cam
     GOOGLE_CLIENT_SECRET=your_google_client_secret
     DISCORD_CLIENT_ID=your_discord_client_id
     DISCORD_CLIENT_SECRET=your_discord_client_secret
+    
+    # Public Config
+    NEXT_PUBLIC_DISCORD_CLIENT_ID=your_discord_application_id_for_bot_invite
     ```
 
 4.  **Run the development server**:

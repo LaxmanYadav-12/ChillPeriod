@@ -21,16 +21,7 @@ export async function GET(req) {
 
     // Case-insensitive regex search
     const users = await User.find({
-      $and: [
-        { 
-            $or: [
-                { username: { $regex: query, $options: 'i' } },
-                { name: { $regex: query, $options: 'i' } }
-            ]
-        },
-        // Exclude current user from results if logged in
-        session ? { _id: { $ne: session.user.id } } : {}
-      ]
+      username: { $regex: query, $options: 'i' }
     })
     .select('name username image totalBunks college')
     .limit(10)

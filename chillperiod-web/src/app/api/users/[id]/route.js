@@ -20,6 +20,13 @@ export async function GET(request, { params }) {
     }
     
     // Add computed fields
+    // Calculate stats dynamically from courses to ensure they are always in sync
+    if (user.courses && Array.isArray(user.courses)) {
+        user.totalClasses = user.courses.reduce((sum, course) => sum + (course.totalClasses || 0), 0);
+        user.attendedClasses = user.courses.reduce((sum, course) => sum + (course.attendedClasses || 0), 0);
+        user.totalBunks = user.totalClasses - user.attendedClasses; // Approximate, or sum bunks if tracked differently
+    }
+
     user.attendancePercentage = user.totalClasses > 0 
       ? Math.round((user.attendedClasses / user.totalClasses) * 100) 
       : 100;
@@ -58,7 +65,7 @@ export async function PATCH(request, { params }) {
     }
     
     // Only allow updating certain fields
-    const allowedFields = ['name', 'college', 'favoriteSpot', 'isPublic', 'notificationsEnabled', 'targetPercentage'];
+    const allowedFields = ['name', 'college', 'semester', 'section', 'favoriteSpot', 'isPublic', 'notificationsEnabled', 'targetPercentage'];
     
     for (const field of allowedFields) {
       if (body[field] !== undefined) {

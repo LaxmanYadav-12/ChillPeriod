@@ -1,11 +1,33 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Spot from '@/models/Spot';
+import UserInteraction from '@/models/UserInteraction';
+import { auth } from '@/auth';
 
 export async function GET() {
   try {
     await dbConnect();
-    const spots = await Spot.find({}).sort({ upvotes: -1 });
+    const session = await auth();
+    
+    // Sort by upvotes desc by default
+    const spots = await Spot.find({}).sort({ upvotes: -1 }).lean();
+
+    if (session) {
+      const upvotes = await UserInteraction.find({
+        userId: session.user.id,
+        type: 'upvote'
+      }).select('spotId');
+
+      const upvotedSpotIds = new Set(upvotes.map(u => u.spotId.toString()));
+
+      const enrichedSpots = spots.map(spot => ({
+        ...spot,
+        isUpvoted: upvotedSpotIds.has(spot._id.toString())
+      }));
+      
+      return NextResponse.json(enrichedSpots);
+    }
+
     return NextResponse.json(spots);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

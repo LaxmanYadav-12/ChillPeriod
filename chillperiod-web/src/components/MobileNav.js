@@ -25,45 +25,45 @@ export default function MobileNav({ currentPage = 'home' }) {
           </Link>
           
           {/* Desktop Links */}
+          {/* Desktop Links */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }} className="desktop-nav">
-            <Link href="/spots" style={{ color: currentPage === 'spots' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'spots' ? 500 : 400, textDecoration: 'none' }}>Spots</Link>
-            <Link href="/attendance" style={{ color: currentPage === 'attendance' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'attendance' ? 500 : 400, textDecoration: 'none' }}>Attendance</Link>
-            <Link href="/leaderboard" style={{ color: currentPage === 'leaderboard' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'leaderboard' ? 500 : 400, textDecoration: 'none' }}>🏆</Link>
-            <Link href="/search" style={{ color: currentPage === 'search' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'search' ? 500 : 400, textDecoration: 'none' }}>🔍</Link>
-            <Link href="/profile" style={{ color: currentPage === 'profile' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'profile' ? 500 : 400, textDecoration: 'none' }}>Profile</Link>
-            <ThemeToggle />
-            {status === 'authenticated' && session?.user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(16,185,129,0.1)', borderRadius: '20px', border: '1px solid rgba(16,185,129,0.2)' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
-                <span style={{ fontSize: '12px', fontWeight: 500, color: '#10b981' }}>{session.user.name?.split(' ')[0] || 'User'}</span>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(239,68,68,0.1)', borderRadius: '20px', border: '1px solid rgba(239,68,68,0.2)' }}>
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }} />
-                <span style={{ fontSize: '12px', fontWeight: 500, color: '#ef4444' }}>Not Logged In</span>
-              </div>
-            )}
-            {currentPage === 'home' && status === 'unauthenticated' && (
-              <Link href="/login" style={{ 
-                padding: '8px 16px', background: 'var(--text-primary)', color: 'var(--bg-primary)', 
-                borderRadius: '10px', fontWeight: 500, textDecoration: 'none', fontSize: '14px'
-              }}>Login</Link>
+            
+            {status === 'authenticated' && (
+              <>
+                <ThemeToggle />
+                <Link href="/spots" style={{ color: currentPage === 'spots' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'spots' ? 500 : 400, textDecoration: 'none' }}>Spots</Link>
+                <Link href="/attendance" style={{ color: currentPage === 'attendance' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'attendance' ? 500 : 400, textDecoration: 'none' }}>Attendance</Link>
+                <Link href="/timetable" style={{ color: currentPage === 'timetable' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'timetable' ? 500 : 400, textDecoration: 'none' }}>Timetable</Link>
+                <Link href="/syllabus" style={{ color: currentPage === 'syllabus' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'syllabus' ? 500 : 400, textDecoration: 'none' }}>Syllabus</Link>
+                <Link href="/leaderboard" style={{ color: currentPage === 'leaderboard' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'leaderboard' ? 500 : 400, textDecoration: 'none' }}>🏆</Link>
+                <Link href="/search" style={{ color: currentPage === 'search' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'search' ? 500 : 400, textDecoration: 'none' }}>🔍</Link>
+                <Link href="/profile" style={{ color: currentPage === 'profile' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'profile' ? 500 : 400, textDecoration: 'none' }}>Profile</Link>
+                
+                {session?.user && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(16,185,129,0.1)', borderRadius: '20px', border: '1px solid rgba(16,185,129,0.2)' }}>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981' }} />
+                      <span style={{ fontSize: '12px', fontWeight: 500, color: '#10b981' }}>{session.user.name?.split(' ')[0] || 'User'}</span>
+                    </div>
+                )}
+              </>
             )}
           </div>
 
           {/* Mobile Hamburger */}
-          <button 
-            onClick={() => setIsOpen(!isOpen)}
-            style={{ 
-              display: 'none',
-              background: 'none', border: 'none', color: 'var(--text-primary)', 
-              fontSize: '24px', cursor: 'pointer', padding: '8px'
-            }}
-            className="mobile-hamburger"
-            aria-label="Toggle menu"
-          >
-            {isOpen ? '✕' : '☰'}
-          </button>
+          {status === 'authenticated' && (
+            <button 
+              onClick={() => setIsOpen(!isOpen)}
+              style={{ 
+                display: 'none',
+                background: 'none', border: 'none', color: 'var(--text-primary)', 
+                fontSize: '24px', cursor: 'pointer', padding: '8px'
+              }}
+              className="mobile-hamburger"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? '✕' : '☰'}
+            </button>
+          )}
         </div>
       </nav>
 
@@ -102,6 +102,28 @@ export default function MobileNav({ currentPage = 'home' }) {
               }}
             >
               📊 Attendance
+            </Link>
+            <Link 
+              href="/timetable" 
+              style={{ 
+                color: currentPage === 'timetable' ? '#8b5cf6' : 'white', 
+                fontSize: '20px', fontWeight: 600, textDecoration: 'none',
+                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                borderRadius: '12px', textAlign: 'center'
+              }}
+            >
+              📅 Timetable
+            </Link>
+            <Link 
+              href="/syllabus" 
+              style={{ 
+                color: currentPage === 'syllabus' ? '#8b5cf6' : 'white', 
+                fontSize: '20px', fontWeight: 600, textDecoration: 'none',
+                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                borderRadius: '12px', textAlign: 'center'
+              }}
+            >
+              📚 Syllabus
             </Link>
             <Link 
               href="/leaderboard" 

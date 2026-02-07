@@ -92,6 +92,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.hasCompletedOnboarding = dbUser.hasCompletedOnboarding || false;
         session.user.followerCount = dbUser.followers?.length || 0;
         session.user.followingCount = dbUser.following?.length || 0;
+        session.user.semester = dbUser.semester;
+        session.user.section = dbUser.section;
       } catch (error) {
         console.error('AUTH DEBUG: Error syncing user to database:', error);
         session.error = error.message;

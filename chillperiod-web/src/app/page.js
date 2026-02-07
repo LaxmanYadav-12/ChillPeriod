@@ -65,6 +65,14 @@ export default function Home() {
             }}>
               Find Spots
             </Link>
+            <a href={`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || 'YOUR_CLIENT_ID'}&permissions=8&scope=bot`} target="_blank" rel="noopener noreferrer" style={{ 
+              padding: '16px 32px', background: '#5865F2', 
+              color: 'white', borderRadius: '14px', fontWeight: 600, fontSize: '16px',
+              textDecoration: 'none', boxShadow: '0 8px 32px rgba(88,101,242,0.3)',
+              display: 'flex', alignItems: 'center', gap: '8px'
+            }}>
+              <span>🤖</span> Add to Discord
+            </a>
           </div>
 
           {/* Stats */}
@@ -80,7 +88,7 @@ export default function Home() {
             </div>
             <div className="stats-divider" style={{ width: '1px', background: 'var(--border-color)' }} />
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '36px', fontWeight: 'bold', color: 'var(--text-primary)' }}>9+</div>
+              <div style={{ fontSize: '36px', fontWeight: 'bold', color: 'var(--text-primary)' }}>15+</div>
               <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Chill Spots</div>
             </div>
           </div>
@@ -100,10 +108,10 @@ export default function Home() {
           {[
             { icon: '📊', title: 'Attendance Tracker', desc: 'Track per-course attendance with visual progress bars.' },
             { icon: '🧮', title: 'Bunk Calculator', desc: 'Know how many classes you can safely skip.' },
-            { icon: ' 📅', title: 'Timetable Sync', desc: 'Add your timetable and manage courses easily.' },
+            { icon: '📅', title: 'Timetable Sync', desc: 'Full CSE Dept (4th & 6th Sem) schedules pre-loaded.' },
             { icon: '📍', title: 'Chill Spots', desc: 'Discover cafes, parks curated by students.' },
-            { icon: '🤖', title: 'Discord Bot', desc: 'Use /bunk, /attend commands in Discord.' },
-            { icon: '🚨', title: 'Smart Alerts', desc: 'Get warnings when approaching danger zone.' },
+            { icon: '🤖', title: 'Discord Bot', desc: 'Invite our bot to sync attendance directly on Discord.' },
+            { icon: '🔔', title: 'Smart Alerts', desc: 'Get browser notifications 5 minutes before every class!' },
           ].map((f, i) => (
             <div key={i} style={{ 
               background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '20px', padding: '24px',

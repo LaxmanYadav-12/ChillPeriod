@@ -10,6 +10,7 @@ import Navbar from '@/components/Navbar';
 import AttendanceTrendChart from '@/components/charts/AttendanceTrendChart';
 import SubjectPieChart from '@/components/charts/SubjectPieChart';
 import MonthlyBarChart from '@/components/charts/MonthlyBarChart';
+import { excusesData } from '@/lib/data/excuses';
 
 const initialCourses = [
   { id: 1, name: "Data Structures", code: "CS201", total: 15, attended: 12 },
@@ -68,7 +69,7 @@ export default function AttendancePage() {
   const [showMassBunkModal, setShowMassBunkModal] = useState(false);
   const [massBunkSelection, setMassBunkSelection] = useState(new Set());
   const [bunkingCourse, setBunkingCourse] = useState(null);
-  const [newCourse, setNewCourse] = useState({ name: '', code: '', total: 0, attended: 0 });
+  const [newCourse, setNewCourse] = useState({ name: '', code: '', type: 'Theory', total: 0, attended: 0 });
   const [chillSpots, setChillSpots] = useState(initialChillSpots);
   
   const today = new Date();
@@ -78,6 +79,16 @@ export default function AttendancePage() {
   const [upvotedSpots, setUpvotedSpots] = useState(new Set());
   const [selectedDate, setSelectedDate] = useState(null);
   const [showDateModal, setShowDateModal] = useState(false);
+  
+  // Excuse Generator State
+  const [excuseTone, setExcuseTone] = useState('funny');
+  const [generatedExcuse, setGeneratedExcuse] = useState('');
+
+  const generateExcuse = () => {
+    const tones = excusesData.tones[excuseTone];
+    const randomExcuse = tones[Math.floor(Math.random() * tones.length)];
+    setGeneratedExcuse(randomExcuse);
+  };
   
   // Fetch courses on load
   useEffect(() => {
@@ -229,6 +240,7 @@ export default function AttendancePage() {
             body: JSON.stringify({
                 name: newCourse.name,
                 code: newCourse.code,
+                type: newCourse.type,
                 totalClasses: Number(newCourse.total) || 0,
                 attendedClasses: Number(newCourse.attended) || 0
             })
@@ -237,7 +249,7 @@ export default function AttendancePage() {
         if (res.ok) {
             const addedCourse = await res.json();
             setCourses(prev => [...prev, { ...addedCourse, id: addedCourse._id }]);
-            setNewCourse({ name: '', code: '', total: 0, attended: 0 });
+            setNewCourse({ name: '', code: '', type: 'Theory', total: 0, attended: 0 });
             setShowAddModal(false);
             // alert("Subject added successfully!"); 
         } else {
@@ -504,6 +516,57 @@ export default function AttendancePage() {
               >
                 Just Bunk
               </button>
+            </div>
+
+            <div style={{ marginTop: '24px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
+               <h4 style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '12px', textAlign: 'center' }}>
+                 Need an excuse? 🎭
+               </h4>
+               <div style={{ display: 'flex', gap: '8px' }}>
+                 <select 
+                   value={excuseTone}
+                   onChange={(e) => setExcuseTone(e.target.value)}
+                   style={{
+                     flex: 1, padding: '10px', borderRadius: '8px', 
+                     background: 'var(--bg-primary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)'
+                   }}
+                 >
+                   {Object.keys(excusesData.tones).map(tone => (
+                     <option key={tone} value={tone}>{tone.charAt(0).toUpperCase() + tone.slice(1)}</option>
+                   ))}
+                 </select>
+                 <button
+                   onClick={generateExcuse}
+                   style={{
+                     padding: '10px 16px', borderRadius: '8px', border: 'none',
+                     background: '#8b5cf6', color: 'white', cursor: 'pointer', fontWeight: 600
+                   }}
+                 >
+                   Generate
+                 </button>
+               </div>
+               
+               {generatedExcuse && (
+                 <div style={{ 
+                   marginTop: '12px', padding: '12px', background: 'var(--bg-primary)', 
+                   borderRadius: '8px', border: '1px solid var(--border-color)',
+                   position: 'relative', animation: 'fadeIn 0.3s ease'
+                 }}>
+                   <p style={{ color: 'var(--text-primary)', fontSize: '14px', paddingRight: '24px', fontStyle: 'italic' }}>
+                     "{generatedExcuse}"
+                   </p>
+                   <button
+                     onClick={() => navigator.clipboard.writeText(generatedExcuse)}
+                     style={{
+                       position: 'absolute', top: '8px', right: '8px',
+                       background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px'
+                     }}
+                     title="Copy to clipboard"
+                   >
+                     📋
+                   </button>
+                 </div>
+               )}
             </div>
 
             <Link href="/spots" style={{ 
@@ -903,52 +966,96 @@ export default function AttendancePage() {
           </div>
 
           {/* Courses List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Courses List */}
+          {/* Courses List - Row Layout */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {courses.map(course => {
-              const stats = getStats(course.totalClasses, course.attendedClasses, requiredPercentage);
-              const barColor = stats.status === 'safe' ? 'linear-gradient(90deg, #059669, #34d399)' : 
-                              stats.status === 'caution' ? 'linear-gradient(90deg, #d97706, #fbbf24)' : 
-                              'linear-gradient(90deg, #dc2626, #f87171)';
+              const stats = getStats(course.totalClasses, course.attendedClasses, course.targetPercentage || 75);
               
+              // Determine bar color
+              let barColor = '#10b981'; // Green
+              if (stats.percentage < 75) barColor = '#ef4444'; // Red
+              else if (stats.percentage < 85) barColor = '#f59e0b'; // Yellow (Caution)
+
               return (
-                <div key={course.id} style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-                    <div style={{ flex: 1, minWidth: '180px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444' }} />
-                        <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>{course.name}</span>
-                        {course.code && <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{course.code}</span>}
-                      </div>
-                      <div style={{ width: '100%', height: '6px', background: 'var(--bg-tertiary)', borderRadius: '3px', marginBottom: '6px' }}>
-                        <div style={{ height: '100%', borderRadius: '3px', background: barColor, width: `${Math.min(100, stats.percentage)}%`, transition: 'width 0.5s' }} />
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                        <span>{course.attendedClasses}/{course.totalClasses}</span>
-                        <span>•</span>
-                        <span style={{ color: stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444' }}>{stats.percentage}%</span>
-                        {stats.safeToBunk > 0 && <><span>•</span><span style={{ color: '#10b981' }}>Skip {stats.safeToBunk}</span></>}
-                      </div>
+                <div key={course.id} className="animate-scale-in" style={{ 
+                  background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', 
+                  padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  gap: '24px', flexWrap: 'wrap'
+                }}>
+                  
+                  {/* Left Side: Info & Progress */}
+                  <div style={{ flex: 1, minWidth: '300px' }}>
+                    
+                    {/* Header: Dot + Name + Code */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                        <div style={{ 
+                            width: '8px', height: '8px', borderRadius: '50%', 
+                            background: stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444',
+                            boxShadow: `0 0 8px ${stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444'}40`
+                        }} />
+                        <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>{course.name}</h3>
+                        {course.code && <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{course.code}</span>}
                     </div>
-                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                      <button onClick={() => initiateEdit(course)} style={{ 
-                        padding: '8px', background: 'rgba(107,114,128,0.1)', color: '#9ca3af', 
-                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px'
-                      }} title="Edit Subject">✏️</button>
-                      <button onClick={() => { setCourseToDelete(course); setShowDeleteModal(true); }} style={{ 
-                        padding: '8px', background: 'rgba(239,68,68,0.1)', color: '#f87171', 
-                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px'
-                      }} title="Delete Subject">🗑️</button>
-                      
-                      <button onClick={() => inititateBunk(course)} style={{ 
-                        padding: '8px 12px', background: 'rgba(239,68,68,0.1)', color: '#f87171', 
-                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 500, fontSize: '12px'
-                      }}>😴 Bunk</button>
-                      <button onClick={() => handleAttend(course.id)} style={{ 
-                        padding: '8px 12px', background: 'rgba(16,185,129,0.1)', color: '#34d399', 
-                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 500, fontSize: '12px'
-                      }}>✅ Attend</button>
+
+                    {/* Progress Bar */}
+                    <div style={{ width: '100%', height: '6px', background: 'var(--bg-tertiary)', borderRadius: '3px', marginBottom: '10px' }}>
+                        <div style={{ 
+                            height: '100%', borderRadius: '3px', background: barColor, 
+                            width: `${Math.min(100, stats.percentage)}%`, transition: 'width 0.5s',
+                            boxShadow: `0 0 10px ${barColor}40`
+                        }} />
+                    </div>
+
+                    {/* Stats Line */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <span>{course.attendedClasses}/{course.totalClasses}</span>
+                        <span style={{ color: 'var(--text-muted)' }}>•</span>
+                        <span style={{ color: barColor, fontWeight: 500 }}>{stats.percentage}%</span>
+                        {stats.safeToBunk > 0 && (
+                            <>
+                                <span style={{ color: 'var(--text-muted)' }}>•</span>
+                                <span style={{ color: '#10b981' }}>Skip {stats.safeToBunk}</span>
+                            </>
+                        )}
+                        {stats.needToAttend > 0 && (
+                            <>
+                                <span style={{ color: 'var(--text-muted)' }}>•</span>
+                                <span style={{ color: '#ef4444' }}>Attend {stats.needToAttend}</span>
+                            </>
+                        )}
                     </div>
                   </div>
+
+                  {/* Right Side: Actions */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button onClick={() => initiateEdit(course)} style={{ 
+                        width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' 
+                    }} title="Edit">✏️</button>
+                    
+                    <button onClick={() => { setCourseToDelete(course); setShowDeleteModal(true); }} style={{ 
+                        width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' 
+                    }} title="Delete">🗑️</button>
+
+                    <button onClick={() => inititateBunk(course)} style={{ 
+                        padding: '10px 16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', 
+                        borderRadius: '10px', color: '#f87171', cursor: 'pointer', fontWeight: 600, fontSize: '13px',
+                        display: 'flex', alignItems: 'center', gap: '6px'
+                    }}>
+                        <span style={{ fontSize: '14px' }}>😴</span> Bunk
+                    </button>
+
+                    <button onClick={() => handleAttend(course.id)} style={{ 
+                        padding: '10px 16px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', 
+                        borderRadius: '10px', color: '#34d399', cursor: 'pointer', fontWeight: 600, fontSize: '13px',
+                        display: 'flex', alignItems: 'center', gap: '6px'
+                    }}>
+                        <span style={{ fontSize: '14px' }}>✅</span> Attend
+                    </button>
+                  </div>
+
                 </div>
               );
             })}

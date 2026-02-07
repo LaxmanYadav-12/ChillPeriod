@@ -32,7 +32,7 @@ export async function POST(req) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const { name, code, totalClasses, attendedClasses, targetPercentage } = body;
+    const { name, code, type, totalClasses, attendedClasses, targetPercentage } = body;
 
     if (!name) return NextResponse.json({ error: 'Course name is required' }, { status: 400 });
 
@@ -41,6 +41,7 @@ export async function POST(req) {
     const newCourse = {
       name,
       code: code || '',
+      type: type || 'Theory',
       totalClasses: Number(totalClasses) || 0,
       attendedClasses: Number(attendedClasses) || 0,
       targetPercentage: Number(targetPercentage) || 75
@@ -69,7 +70,7 @@ export async function PATCH(req) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const { courseId, name, code, totalClasses, attendedClasses } = body;
+    const { courseId, name, code, type, totalClasses, attendedClasses } = body;
 
     if (!courseId) return NextResponse.json({ error: 'Course ID required' }, { status: 400 });
 
@@ -79,6 +80,7 @@ export async function PATCH(req) {
     const updateFields = {};
     if (name) updateFields['courses.$.name'] = name;
     if (code !== undefined) updateFields['courses.$.code'] = code;
+    if (type) updateFields['courses.$.type'] = type;
     if (totalClasses !== undefined) updateFields['courses.$.totalClasses'] = Number(totalClasses);
     if (attendedClasses !== undefined) updateFields['courses.$.attendedClasses'] = Number(attendedClasses);
 

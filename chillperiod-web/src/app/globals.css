@@ -68,7 +68,21 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+/* 
+  Global Theme Transition 
+  - Only active when switching themes (controlled by JS)
+  - Prevents sluggish hover states by not applying globally all the time
+*/
+.theme-transitioning,
+html.theme-transitioning,
+html.theme-transitioning body,
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-delay: 0s !important;
 }
 
 /* Ensure containers center properly */

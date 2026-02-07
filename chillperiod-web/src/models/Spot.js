@@ -11,11 +11,11 @@ const spotSchema = new mongoose.Schema({
   category: { 
     type: String, 
     required: true, 
-    enum: ['cafe', 'restaurant', 'library', 'park', 'arcade', 'mall', 'other'],
+    enum: ['cafe', 'restaurant', 'street_food', 'park', 'shopping', 'gaming', 'sweet_shop', 'library', 'other', 'arcade', 'mall'], 
     index: true 
   },
-  vibe: { type: String, enum: ['quiet', 'social', 'both'], default: 'both' },
-  budget: { type: String, enum: ['free', 'cheap', 'moderate', 'expensive'], default: 'moderate' },
+  vibe: { type: String, enum: ['quiet', 'social', 'productive', 'romantic', 'late_night', 'nature', 'both'], default: 'both' },
+  budget: { type: String, enum: ['free', 'broke', 'cheap', 'moderate', 'expensive', 'luxury'], default: 'moderate' },
   bestFor: { type: String, trim: true },
   avgTime: { type: String, trim: true },
   addedBy: { discordId: String, username: String },

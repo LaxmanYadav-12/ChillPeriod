@@ -41,8 +41,7 @@ export default function SearchPage() {
       <main style={{ maxWidth: '600px', margin: '0 auto', padding: '80px 20px 20px' }}>
         <h1 style={{ 
           fontSize: '28px', fontWeight: 700, marginBottom: '24px',
-          background: 'linear-gradient(135deg, #fff 0%, #a5b4fc 100%)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+          color: 'var(--text-primary)'
         }}>
             Find Friends 🕵️‍♂️
         </h1>
@@ -58,8 +57,8 @@ export default function SearchPage() {
               padding: '16px 20px',
               paddingLeft: '48px',
               fontSize: '16px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
               borderRadius: '16px',
               color: 'var(--text-primary)',
               outline: 'none',
@@ -77,8 +76,8 @@ export default function SearchPage() {
               <div style={{ 
                 display: 'flex', alignItems: 'center', gap: '16px',
                 padding: '16px',
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid rgba(255, 255, 255, 0.05)',
+                background: 'var(--card-bg)',
+                border: '1px solid var(--border-color)',
                 borderRadius: '16px',
                 transition: 'transform 0.2s',
                 cursor: 'pointer'
@@ -91,7 +90,7 @@ export default function SearchPage() {
                     fontSize: '20px', fontWeight: 'bold', color: 'white',
                     overflow: 'hidden'
                 }}>
-                    {user.image ? <img src={user.image} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : user.name[0]}
+                    {user.image ? <img src={user.image} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (user.name?.[0] || 'U')}
                 </div>
 
                 <div style={{ flex: 1 }}>
@@ -99,7 +98,7 @@ export default function SearchPage() {
                         {user.name}
                     </h3>
                     <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: '4px 0 0' }}>
-                        @{user.username || 'user'} • {user.college || 'No College'}
+                        @{user.username || 'user'} • {(typeof user.college === 'object' ? user.college?.name : user.college) || 'No College'}
                     </p>
                 </div>
                 

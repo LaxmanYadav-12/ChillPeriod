@@ -5,6 +5,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
+import { getSemesters, getSectionsForSemester } from '@/lib/data/timetable';
 
 import { useRouter } from 'next/navigation';
 
@@ -13,11 +14,14 @@ export default function ProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
+  const [saveStatus, setSaveStatus] = useState(''); // 'saving', 'saved', 'error'
   
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [editCollege, setEditCollege] = useState('');
+  const [editSemester, setEditSemester] = useState(4);
+  const [editSection, setEditSection] = useState('CSE-A');
   const [usernameError, setUsernameError] = useState('');
   const [error, setError] = useState(null);
 
@@ -51,7 +55,10 @@ export default function ProfilePage() {
   const fetchUserData = async () => {
     try {
       console.log('ProfilePage: Fetching user data for ID:', session.user.id);
-      const res = await fetch(`/api/users/${session.user.id}`);
+      const res = await fetch(`/api/users/${session.user.id}?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Pragma': 'no-cache' }
+      });
       if (res.ok) {
         const data = await res.json();
         setUserData(data);
@@ -59,6 +66,8 @@ export default function ProfilePage() {
         setEditName(data.name || '');
         setEditUsername(data.username || '');
         setEditCollege(data.college || '');
+        setEditSemester(data.semester || 4);
+        setEditSection(data.section || 'CSE-A');
       } else {
         const errorData = await res.json().catch(() => ({}));
         console.error('ProfilePage: API error:', res.status, errorData);
@@ -98,7 +107,9 @@ export default function ProfilePage() {
         body: JSON.stringify({
           name: editName,
           username: editUsername,
-          college: editCollege
+          college: editCollege,
+          semester: editSemester,
+          section: editSection
         })
       });
 
@@ -116,6 +127,41 @@ export default function ProfilePage() {
       setUsernameError(err.message || 'Something went wrong');
     }
   };
+
+  const handleToggleNotifications = async () => {
+    if (!userData) return;
+    
+    // Optimistic update
+    const previousState = userData.notificationsEnabled;
+    const newState = !previousState;
+
+    if (newState) {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        alert('You need to allow notifications in your browser to get class alerts!');
+        return;
+      }
+    }
+    
+    setUserData(prev => ({ ...prev, notificationsEnabled: newState }));
+    
+    try {
+      const res = await fetch(`/api/users/${session.user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationsEnabled: newState })
+      });
+      
+      if (!res.ok) {
+        throw new Error('Failed to update');
+      }
+    } catch (err) {
+      console.error(err);
+      // Revert on error
+      setUserData(prev => ({ ...prev, notificationsEnabled: previousState }));
+    }
+  };
+
 
   if (error) {
     return (
@@ -174,8 +220,12 @@ export default function ProfilePage() {
     attendancePercentage: 100,
     currentStreak: 0,
     longestStreak: 0,
+    notificationsEnabled: userData?.notificationsEnabled ?? true,
+    notificationsEnabled: userData?.notificationsEnabled ?? true,
     followerCount: 0,
-    followingCount: 0
+    followingCount: 0,
+    semester: session?.user?.semester || 4,
+    section: session?.user?.section || 'CSE-A'
   };
 
   const achievements = [
@@ -242,20 +292,60 @@ export default function ProfilePage() {
               <p style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '4px' }}>Others can find you by @username</p>
             </div>
 
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>College</label>
-              <input 
-                type="text" 
-                value={editCollege} 
-                onChange={e => setEditCollege(e.target.value)}
-                placeholder="Your college name"
-                style={{ 
-                  width: '100%', padding: '12px 16px', background: 'var(--bg-tertiary)', 
-                  border: '1px solid var(--border-color)', borderRadius: '10px', 
-                  color: 'var(--text-primary)', fontSize: '14px' 
-                }}
-              />
-            </div>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>College</label>
+                <input 
+                  type="text" 
+                  value={editCollege} 
+                  onChange={e => setEditCollege(e.target.value)}
+                  placeholder="Your college name"
+                  style={{ 
+                    width: '100%', padding: '12px 16px', background: 'var(--bg-tertiary)', 
+                    border: '1px solid var(--border-color)', borderRadius: '10px', 
+                    color: 'var(--text-primary)', fontSize: '14px' 
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Semester</label>
+                  <select 
+                    value={editSemester} 
+                    onChange={e => {
+                      const sem = parseInt(e.target.value);
+                      setEditSemester(sem);
+                      const sections = getSectionsForSemester(sem);
+                      if (sections.length > 0) setEditSection(sections[0]);
+                    }}
+                    style={{ 
+                      width: '100%', padding: '12px', background: 'var(--bg-tertiary)', 
+                      border: '1px solid var(--border-color)', borderRadius: '10px', 
+                      color: 'var(--text-primary)', fontSize: '14px', outline: 'none'
+                    }}
+                  >
+                    {getSemesters().map(sem => (
+                      <option key={sem} value={sem}>{sem}th Sem</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Section</label>
+                  <select 
+                    value={editSection} 
+                    onChange={e => setEditSection(e.target.value)}
+                    style={{ 
+                      width: '100%', padding: '12px', background: 'var(--bg-tertiary)', 
+                      border: '1px solid var(--border-color)', borderRadius: '10px', 
+                      color: 'var(--text-primary)', fontSize: '14px', outline: 'none'
+                    }}
+                  >
+                    {getSectionsForSemester(editSemester).map(sec => (
+                      <option key={sec} value={sec}>{sec}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
             <div style={{ display: 'flex', gap: '12px' }}>
               <button 
@@ -316,7 +406,7 @@ export default function ProfilePage() {
               </p>
             )}
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>
-              📍 {user.college || 'No college set'}
+              📍 {user.college || 'No college set'} • {user.semester ? `${user.semester}th Sem` : ''} {user.section ? `(${user.section})` : ''}
             </p>
 
             {/* Follower/Following Counts - Real Data */}
@@ -348,6 +438,8 @@ export default function ProfilePage() {
                 setEditName(user.name); 
                 setEditUsername(user.username || ''); 
                 setEditCollege(user.college || ''); 
+                setEditSemester(user.semester || 4);
+                setEditSection(user.section || 'CSE-A');
                 setIsEditing(true); 
               }}
               style={{ 
@@ -438,6 +530,104 @@ export default function ProfilePage() {
               <ThemeToggle />
             </div>
 
+            {/* Academic Details (Semester / Section) */}
+            <div style={{ 
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '12px'
+            }}>
+              <div>
+                <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  Class
+                  {saveStatus === 'saving' && <span style={{ fontSize: '10px', color: '#fbbf24' }}>Saving...</span>}
+                  {saveStatus === 'saved' && <span style={{ fontSize: '10px', color: '#10b981' }}>Saved!</span>}
+                </div>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Your timetable source</div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select 
+                  value={user.semester || 4} 
+                  onChange={async (e) => {
+                    const newSem = parseInt(e.target.value);
+                    const sections = getSectionsForSemester(newSem);
+                    const newSec = sections.length > 0 ? sections[0] : 'CSE-A'; // Default to first
+                    
+                    // Optimistic update
+                    setUserData(prev => ({ ...prev, semester: newSem, section: newSec }));
+                    setSaveStatus('saving');
+                    
+                    try {
+                      const res = await fetch(`/api/users/${session.user.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ semester: newSem, section: newSec })
+                      });
+                      
+                      if (!res.ok) {
+                          const errData = await res.json();
+                          throw new Error(errData.error || 'Update failed');
+                      }
+                      setSaveStatus('saved');
+                      setTimeout(() => setSaveStatus(''), 2000);
+                    } catch (err) {
+                      console.error('Failed to update semester', err);
+                      // Revert
+                      setUserData(prev => ({ ...prev, semester: user.semester, section: user.section }));
+                      alert(`Failed to save class: ${err.message}`);
+                      setSaveStatus('error');
+                    }
+                  }}
+                  style={{ 
+                    padding: '6px 10px', background: 'var(--card-bg)', 
+                    border: '1px solid var(--border-color)', borderRadius: '8px', 
+                    color: 'var(--text-primary)', fontSize: '12px', outline: 'none', cursor: 'pointer'
+                  }}
+                >
+                  {getSemesters().map(sem => (
+                    <option key={sem} value={sem}>{sem}th Sem</option>
+                  ))}
+                </select>
+
+                <select 
+                  value={user.section || 'CSE-A'} 
+                  onChange={async (e) => {
+                    const newSec = e.target.value;
+                    // Optimistic update
+                    setUserData(prev => ({ ...prev, section: newSec }));
+                    setSaveStatus('saving');
+                    
+                    try {
+                      const res = await fetch(`/api/users/${session.user.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ section: newSec })
+                      });
+                      
+                      if (!res.ok) {
+                          const errData = await res.json();
+                          throw new Error(errData.error || 'Update failed');
+                      }
+                      setSaveStatus('saved');
+                      setTimeout(() => setSaveStatus(''), 2000);
+                    } catch (err) {
+                      console.error('Failed to update section', err);
+                      setUserData(prev => ({ ...prev, section: user.section })); // Revert
+                      alert(`Failed to save section: ${err.message}`);
+                      setSaveStatus('error');
+                    }
+                  }}
+                  style={{ 
+                    padding: '6px 10px', background: 'var(--card-bg)', 
+                    border: '1px solid var(--border-color)', borderRadius: '8px', 
+                    color: 'var(--text-primary)', fontSize: '12px', outline: 'none', cursor: 'pointer'
+                  }}
+                >
+                  {getSectionsForSemester(user.semester || 4).map(sec => (
+                    <option key={sec} value={sec}>{sec}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             {/* Notifications (placeholder) */}
             <div style={{ 
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -447,13 +637,20 @@ export default function ProfilePage() {
                 <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>Notifications</div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Get alerts when attendance drops</div>
               </div>
-              <div style={{ 
-                width: '44px', height: '24px', background: '#8b5cf6', borderRadius: '12px', 
-                position: 'relative', cursor: 'pointer' 
-              }}>
+              <div 
+                onClick={handleToggleNotifications}
+                style={{ 
+                  width: '44px', height: '24px', 
+                  background: user.notificationsEnabled ? '#8b5cf6' : 'var(--text-muted)', 
+                  borderRadius: '12px', 
+                  position: 'relative', cursor: 'pointer',
+                  transition: 'background 0.3s'
+                }}>
                 <div style={{ 
                   width: '18px', height: '18px', background: 'white', borderRadius: '50%', 
-                  position: 'absolute', top: '3px', right: '3px' 
+                  position: 'absolute', top: '3px', 
+                  left: user.notificationsEnabled ? '23px' : '3px',
+                  transition: 'left 0.3s'
                 }} />
               </div>
             </div>

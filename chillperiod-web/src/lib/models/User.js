@@ -11,6 +11,8 @@ const UserSchema = new mongoose.Schema({
   username: { type: String, unique: true, sparse: true },
   image: String,
   college: String,
+  semester: Number,
+  section: String,
   
   // Social
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -39,6 +41,7 @@ const UserSchema = new mongoose.Schema({
   courses: [{
     name: { type: String, required: true },
     code: String,
+    type: { type: String, enum: ['Theory', 'Lab'], default: 'Theory' },
     totalClasses: { type: Number, default: 0 },
     attendedClasses: { type: Number, default: 0 },
     targetPercentage: { type: Number, default: 75 }
@@ -83,5 +86,10 @@ UserSchema.methods.getBunkTitle = function() {
 // Ensure virtuals are included in JSON
 UserSchema.set('toJSON', { virtuals: true });
 UserSchema.set('toObject', { virtuals: true });
+
+// Prevent Mongoose caching stale schema in development
+if (process.env.NODE_ENV === 'development' && mongoose.models.User) {
+  delete mongoose.models.User;
+}
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);
