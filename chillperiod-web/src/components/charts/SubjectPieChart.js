@@ -13,7 +13,7 @@ export default function SubjectPieChart({ courses }) {
   // Calculate subject-wise attendance
   const subjectData = courses.map(course => ({
     name: course.name,
-    percentage: Math.round((course.attended / course.total) * 100)
+    percentage: course.totalClasses > 0 ? Math.round((course.attendedClasses / course.totalClasses) * 100) : 100
   }));
 
   const data = {

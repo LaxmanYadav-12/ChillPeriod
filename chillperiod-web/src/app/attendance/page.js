@@ -60,7 +60,8 @@ export default function AttendancePage() {
     }
   }, [status]);
 
-  const [courses, setCourses] = useState(initialCourses);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [requiredPercentage] = useState(75);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showBunkModal, setShowBunkModal] = useState(false);
@@ -78,9 +79,78 @@ export default function AttendancePage() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [showDateModal, setShowDateModal] = useState(false);
   
+  // Fetch courses on load
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchCourses();
+    } else if (status === 'unauthenticated') {
+      // Keep demo data for guests if needed, or clear it
+      setLoading(false);
+    }
+  }, [status]);
+
+  const fetchCourses = async () => {
+    try {
+      const res = await fetch('/api/courses');
+      if (res.ok) {
+        const data = await res.json();
+        // data = { courses: [], attendanceLog: [] }
+        const coursesData = data.courses || [];
+        setCourses(coursesData.map(c => ({ ...c, id: c._id }))); 
+        
+        // Process attendanceLog for the calendar
+        // Backend format: [{ date: "YYYY-MM-DD", actions: [...] }]
+        // Frontend format: { "YYYY-MM-DD": { attended: X, bunked: Y, courses: { id: { status } } } }
+        const logMap = {};
+        
+        // Create a Set of active course IDs for efficient lookup
+        const activeCourseIds = new Set(coursesData.map(c => c._id));
+
+        if (data.attendanceLog) {
+            data.attendanceLog.forEach(day => {
+                const dateKey = day.date; // already YYYY-MM-DD strings?
+                
+                // Filter actions to only include those for active courses
+                const activeActions = day.actions.filter(action => activeCourseIds.has(action.courseId));
+                
+                // Construct the daily stats only from active actions
+                let attendedCount = 0;
+                let bunkedCount = 0;
+                const courseStatus = {};
+                
+                activeActions.forEach(action => {
+                    if (action.status === 'attended') attendedCount++;
+                    if (action.status === 'bunked') bunkedCount++;
+                    courseStatus[action.courseId] = { 
+                        attended: action.status === 'attended',
+                        bunked: action.status === 'bunked'
+                    };
+                });
+
+                // Only add to logMap if there are active actions, or if we want to show empty days?
+                // Actually, the calendar iterates over days and checks logMap[dateKey]. 
+                // If we have 0 actions, it might be better to just not have an entry, OR have an entry with 0.
+                if (activeActions.length > 0) {
+                    logMap[dateKey] = {
+                        attended: attendedCount,
+                        bunked: bunkedCount,
+                        courses: courseStatus
+                    };
+                }
+            });
+            setAttendanceLog(logMap);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch courses', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const calendarDays = getCalendarDays(calendarYear, calendarMonth);
-  const totalClasses = courses.reduce((sum, c) => sum + c.total, 0);
-  const attendedClasses = courses.reduce((sum, c) => sum + c.attended, 0);
+  const totalClasses = courses.reduce((sum, c) => sum + c.totalClasses, 0); // Note: API uses totalClasses
+  const attendedClasses = courses.reduce((sum, c) => sum + c.attendedClasses, 0);
   const overallStats = getStats(totalClasses, attendedClasses, requiredPercentage);
 
   const inititateBunk = (course) => {
@@ -88,36 +158,155 @@ export default function AttendancePage() {
     setShowBunkModal(true);
   };
 
-  const confirmBunk = (spot) => {
-    if (bunkingCourse) {
-      setCourses(prev => prev.map(c => c.id === bunkingCourse.id ? { ...c, total: c.total + 1 } : c));
-      const dateKey = `${calendarYear}-${calendarMonth}-${today.getDate()}`;
-      setAttendanceLog(prev => ({ ...prev, [dateKey]: { ...prev[dateKey], bunked: (prev[dateKey]?.bunked || 0) + 1 } }));
+  const markAttendance = async (courseId, status, spot = null) => {
+    // Optimistic UI update
+    setCourses(prev => prev.map(c => {
+        if (c.id === courseId) {
+            return {
+                ...c,
+                totalClasses: c.totalClasses + 1,
+                attendedClasses: status === 'attended' ? c.attendedClasses + 1 : c.attendedClasses
+            };
+        }
+        return c;
+    }));
+
+    // Call API
+    try {
+        const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        await fetch('/api/attendance/mark', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                courseId, 
+                status, 
+                date: dateStr 
+            })
+        });
+        
+        // Update local log for calendar
+        const dateKey = dateStr; // dateStr is already YYYY-MM-DD padded
+        setAttendanceLog(prev => ({  
+            ...prev, 
+            [dateKey]: { 
+                ...prev[dateKey], 
+                [status]: (prev[dateKey]?.[status] || 0) + 1 
+            } 
+        }));
+
+    } catch (error) {
+        console.error('Failed to mark attendance', error);
+        // Revert optimistic update if needed (omitted for brevity)
     }
-    // Open Google Maps if spot has coordinates
+
     if (spot && spot.lat && spot.lng) {
       window.open(`https://www.google.com/maps/search/?api=1&query=${spot.lat},${spot.lng}`, '_blank');
+    }
+  };
+
+  const confirmBunk = (spot) => {
+    if (bunkingCourse) {
+        markAttendance(bunkingCourse.id, 'bunked', spot);
     }
     setShowBunkModal(false);
     setBunkingCourse(null);
   };
 
   const handleAttend = (courseId) => {
-    setCourses(prev => prev.map(c => c.id === courseId ? { ...c, total: c.total + 1, attended: c.attended + 1 } : c));
-    const dateKey = `${calendarYear}-${calendarMonth}-${today.getDate()}`;
-    setAttendanceLog(prev => ({ ...prev, [dateKey]: { ...prev[dateKey], attended: (prev[dateKey]?.attended || 0) + 1 } }));
+    markAttendance(courseId, 'attended');
   };
 
-  const handleAddCourse = () => {
-    if (!newCourse.name.trim()) return;
-    const id = Math.max(...courses.map(c => c.id), 0) + 1;
-    setCourses(prev => [...prev, { ...newCourse, id, total: Number(newCourse.total) || 0, attended: Number(newCourse.attended) || 0 }]);
-    setNewCourse({ name: '', code: '', total: 0, attended: 0 });
-    setShowAddModal(false);
+  const handleAddCourse = async () => {
+    if (!newCourse.name.trim()) {
+        alert("Please enter a subject name.");
+        return;
+    }
+    
+    try {
+        const res = await fetch('/api/courses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: newCourse.name,
+                code: newCourse.code,
+                totalClasses: Number(newCourse.total) || 0,
+                attendedClasses: Number(newCourse.attended) || 0
+            })
+        });
+
+        if (res.ok) {
+            const addedCourse = await res.json();
+            setCourses(prev => [...prev, { ...addedCourse, id: addedCourse._id }]);
+            setNewCourse({ name: '', code: '', total: 0, attended: 0 });
+            setShowAddModal(false);
+            // alert("Subject added successfully!"); 
+        } else {
+            const err = await res.json();
+            alert(`Failed to add subject: ${err.error}`);
+            console.error(err);
+        }
+    } catch (error) {
+        console.error('Failed to add course', error);
+        alert("Something went wrong. Check console.");
+    }
   };
 
-  const handleDeleteCourse = (courseId) => {
+  const handleDeleteCourse = async (courseId) => {
+    // Optimistic
     setCourses(prev => prev.filter(c => c.id !== courseId));
+    try {
+        await fetch(`/api/courses?id=${courseId}`, { method: 'DELETE' });
+    } catch (error) {
+        console.error('Failed to delete course', error);
+    }
+  };
+
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState(null);
+
+  // Open modal with pre-filled data
+  const initiateEdit = (course) => {
+    setEditingCourse({ 
+        ...course, 
+        // Ensure numbers
+        totalClasses: course.totalClasses || 0,
+        attendedClasses: course.attendedClasses || 0
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateCourse = async () => {
+    if (!editingCourse || !editingCourse.name.trim()) return;
+
+    try {
+        const res = await fetch('/api/courses', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                courseId: editingCourse.id,
+                name: editingCourse.name,
+                code: editingCourse.code,
+                totalClasses: Number(editingCourse.totalClasses),
+                attendedClasses: Number(editingCourse.attendedClasses)
+            })
+        });
+
+        if (res.ok) {
+            const updated = await res.json();
+            // Update UI list
+            setCourses(prev => prev.map(c => c.id === updated._id ? { ...updated, id: updated._id } : c));
+            setShowEditModal(false);
+            setEditingCourse(null);
+        } else {
+            const err = await res.json();
+            alert(`Failed to update: ${err.error}`);
+        }
+    } catch (error) {
+        console.error('Failed to update course', error);
+        alert('Failed to update course');
+    }
   };
 
   const upvoteSpot = (spotId, e) => {
@@ -295,24 +484,25 @@ export default function AttendancePage() {
               ))}
             </div>
 
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button 
-                onClick={() => confirmBunk(null)}
-                style={{ 
-                  flex: 1, padding: '14px', background: 'rgba(239,68,68,0.1)', color: '#f87171', 
-                  border: '1px solid rgba(239,68,68,0.3)', borderRadius: '12px', cursor: 'pointer', fontWeight: 600
-                }}
-              >
-                Just Bunk 🏠
-              </button>
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
               <button 
                 onClick={() => { setShowBunkModal(false); setBunkingCourse(null); }}
                 style={{ 
-                  flex: 1, padding: '14px', background: '#1f2937', color: '#9ca3af', 
-                  border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 500
+                  flex: 1, padding: '12px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', 
+                  border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 600 
                 }}
               >
                 Cancel
+              </button>
+              <button 
+                onClick={() => confirmBunk(null)}
+                style={{ 
+                  flex: 1, padding: '12px', background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', 
+                  border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', cursor: 'pointer', fontWeight: 600 
+                }}
+              >
+                Just Bunk
               </button>
             </div>
 
@@ -374,6 +564,100 @@ export default function AttendancePage() {
             <div style={{ display: 'flex', gap: '12px' }}>
               <button onClick={() => setShowAddModal(false)} style={{ flex: 1, padding: '12px', background: '#1f2937', color: '#9ca3af', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500 }}>Cancel</button>
               <button onClick={handleAddCourse} style={{ flex: 1, padding: '12px', background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500 }}>Add Subject</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Course Modal */}
+      {showEditModal && editingCourse && (
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+        }} onClick={() => setShowEditModal(false)}>
+          <div style={{ 
+            background: '#12121a', border: '1px solid #2a2a3a', borderRadius: '20px', 
+            padding: '32px', maxWidth: '400px', width: '100%'
+          }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'white', marginBottom: '24px', textAlign: 'center' }}>
+              ✏️ Edit Subject
+            </h3>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', color: '#9ca3af', fontSize: '14px', marginBottom: '6px' }}>Subject Name</label>
+              <input type="text" value={editingCourse.name} onChange={e => setEditingCourse(prev => ({ ...prev, name: e.target.value }))}
+                style={{ width: '100%', padding: '12px 16px', background: '#0a0a0f', border: '1px solid #2a2a3a', borderRadius: '10px', color: 'white', fontSize: '14px' }}
+              />
+            </div>
+
+            {/* ... other fields ... */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', color: '#9ca3af', fontSize: '14px', marginBottom: '6px' }}>Subject Code</label>
+              <input type="text" value={editingCourse.code || ''} onChange={e => setEditingCourse(prev => ({ ...prev, code: e.target.value }))}
+                style={{ width: '100%', padding: '12px 16px', background: '#0a0a0f', border: '1px solid #2a2a3a', borderRadius: '10px', color: 'white', fontSize: '14px' }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+              <div>
+                <label style={{ display: 'block', color: '#9ca3af', fontSize: '14px', marginBottom: '6px' }}>Total Classes</label>
+                <input type="number" value={editingCourse.totalClasses} onChange={e => setEditingCourse(prev => ({ ...prev, totalClasses: e.target.value }))} min="0"
+                  style={{ width: '100%', padding: '12px 16px', background: '#0a0a0f', border: '1px solid #2a2a3a', borderRadius: '10px', color: 'white', fontSize: '14px' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', color: '#9ca3af', fontSize: '14px', marginBottom: '6px' }}>Attended</label>
+                <input type="number" value={editingCourse.attendedClasses} onChange={e => setEditingCourse(prev => ({ ...prev, attendedClasses: e.target.value }))} min="0"
+                  style={{ width: '100%', padding: '12px 16px', background: '#0a0a0f', border: '1px solid #2a2a3a', borderRadius: '10px', color: 'white', fontSize: '14px' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => setShowEditModal(false)} style={{ flex: 1, padding: '12px', background: '#1f2937', color: '#9ca3af', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500 }}>Cancel</button>
+              <button onClick={handleUpdateCourse} style={{ flex: 1, padding: '12px', background: '#8b5cf6', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500 }}>Save Changes</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && courseToDelete && (
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 110,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+        }} onClick={() => setShowDeleteModal(false)}>
+          <div style={{ 
+            background: '#12121a', border: '1px solid #2a2a3a', borderRadius: '24px', 
+            padding: '32px', maxWidth: '400px', width: '100%', textAlign: 'center'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🗑️</div>
+            <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'white', marginBottom: '12px' }}>
+              Delete {courseToDelete.name}?
+            </h3>
+            <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '24px' }}>
+              This action cannot be undone. All attendance data for this subject will be lost.
+            </p>
+            
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={() => setShowDeleteModal(false)}
+                style={{ 
+                  flex: 1, padding: '14px', background: '#1f2937', color: '#9ca3af', 
+                  border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 600 
+                }}
+              >Cancel</button>
+              <button 
+                onClick={() => {
+                  handleDeleteCourse(courseToDelete.id);
+                  setShowDeleteModal(false);
+                }}
+                style={{ 
+                  flex: 1, padding: '14px', background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', 
+                  border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', cursor: 'pointer', fontWeight: 600,
+                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.1)'
+                }}
+              >Delete</button>
             </div>
           </div>
         </div>
@@ -572,7 +856,7 @@ export default function AttendancePage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
                 {calendarDays.map((day, i) => {
                   if (day === null) return <div key={i} />;
-                  const dateKey = `${calendarYear}-${calendarMonth}-${day}`;
+                  const dateKey = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                   const log = attendanceLog[dateKey];
                   const isToday = day === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear();
                   let bgColor = 'transparent';
@@ -621,7 +905,7 @@ export default function AttendancePage() {
           {/* Courses List */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {courses.map(course => {
-              const stats = getStats(course.total, course.attended, requiredPercentage);
+              const stats = getStats(course.totalClasses, course.attendedClasses, requiredPercentage);
               const barColor = stats.status === 'safe' ? 'linear-gradient(90deg, #059669, #34d399)' : 
                               stats.status === 'caution' ? 'linear-gradient(90deg, #d97706, #fbbf24)' : 
                               'linear-gradient(90deg, #dc2626, #f87171)';
@@ -639,13 +923,22 @@ export default function AttendancePage() {
                         <div style={{ height: '100%', borderRadius: '3px', background: barColor, width: `${Math.min(100, stats.percentage)}%`, transition: 'width 0.5s' }} />
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                        <span>{course.attended}/{course.total}</span>
+                        <span>{course.attendedClasses}/{course.totalClasses}</span>
                         <span>•</span>
                         <span style={{ color: stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444' }}>{stats.percentage}%</span>
                         {stats.safeToBunk > 0 && <><span>•</span><span style={{ color: '#10b981' }}>Skip {stats.safeToBunk}</span></>}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <button onClick={() => initiateEdit(course)} style={{ 
+                        padding: '8px', background: 'rgba(107,114,128,0.1)', color: '#9ca3af', 
+                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px'
+                      }} title="Edit Subject">✏️</button>
+                      <button onClick={() => { setCourseToDelete(course); setShowDeleteModal(true); }} style={{ 
+                        padding: '8px', background: 'rgba(239,68,68,0.1)', color: '#f87171', 
+                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px'
+                      }} title="Delete Subject">🗑️</button>
+                      
                       <button onClick={() => inititateBunk(course)} style={{ 
                         padding: '8px 12px', background: 'rgba(239,68,68,0.1)', color: '#f87171', 
                         border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 500, fontSize: '12px'
@@ -654,10 +947,6 @@ export default function AttendancePage() {
                         padding: '8px 12px', background: 'rgba(16,185,129,0.1)', color: '#34d399', 
                         border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 500, fontSize: '12px'
                       }}>✅ Attend</button>
-                      <button onClick={() => handleDeleteCourse(course.id)} style={{ 
-                        padding: '8px', background: 'rgba(107,114,128,0.1)', color: '#6b7280', 
-                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px'
-                      }}>🗑️</button>
                     </div>
                   </div>
                 </div>
@@ -695,9 +984,9 @@ export default function AttendancePage() {
           boxShadow: 'var(--shadow-sm)'
         }}>
           <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '16px' }}>
-            📈 Attendance Trend
+            📈 Daily Efficiency (Last 7 Days)
           </h3>
-          <AttendanceTrendChart />
+          <AttendanceTrendChart attendanceLog={attendanceLog} />
         </div>
 
         {/* Charts Grid */}
@@ -732,7 +1021,7 @@ export default function AttendancePage() {
             <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '16px' }}>
               📊 Monthly Comparison
             </h3>
-            <MonthlyBarChart />
+            <MonthlyBarChart attendanceLog={attendanceLog} />
           </div>
         </div>
 

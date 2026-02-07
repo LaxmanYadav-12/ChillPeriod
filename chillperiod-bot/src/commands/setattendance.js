@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { successEmbed, errorEmbed } from '../utils/embed.js';
-import Attendance from '../models/Attendance.js';
+import User from '../models/User.js';
 
 export const data = new SlashCommandBuilder()
     .setName('setattendance')
@@ -16,18 +16,11 @@ export const data = new SlashCommandBuilder()
             .setDescription('Number of classes you\'ve attended')
             .setRequired(true)
             .setMinValue(0)
-            .setMaxValue(1000))
-    .addIntegerOption(option =>
-        option.setName('required')
-            .setDescription('Required attendance percentage (default: 75)')
-            .setRequired(false)
-            .setMinValue(0)
-            .setMaxValue(100));
+            .setMaxValue(1000));
 
 export async function execute(interaction) {
     const total = interaction.options.getInteger('total');
     const attended = interaction.options.getInteger('attended');
-    const required = interaction.options.getInteger('required') || 75;
     
     // Validate
     if (attended > total) {
@@ -40,32 +33,37 @@ export async function execute(interaction) {
         });
     }
     
-    // Update or create attendance record
-    const attendance = await Attendance.findOneAndUpdate(
+    // Update or create user record
+    // We clear courses because this is a "quick set" that overrides detailed tracking
+    const user = await User.findOneAndUpdate(
         { discordId: interaction.user.id },
         {
             discordId: interaction.user.id,
             username: interaction.user.username,
+            name: interaction.user.username,
             totalClasses: total,
             attendedClasses: attended,
-            requiredPercentage: required,
-            // Clear courses when using quick setup
+            // Clear courses when using quick setup to avoid sync conflicts
             courses: [{
                 name: 'All Classes',
                 totalClasses: total,
-                attendedClasses: attended
+                attendedClasses: attended,
+                targetPercentage: 75
             }]
         },
         { upsert: true, new: true }
     );
     
-    const percentage = attendance.percentage;
-    const status = attendance.getStatus();
+    const percentage = user.attendancePercentage;
+    let statusEmoji = '🟢';
+    let statusMsg = 'You set your attendance!';
+    
+    if (percentage < 75) statusEmoji = '🔴';
     
     await interaction.reply({
         embeds: [successEmbed(
             'Attendance Set!',
-            `**Current: ${percentage}%** (${attended}/${total})\n**Required: ${required}%**\n\n${status.emoji} ${status.message}\n\nUse \`/attendance\` to view your dashboard!`
+            `**Current: ${percentage}%** (${attended}/${total})\n\n${statusEmoji} Updated successfully!\n\nUse \`/attendance\` to view your dashboard!`
         )]
     });
 }

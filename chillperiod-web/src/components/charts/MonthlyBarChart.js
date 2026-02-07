@@ -21,24 +21,59 @@ ChartJS.register(
   Legend
 );
 
-export default function MonthlyBarChart() {
+export default function MonthlyBarChart({ attendanceLog }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   
-  // Sample data for past 6 months
+  // Calculate monthly stats
+  // 1. Identify last 6 months
+  const months = [];
+  const today = new Date();
+  
+  for (let i = 5; i >= 0; i--) {
+      const d = new Date(today);
+      d.setMonth(today.getMonth() - i);
+      months.push({
+          name: d.toLocaleString('default', { month: 'long' }),
+          year: d.getFullYear(),
+          monthIdx: d.getMonth(), // 0-11
+          total: 0,
+          attended: 0
+      });
+  }
+
+  // 2. Aggregate from log
+  if (attendanceLog) {
+      Object.entries(attendanceLog).forEach(([dateStr, dayLog]) => {
+          // dateStr is "YYYY-MM-DD"
+          const [y, m, d] = dateStr.split('-').map(Number);
+          // m is 1-12 in string, but we stored it how? 
+          // attendance/page.js says dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}...`
+          // So m is 1-based.
+          
+          const monthIdx = m - 1; // 0-11
+          
+          const targetMonth = months.find(mo => mo.monthIdx === monthIdx && mo.year === y);
+          if (targetMonth) {
+              const att = dayLog.attended || 0;
+              const bunk = dayLog.bunked || 0;
+              targetMonth.attended += att;
+              targetMonth.total += (att + bunk);
+          }
+      });
+  }
+
   const data = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+    labels: months.map(m => m.name),
     datasets: [{
       label: 'Monthly Attendance %',
-      data: [78, 82, 85, 88, 90, 92],
-      backgroundColor: [
-        '#ef4444',
-        '#f59e0b',
-        '#f59e0b',
-        '#10b981',
-        '#10b981',
-        '#10b981',
-      ],
+      data: months.map(m => m.total > 0 ? Math.round((m.attended / m.total) * 100) : 0),
+      backgroundColor: months.map(m => {
+          const pct = m.total > 0 ? (m.attended / m.total) * 100 : 0;
+          if (pct >= 80) return '#10b981'; // Green
+          if (pct >= 75) return '#f59e0b'; // Amber
+          return '#ef4444'; // Red
+      }),
       borderColor: 'var(--bg-primary)',
       borderWidth: 2,
       borderRadius: 8,

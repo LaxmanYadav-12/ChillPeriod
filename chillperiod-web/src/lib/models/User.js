@@ -35,6 +35,24 @@ const UserSchema = new mongoose.Schema({
   targetPercentage: { type: Number, default: 75 },
   hasCompletedOnboarding: { type: Boolean, default: false },
   
+  // Courses & Attendance
+  courses: [{
+    name: { type: String, required: true },
+    code: String,
+    totalClasses: { type: Number, default: 0 },
+    attendedClasses: { type: Number, default: 0 },
+    targetPercentage: { type: Number, default: 75 }
+  }],
+  
+  attendanceLog: [{
+    date: { type: String, required: true }, // Format: YYYY-MM-DD
+    actions: [{
+      courseId: { type: mongoose.Schema.Types.ObjectId, required: true },
+      status: { type: String, enum: ['attended', 'bunked'], required: true },
+      timestamp: { type: Date, default: Date.now }
+    }]
+  }],
+
 }, { timestamps: true });
 
 // Virtuals for computed fields

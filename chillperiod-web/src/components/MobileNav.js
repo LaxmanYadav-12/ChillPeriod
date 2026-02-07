@@ -29,6 +29,7 @@ export default function MobileNav({ currentPage = 'home' }) {
             <Link href="/spots" style={{ color: currentPage === 'spots' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'spots' ? 500 : 400, textDecoration: 'none' }}>Spots</Link>
             <Link href="/attendance" style={{ color: currentPage === 'attendance' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'attendance' ? 500 : 400, textDecoration: 'none' }}>Attendance</Link>
             <Link href="/leaderboard" style={{ color: currentPage === 'leaderboard' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'leaderboard' ? 500 : 400, textDecoration: 'none' }}>🏆</Link>
+            <Link href="/search" style={{ color: currentPage === 'search' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'search' ? 500 : 400, textDecoration: 'none' }}>🔍</Link>
             <Link href="/profile" style={{ color: currentPage === 'profile' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'profile' ? 500 : 400, textDecoration: 'none' }}>Profile</Link>
             <ThemeToggle />
             {status === 'authenticated' && session?.user ? (
@@ -112,6 +113,17 @@ export default function MobileNav({ currentPage = 'home' }) {
               }}
             >
               🏆 Leaderboard
+            </Link>
+            <Link 
+              href="/search" 
+              style={{ 
+                color: currentPage === 'search' ? '#8b5cf6' : 'white', 
+                fontSize: '20px', fontWeight: 600, textDecoration: 'none',
+                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                borderRadius: '12px', textAlign: 'center'
+              }}
+            >
+              🔍 Find Friends
             </Link>
             <Link 
               href="/profile" 

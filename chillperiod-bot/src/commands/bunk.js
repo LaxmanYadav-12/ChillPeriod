@@ -1,6 +1,6 @@
-import { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder } from 'discord.js';
-import { createEmbed, Colors, successEmbed, errorEmbed, warningEmbed } from '../utils/embed.js';
-import Attendance from '../models/Attendance.js';
+import { SlashCommandBuilder } from 'discord.js';
+import { createEmbed, Colors, warningEmbed, errorEmbed } from '../utils/embed.js';
+import User from '../models/User.js';
 
 export const data = new SlashCommandBuilder()
     .setName('bunk')
@@ -21,102 +21,90 @@ export async function execute(interaction) {
     const courseName = interaction.options.getString('course');
     const count = interaction.options.getInteger('count') || 1;
     
-    let attendance = await Attendance.findOne({ discordId: interaction.user.id });
+    let user = await User.findOne({ discordId: interaction.user.id });
     
-    if (!attendance) {
+    if (!user || user.courses.length === 0) {
         return interaction.reply({
             embeds: [errorEmbed(
                 'No Attendance Data',
-                'Set up your attendance first with `/setattendance`!'
+                'Set up your attendance first with `/addcourse`!'
             )],
             ephemeral: true
         });
     }
     
-    // Check if safe to bunk
-    const beforeStatus = attendance.getStatus();
-    const beforePercentage = attendance.percentage;
+    const beforePercentage = user.attendancePercentage;
+    let targetCourse = null;
     
     // Update attendance
-    if (courseName && attendance.courses.length > 1) {
+    if (courseName && user.courses.length > 1) {
         // Find specific course
-        const course = attendance.courses.find(c => 
+        targetCourse = user.courses.find(c => 
             c.name.toLowerCase().includes(courseName.toLowerCase())
         );
         
-        if (!course) {
+        if (!targetCourse) {
             return interaction.reply({
                 embeds: [errorEmbed(
                     'Course Not Found',
-                    `Couldn't find course matching "${courseName}".\n\nYour courses: ${attendance.courses.map(c => c.name).join(', ')}`
+                    `Couldn't find course matching "${courseName}".\n\nYour courses: ${user.courses.map(c => c.name).join(', ')}`
                 )],
                 ephemeral: true
             });
         }
-        
-        course.totalClasses += count;
-        attendance.recalculateTotals();
     } else {
         // Quick mode - update first/only course
-        if (attendance.courses.length > 0) {
-            attendance.courses[0].totalClasses += count;
+        if (user.courses.length > 0) {
+            targetCourse = user.courses[0];
         }
-        attendance.totalClasses += count;
     }
     
-    await attendance.save();
+    if (targetCourse) {
+        targetCourse.totalClasses += count;
+        // Do NOT increment attendedClasses
+        
+        // Log this action
+        const today = new Date().toISOString().split('T')[0];
+        let todayLog = user.attendanceLog.find(l => l.date === today);
+        if (!todayLog) {
+            user.attendanceLog.push({ date: today, actions: [] });
+            todayLog = user.attendanceLog[user.attendanceLog.length - 1];
+        }
+        
+        // Add action for each count
+        for(let i=0; i<count; i++) {
+            todayLog.actions.push({
+                courseId: targetCourse._id,
+                status: 'bunked'
+            });
+        }
+    }
+
+    // Update global stats
+    user.totalClasses = user.courses.reduce((sum, c) => sum + c.totalClasses, 0);
+    user.attendedClasses = user.courses.reduce((sum, c) => sum + c.attendedClasses, 0);
+    user.totalBunks += count;
+    user.currentStreak = 0; // Reset streak on bunk
+
+    await user.save();
     
     // Get new status
-    const afterStatus = attendance.getStatus();
-    const afterPercentage = attendance.percentage;
+    const afterPercentage = user.attendancePercentage;
+    const required = 75;
     
-    // Build response
     let embed;
-    const required = attendance.requiredPercentage;
-    const safeToBunk = attendance.safeToBunk;
-    
-    if (afterStatus.status === 'Danger Zone' && beforeStatus.status !== 'Danger Zone') {
-        // Just dropped into danger zone
+    if (afterPercentage < required && beforePercentage >= required) {
         embed = warningEmbed(
             `🚨 Bunked ${count} Class${count > 1 ? 'es' : ''}!`,
             `⚠️ **ALERT: You've entered the Danger Zone!**\n\n` +
             `${beforePercentage}% → **${afterPercentage}%** (below ${required}%)\n\n` +
-            `${afterStatus.message}`
-        );
-    } else if (afterPercentage <= required + 5 && afterPercentage >= required) {
-        // Very close to threshold (within 5%)
-        embed = createEmbed({
-            title: `⚠️ Bunked ${count} Class${count > 1 ? 'es' : ''} - CAREFUL!`,
-            description: `${beforePercentage}% → **${afterPercentage}%**\n\n` +
-                `🔔 **You're only ${(afterPercentage - required).toFixed(1)}% above the ${required}% limit!**\n\n` +
-                `${safeToBunk > 0 ? `You can only safely bunk **${safeToBunk}** more class${safeToBunk !== 1 ? 'es' : ''}!` : `⚠️ **Don't bunk anymore!** Attend the next class.`}`,
-            color: 0xF59E0B, // Amber warning
-            footer: 'Use /attendance to see full stats'
-        });
-    } else if (afterPercentage <= required + 10 && afterPercentage > required + 5) {
-        // Approaching threshold (within 10%)
-        embed = createEmbed({
-            title: `😎 Bunked ${count} Class${count > 1 ? 'es' : ''}`,
-            description: `${beforePercentage}% → **${afterPercentage}%**\n\n` +
-                `📢 **Heads up:** You're ${(afterPercentage - required).toFixed(1)}% above the ${required}% limit.\n` +
-                `Safe to bunk: **${safeToBunk}** more class${safeToBunk !== 1 ? 'es' : ''}.`,
-            color: 0xF59E0B, // Amber
-            footer: 'Use /attendance to see full stats'
-        });
-    } else if (afterStatus.status === 'Danger Zone') {
-        // Already in danger zone
-        embed = warningEmbed(
-            `Bunked ${count} Class${count > 1 ? 'es' : ''}`,
-            `📛 **You're in the Danger Zone!**\n\n` +
-            `${beforePercentage}% → **${afterPercentage}%**\n\n` +
-            `${afterStatus.message}`
+            `Attend your next classes!`
         );
     } else {
-        // Safe zone
         embed = createEmbed({
-            title: `😎 Bunked ${count} Class${count > 1 ? 'es' : ''}!`,
-            description: `${beforePercentage}% → **${afterPercentage}%**\n\n${afterStatus.emoji} ${afterStatus.message}`,
-            color: afterStatus.color,
+            title: `😴 Bunked ${count} Class${count > 1 ? 'es' : ''}!`,
+            description: `${beforePercentage}% → **${afterPercentage}%**\n\nTake a chill pill! 💊`,
+            color: Colors.WARNING,
             footer: 'Use /attendance to see full stats'
         });
     }

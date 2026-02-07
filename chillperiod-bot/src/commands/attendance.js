@@ -1,56 +1,73 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { createEmbed, Colors, errorEmbed } from '../utils/embed.js';
-import Attendance from '../models/Attendance.js';
+import User from '../models/User.js';
 
 export const data = new SlashCommandBuilder()
     .setName('attendance')
     .setDescription('View your attendance stats and safe-to-bunk status');
 
 export async function execute(interaction) {
-    let attendance = await Attendance.findOne({ discordId: interaction.user.id });
+    let user = await User.findOne({ discordId: interaction.user.id });
     
-    if (!attendance) {
+    if (!user || !user.courses || user.courses.length === 0) {
         return interaction.reply({
             embeds: [errorEmbed(
                 'No Attendance Data',
-                'You haven\'t set up attendance tracking yet!\n\nUse `/addcourse` to add your courses, or `/setattendance` for quick setup.'
+                'You haven\'t set up attendance tracking yet!\n\nUse `/addcourse` to add your courses.'
             )],
             ephemeral: true
         });
     }
     
     // Get status info
-    const status = attendance.getStatus();
-    const percentage = attendance.percentage;
+    const percentage = user.attendancePercentage;
+    const safeToSkip = user.safeToSkip;
+    const bunkTitle = user.getBunkTitle(); // e.g. "Rookie", "Bunk King"
+    
+    // Status text based on global percentage (using 75% as default reference)
+    let statusEmoji = '🟢';
+    let statusText = 'Safe Zone';
+    let statusMessage = `You can safely bunk ${safeToSkip} more classes overall.`;
+    let statusColor = Colors.SUCCESS;
+
+    if (percentage < 75) {
+        statusEmoji = '🔴';
+        statusText = 'Danger Zone';
+        statusMessage = `You are below 75%! Attend classes to catch up.`;
+        statusColor = Colors.ERROR;
+    } else if (percentage < 80) {
+        statusEmoji = '🟡';
+        statusText = 'Caution Zone';
+        statusMessage = `You are close to the edge!`;
+        statusColor = Colors.WARNING;
+    }
     
     // Build progress bar
-    const progressBar = buildProgressBar(percentage, attendance.requiredPercentage);
+    const progressBar = buildProgressBar(percentage, 75);
     
     // Build course breakdown
     let courseBreakdown = '';
-    if (attendance.courses.length > 0) {
-        courseBreakdown = attendance.courses.map(course => {
-            const pct = course.totalClasses > 0 
-                ? Math.round((course.attendedClasses / course.totalClasses) * 100) 
-                : 100;
-            const icon = pct >= attendance.requiredPercentage ? '✅' : '⚠️';
-            return `${icon} **${course.name}**: ${course.attendedClasses}/${course.totalClasses} (${pct}%)`;
-        }).join('\n');
-    }
+    courseBreakdown = user.courses.map(course => {
+        const stats = user.getCourseStatus(course);
+        const pct = course.totalClasses > 0 
+            ? Math.round((course.attendedClasses / course.totalClasses) * 100) 
+            : 100;
+        return `${stats.emoji} **${course.name}**: ${course.attendedClasses}/${course.totalClasses} (${pct}%)`;
+    }).join('\n');
     
     const embed = createEmbed({
-        title: `${status.emoji} Attendance Dashboard`,
-        description: `**Overall: ${percentage}%**\n${progressBar}\n\n${status.message}`,
-        color: status.color,
+        title: `${statusEmoji} Attendance Dashboard`,
+        description: `**Overall: ${percentage}%**\n${progressBar}\n\n${statusMessage}`,
+        color: statusColor,
         fields: [
             {
                 name: '📊 Stats',
-                value: `Classes Attended: **${attendance.attendedClasses}/${attendance.totalClasses}**\nRequired: **${attendance.requiredPercentage}%**`,
+                value: `Classes Attended: **${user.attendedClasses}/${user.totalClasses}**\nBunks: **${user.totalBunks}**`,
                 inline: true
             },
             {
-                name: `${status.emoji} Status`,
-                value: `**${status.status}**\n${attendance.safeToBunk > 0 ? `Safe to bunk: **${attendance.safeToBunk}**` : attendance.needToAttend > 0 ? `Need to attend: **${attendance.needToAttend}**` : 'Right on the edge!'}`,
+                name: `${bunkTitle.emoji} Rank`,
+                value: `**${bunkTitle.title}**\nStreak: ${user.currentStreak} days`,
                 inline: true
             }
         ],
