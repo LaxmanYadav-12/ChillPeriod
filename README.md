@@ -1,292 +1,103 @@
-# 🎯 ChillPeriod
+# ChillPeriod 🧊📚
 
-> **Making student free periods productive without losing academic track**
+**The Ultimate Attendance Manager & Bunk Planner for Students.**
 
-A dual-platform solution (Discord Bot + Web App) helping college students track attendance, find chill spots, and make smarter use of their free time.
+ChillPeriod isn't just an attendance tracker; it's a lifestyle manager. It helps you calculate exactly how many classes you *must* attend to meet your college's criteria (75%) and how many you can safely *bunk* (skip) without getting into trouble.
 
----
-
-## ✨ Features
-
-### Current Features ✅
-- **📊 Attendance Tracking** - Monitor class attendance & know when it's safe to skip
-- **📍 Chill Spots Finder** - Discover nearby cafés, libraries, and hangout spots
-- **🎮 Discord Bot** - 11 slash commands for quick access
-- **🌐 Web Dashboard** - Beautiful Next.js interface for managing everything
-- **🔐 Authentication** - Secure Discord OAuth integration
-- **💾 Unified Database** - Seamless sync between bot and web app
-
-### Coming Soon 🚀
-- **🌙 Dark Mode** - Toggle theme preference
-- **⭐ Community Reviews** - Rate and review chill spots
-- **📈 Attendance Analytics** - Visual charts and trend analysis
-- **👥 Study Groups** - Find peers with similar schedules
-- **🔔 Push Notifications** - Alerts for attendance thresholds
-- **📱 PWA Support** - Installable web app
-- **🎮 Gamification** - Streaks, badges, and achievements
-- **📢 Chill Feed** - Social updates during free periods
-- **📅 Event Calendar** - Campus events and activities
+When you do decide to bunk, ChillPeriod suggests the best "Chill Spots" near campus and lets you coordinate mass bunks with friends.
 
 ---
 
-## 🏗️ Architecture
+## 🚀 Key Features
 
-```
-┌─────────────────┐         ┌─────────────────┐
-│  Discord Bot    │         │   Next.js Web   │
-│  (Discord.js)   │         │      App        │
-└────────┬────────┘         └────────┬────────┘
-         │                           │
-         └───────────┬───────────────┘
-                     │
-              ┌──────▼──────┐
-              │   MongoDB   │
-              │  Database   │
-              └─────────────┘
-```
+### 📊 Smart Attendance Tracking
+- **Safe-to-Bunk Calculator**: Know instantly if you're in the "Safe Zone" (Green), "Caution Zone" (Yellow), or "Danger Zone" (Red).
+- **Subject Management**: Add all your courses and track attendance individually.
+- **Visual Analytics**: Beautiful charts showing your attendance trends and monthly breakdowns.
+
+### 😴 Strategic Bunking
+- **Mass Bunk Coordination**: Plan skips with your entire class group.
+- **Chill Spots**: Discover and upvote the best hangout spots near campus (cafes, parks, malls) with real-time "vibe" checks.
+
+### 🤝 Social & Leaderboard
+- **Friend Activity**: See what your friends are up to (attending or chilling).
+- **Pro Bunkers Leaderboard**: Compete for titles like "Bunk King" or "Serial Skipper" based on your *calculated* risks.
+
+### 🔐 Secure & Private
+- **Authentication**: Sign in securely with **Google** or **Discord**.
+- **Privacy Controls**: Choose to keep your profile public or private.
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Discord Bot
-- **Node.js** 18+ - Runtime environment
-- **Discord.js** ^14.14.1 - Discord API wrapper
-- **Mongoose** ^8.0.3 - MongoDB ODM
-- **dotenv** - Environment configuration
-
-### Web Application
-- **Next.js** 16.1.6 - React framework
-- **React** 19.2.3 - UI library
-- **NextAuth** ^5.0.0-beta - Authentication
-- **Tailwind CSS** ^4 - Styling
-- **Mongoose** ^9.1.5 - MongoDB ODM
+- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
+- **Database**: [MongoDB Atlas](https://www.mongodb.com/atlas) with Mongoose
+- **Authentication**: [Auth.js (NextAuth v5)](https://authjs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Charts**: [Chart.js](https://www.chartjs.org/)
 
 ---
 
-## 🚀 Quick Start
+## 🏁 Getting Started
 
 ### Prerequisites
-- Node.js 18 or higher
-- MongoDB (local installation or Atlas URI)
-- Discord Bot Token ([Create one here](https://discord.com/developers/applications))
+- Node.js 18+
+- MongoDB Atlas Account
 
 ### Installation
 
-#### 1️⃣ Discord Bot Setup
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/yourusername/chillperiod.git
+    cd chillperiod-web
+    ```
 
-```bash
-# Navigate to bot directory
-cd chillperiod-bot
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-# Install dependencies
-npm install
+3.  **Set up Environment Variables**:
+    Create a `.env.local` file in the root directory and add the following:
 
-# Create environment file
-cp .env.example .env
-```
+    ```env
+    MONGODB_URI=your_mongodb_connection_string
+    NEXTAUTH_URL=http://localhost:3000
+    NEXTAUTH_SECRET=your_random_secret_string
 
-**Configure `.env`:**
-```env
-DISCORD_TOKEN=your_bot_token
-CLIENT_ID=your_application_client_id
-GUILD_ID=your_test_server_id
-MONGODB_URI=mongodb://localhost:27017/chillperiod
-```
+    # OAuth Providers
+    GOOGLE_CLIENT_ID=your_google_client_id
+    GOOGLE_CLIENT_SECRET=your_google_client_secret
+    DISCORD_CLIENT_ID=your_discord_client_id
+    DISCORD_CLIENT_SECRET=your_discord_client_secret
+    ```
 
-**Deploy commands & start:**
-```bash
-npm run deploy    # Deploy slash commands
-npm run dev       # Start with auto-reload
-```
+4.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
 
-#### 2️⃣ Web App Setup
-
-```bash
-# Navigate to web directory
-cd chillperiod-web
-
-# Install dependencies
-npm install
-
-# Create environment file
-cp .env.example .env.local
-```
-
-**Configure `.env.local`:**
-```env
-MONGODB_URI=mongodb://localhost:27017/chillperiod
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=generate_random_secret_here
-DISCORD_CLIENT_ID=your_client_id
-DISCORD_CLIENT_SECRET=your_client_secret
-```
-
-**Start development server:**
-```bash
-npm run dev       # Opens on http://localhost:3000
-```
-
----
-
-## 🎮 Discord Commands
-
-| Command | Description | Example |
-|---------|-------------|---------|
-| `/ping` | Check bot latency | `/ping` |
-| `/help` | View all commands | `/help` |
-| `/setcollege` | Set your college | `/setcollege BPIT` |
-| `/addcourse` | Add course to track | `/addcourse DSA 75` |
-| `/attend` | Mark attendance | `/attend DSA` |
-| `/attendance` | View summary | `/attendance` |
-| `/setattendance` | Manually set counts | `/setattendance DSA 45 60` |
-| `/bunk` | Calculate safe bunks | `/bunk DSA` |
-| `/addspot` | Submit new spot | `/addspot CCD Cafe` |
-| `/findspots` | Find nearby spots | `/findspots cafe` |
-| `/spotinfo` | Get spot details | `/spotinfo CCD` |
-
----
-
-## 📁 Project Structure
-
-```
-AntiGrav_Proj/
-├── chillperiod-bot/          # Discord Bot
-│   ├── src/
-│   │   ├── commands/         # 11 slash commands
-│   │   ├── events/           # Event handlers
-│   │   ├── models/           # MongoDB schemas
-│   │   ├── utils/            # Helper functions
-│   │   └── index.js          # Entry point
-│   ├── config/
-│   │   └── colleges.json     # College presets
-│   └── package.json
-│
-└── chillperiod-web/          # Next.js Web App
-    ├── src/
-    │   ├── app/
-    │   │   ├── page.js       # Homepage
-    │   │   ├── login/        # Auth pages
-    │   │   ├── attendance/   # Attendance dashboard
-    │   │   ├── spots/        # Spots explorer
-    │   │   └── api/          # API routes
-    │   ├── components/       # UI components
-    │   ├── models/           # DB schemas
-    │   └── auth.js           # NextAuth config
-    └── package.json
-```
-
----
-
-## 🗄️ Database Schema
-
-### User
-```javascript
-{
-  discordId: String,
-  username: String,
-  college: String,
-  courses: Array
-}
-```
-
-### Attendance
-```javascript
-{
-  userId: ObjectId,
-  courseName: String,
-  totalClasses: Number,
-  attendedClasses: Number,
-  requiredPercentage: Number,
-  lastUpdated: Date
-}
-```
-
-### Spot
-```javascript
-{
-  name: String,
-  type: String,
-  location: Object,
-  college: String,
-  addedBy: ObjectId,
-  rating: Number,
-  reviews: Array
-}
-```
-
----
-
-## 🎯 Roadmap
-
-### Phase 1: Core Features ✅
-- [x] Discord bot with slash commands
-- [x] Web app with authentication
-- [x] Attendance tracking system
-- [x] Chill spots discovery
-- [x] MongoDB integration
-
-### Phase 2: Enhanced UX 🚧
-- [ ] Dark mode toggle
-- [ ] Mobile responsive design
-- [ ] Loading states & animations
-- [ ] Error handling pages
-
-### Phase 3: Community Features 📅
-- [ ] Spot reviews & ratings
-- [ ] Study group finder
-- [ ] Chill feed (social updates)
-- [ ] User profiles
-
-### Phase 4: Advanced Analytics 🔮
-- [ ] Attendance trend charts
-- [ ] Personalized spot recommendations
-- [ ] Predictive bunking alerts
-- [ ] Campus heatmaps
-
-### Phase 5: Production Ready 🏭
-- [ ] TypeScript migration
-- [ ] Unit & integration tests
-- [ ] CI/CD pipeline
-- [ ] Docker deployment
-- [ ] PWA support
+5.  Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! This project is built for students, by students.
+We welcome contributions! Please feel free to submit a Pull Request.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-MIT License - see LICENSE file for details
+1.  Fork the project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
 ---
 
-## 👨‍💻 Author
+## 📄 License
 
-Made with ❤️ by [Tony](https://github.com/DarkModeTony)
-
----
-
-## 🙏 Acknowledgments
-
-- Inspired by the student community's need for better time management
-- Built with modern web technologies
-- Special thanks to all contributors
+This project is licensed under the MIT License - see the `LICENSE` file for details.
 
 ---
 
-## 📬 Support
-
-Having issues? [Open an issue](https://github.com/yourusername/chillperiod/issues) or reach out on Discord!
-
-**Happy Chilling! 🎉**
+### *Remember: Attend responsibly. Bunk strategically.* 😉
