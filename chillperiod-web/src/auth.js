@@ -77,13 +77,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!dbUser) {
           console.log('AUTH DEBUG: Creating new user...');
-          dbUser = await User.create({
+          const newUser = {
             email: session.user.email,
             name: session.user.name || token.username || 'User',
             image: session.user.image,
-            discordId: token.discordId,
-            googleId: token.googleId,
-          });
+          };
+          if (token.discordId) newUser.discordId = token.discordId;
+          if (token.googleId) newUser.googleId = token.googleId;
+
+          dbUser = await User.create(newUser);
           console.log('AUTH DEBUG: New user created');
         }
         session.user.id = dbUser._id.toString();

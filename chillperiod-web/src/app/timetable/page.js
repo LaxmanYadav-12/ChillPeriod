@@ -76,7 +76,7 @@ export default function TimetablePage() {
                 border: '1px solid var(--border-color)', outline: 'none'
               }}
             >
-              {[4, 6].map(sem => (
+              {getSemesters().map(sem => (
                 <option key={sem} value={sem}>{sem}th Semester</option>
               ))}
             </select>

@@ -12,44 +12,68 @@ export async function POST(req) {
     }
 
     await dbConnect();
-    const { spotId } = await req.json();
+    const { spotId, action } = await req.json(); // action: 'upvote' or 'downvote'
     const userId = session.user.id;
 
-    // Check for existing upvote
+    if (!['upvote', 'downvote'].includes(action)) {
+       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    }
+
+    // Check for existing interaction (vote)
     const existingInteraction = await UserInteraction.findOne({
       userId,
       spotId,
-      type: 'upvote'
+      type: { $in: ['upvote', 'downvote'] }
     });
 
     let spot;
+    let newInteractionType = null;
 
     if (existingInteraction) {
-      // Toggle OFF: Remove upvote
-      await UserInteraction.findByIdAndDelete(existingInteraction._id);
-      spot = await Spot.findByIdAndUpdate(
-        spotId,
-        { $inc: { upvotes: -1 } },
-        { new: true }
-      );
+      if (existingInteraction.type === action) {
+        // Same action? Toggle OFF (Remove vote)
+        await UserInteraction.findByIdAndDelete(existingInteraction._id);
+        spot = await Spot.findByIdAndUpdate(
+          spotId,
+          { $inc: { [action + 's']: -1 } }, // decrements upvotes or downvotes
+          { new: true }
+        );
+      } else {
+        // Different action? Switch Vote (e.g. up -> down)
+        // 1. Remove old vote
+        await UserInteraction.findByIdAndDelete(existingInteraction._id);
+        // 2. Add new vote interaction
+        await UserInteraction.create({ userId, spotId, type: action });
+        
+        // 3. Update Spot counts
+        const incUpdate = { 
+            [existingInteraction.type + 's']: -1, // decrement old
+            [action + 's']: 1 // increment new
+        };
+
+        spot = await Spot.findByIdAndUpdate(
+          spotId,
+          { $inc: incUpdate },
+          { new: true }
+        );
+        newInteractionType = action;
+      }
     } else {
-      // Toggle ON: Add upvote
-      await UserInteraction.create({
-        userId,
-        spotId,
-        type: 'upvote'
-      });
+      // No existing vote? Add new vote
+      await UserInteraction.create({ userId, spotId, type: action });
       spot = await Spot.findByIdAndUpdate(
         spotId,
-        { $inc: { upvotes: 1 } },
+        { $inc: { [action + 's']: 1 } },
         { new: true }
       );
+      newInteractionType = action;
     }
 
     return NextResponse.json({ 
       success: true, 
       upvotes: spot.upvotes, 
-      isUpvoted: !existingInteraction 
+      downvotes: spot.downvotes,
+      userVote: newInteractionType // 'upvote', 'downvote', or null
     });
 
   } catch (error) {

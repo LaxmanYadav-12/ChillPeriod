@@ -50,28 +50,35 @@ export default function Home() {
           </p>
 
           {/* CTA Buttons */}
-          <div id="cta-buttons" style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
-            <Link href="/login" style={{ 
-              padding: '16px 32px', background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', 
-              color: 'white', borderRadius: '14px', fontWeight: 600, fontSize: '16px',
-              textDecoration: 'none', boxShadow: '0 8px 32px rgba(139,92,246,0.3)'
-            }}>
-              Get Started
-            </Link>
-            <Link href="/spots" style={{ 
-              padding: '16px 32px', background: 'rgba(255,255,255,0.05)', 
-              border: '1px solid rgba(255,255,255,0.1)', color: 'white', 
-              borderRadius: '14px', fontWeight: 600, fontSize: '16px', textDecoration: 'none'
-            }}>
-              Find Spots
-            </Link>
+          {/* CTA Buttons */}
+          <div id="cta-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', width: 'fit-content', margin: '0 auto' }}>
+            <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
+              <Link href="/login" style={{ 
+                flex: 1, padding: '16px 24px', background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', 
+                color: 'white', borderRadius: '14px', fontWeight: 600, fontSize: '16px',
+                textDecoration: 'none', boxShadow: '0 8px 32px rgba(139,92,246,0.3)',
+                whiteSpace: 'nowrap', textAlign: 'center'
+              }}>
+                Get Started
+              </Link>
+              <Link href="/spots" style={{ 
+                flex: 1, padding: '16px 24px', background: 'var(--bg-tertiary)', 
+                border: '1px solid var(--border-color)', color: 'var(--text-primary)', 
+                borderRadius: '14px', fontWeight: 600, fontSize: '16px', textDecoration: 'none',
+                whiteSpace: 'nowrap', textAlign: 'center'
+              }}>
+                Find Spots
+              </Link>
+            </div>
             <a href={`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || 'YOUR_CLIENT_ID'}&permissions=8&scope=bot`} target="_blank" rel="noopener noreferrer" style={{ 
-              padding: '16px 32px', background: '#5865F2', 
+              width: '100%', padding: '16px 32px', background: '#5865F2', 
               color: 'white', borderRadius: '14px', fontWeight: 600, fontSize: '16px',
               textDecoration: 'none', boxShadow: '0 8px 32px rgba(88,101,242,0.3)',
-              display: 'flex', alignItems: 'center', gap: '8px'
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
             }}>
-              <span>🤖</span> Add to Discord
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+              </svg> Add to Discord
             </a>
           </div>
 
@@ -100,9 +107,7 @@ export default function Home() {
         <h2 id="features-heading" style={{ fontSize: '36px', fontWeight: 'bold', color: 'var(--text-primary)', textAlign: 'center', marginBottom: '16px' }}>
           Everything you need
         </h2>
-        <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '48px' }}>
-          Inspired by BunkMate, built for the web
-        </p>
+
 
         <div id="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
           {[
@@ -110,7 +115,11 @@ export default function Home() {
             { icon: '🧮', title: 'Bunk Calculator', desc: 'Know how many classes you can safely skip.' },
             { icon: '📅', title: 'Timetable Sync', desc: 'Full CSE Dept (4th & 6th Sem) schedules pre-loaded.' },
             { icon: '📍', title: 'Chill Spots', desc: 'Discover cafes, parks curated by students.' },
-            { icon: '🤖', title: 'Discord Bot', desc: 'Invite our bot to sync attendance directly on Discord.' },
+            { icon: (
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="#5865F2">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+              </svg>
+            ), title: 'Discord Bot', desc: 'Invite our bot to sync attendance directly on Discord.' },
             { icon: '🔔', title: 'Smart Alerts', desc: 'Get browser notifications 5 minutes before every class!' },
           ].map((f, i) => (
             <div key={i} style={{ 

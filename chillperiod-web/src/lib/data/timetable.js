@@ -18,6 +18,260 @@ export const TIMETABLE_DATA = {
 
   "sections": [
 
+    /* ===================== 2nd SEM (First Year) ===================== */
+
+    {
+      "section": "CSE-A",
+      "semester": 2,
+      "room": "103",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"ES"},
+          {"slot":2,"type":"THEORY","subject":"LIB"},
+          {"slot":3,"type":"THEORY","subject":"AM"},
+          {"slot":4,"type":"THEORY","subject":"AC"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"EM"},
+          {"slot":7,"type":"THEORY","subject":"AC"},
+          {"slot":8,"type":"LAB","G1":"WP Lab","G2":"AP Lab"},
+          {"slot":9,"type":"LAB","G1":"WP Lab","G2":"AP Lab"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"EM"},
+          {"slot":2,"type":"THEORY","subject":"AM"},
+          {"slot":3,"type":"LAB","G1":"AP Lab","G2":"ES Lab"},
+          {"slot":4,"type":"LAB","G1":"AP Lab","G2":"ES Lab"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"AP"},
+          {"slot":7,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"LAB","G1":"AC Lab","G2":"WP Lab"},
+          {"slot":2,"type":"LAB","G1":"AC Lab","G2":"WP Lab"},
+          {"slot":3,"type":"THEORY","subject":"AC"},
+          {"slot":4,"type":"THEORY","subject":"AP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"CS"},
+          {"slot":7,"type":"THEORY","subject":"ES"},
+          {"slot":8,"type":"LAB","G1":"ES Lab","G2":"LIB"},
+          {"slot":9,"type":"LAB","G1":"ES Lab","G2":"LIB"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"LIB"},
+          {"slot":2,"type":"THEORY","subject":"CS"},
+          {"slot":3,"type":"LAB","G1":"EG Lab","G2":"AC Lab"},
+          {"slot":4,"type":"LAB","G1":"EG Lab","G2":"AC Lab"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"ES"},
+          {"slot":7,"type":"THEORY","subject":"AM"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"CS"},
+          {"slot":2,"type":"THEORY","subject":"AM"},
+          {"slot":3,"type":"THEORY","subject":"EM"},
+          {"slot":4,"type":"THEORY","subject":"AP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PDP"},
+          {"slot":7,"type":"THEORY","subject":"LIB"},
+          {"slot":8,"type":"LAB","G1":"LIB","G2":"EG Lab"},
+          {"slot":9,"type":"LAB","G1":"LIB","G2":"EG Lab"}
+        ]
+      }
+    },
+
+    {
+      "section": "CSE-B",
+      "semester": 2,
+      "room": "104",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"AM"},
+          {"slot":2,"type":"THEORY","subject":"AC"},
+          {"slot":3,"type":"THEORY","subject":"ES"},
+          {"slot":4,"type":"THEORY","subject":"AP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"WP Lab","G2":"AP Lab"},
+          {"slot":7,"type":"LAB","G1":"WP Lab","G2":"AP Lab"},
+          {"slot":8,"type":"LAB","G1":"ES Lab","G2":"LIB"},
+          {"slot":9,"type":"LAB","G1":"ES Lab","G2":"LIB"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"LAB","G1":"AC Lab","G2":"LIB"},
+          {"slot":2,"type":"LAB","G1":"AC Lab","G2":"LIB"},
+          {"slot":3,"type":"THEORY","subject":"EM"},
+          {"slot":4,"type":"THEORY","subject":"AC"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"AC"},
+          {"slot":7,"type":"THEORY","subject":"CS"},
+          {"slot":8,"type":"LAB","G1":"EG Lab","G2":"WP Lab"},
+          {"slot":9,"type":"LAB","G1":"EG Lab","G2":"WP Lab"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"ES"},
+          {"slot":2,"type":"THEORY","subject":"AM"},
+          {"slot":3,"type":"THEORY","subject":"CS"},
+          {"slot":4,"type":"THEORY","subject":"AP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"EG Lab","G2":"AC Lab"},
+          {"slot":7,"type":"LAB","G1":"EG Lab","G2":"AC Lab"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"AP"},
+          {"slot":2,"type":"THEORY","subject":"EM"},
+          {"slot":3,"type":"THEORY","subject":"CS"},
+          {"slot":4,"type":"THEORY","subject":"ES"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"AM"},
+          {"slot":7,"type":"THEORY","subject":"PDP"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"LAB","G1":"LIB","G2":"WP Lab"},
+          {"slot":2,"type":"LAB","G1":"LIB","G2":"WP Lab"},
+          {"slot":3,"type":"LAB","G1":"EG Lab","G2":"ES Lab"},
+          {"slot":4,"type":"LAB","G1":"EG Lab","G2":"ES Lab"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"EM"},
+          {"slot":7,"type":"THEORY","subject":"AM"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
+    },
+
+    {
+      "section": "CSE-C",
+      "semester": 2,
+      "room": "112",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"LAB","G1":"WP Lab","G2":"EG Lab"},
+          {"slot":2,"type":"LAB","G1":"WP Lab","G2":"EG Lab"},
+          {"slot":3,"type":"THEORY","subject":"AC"},
+          {"slot":4,"type":"THEORY","subject":"AC"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"AM"},
+          {"slot":7,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"AP"},
+          {"slot":2,"type":"THEORY","subject":"CS"},
+          {"slot":3,"type":"LAB","G1":"EG Lab","G2":"AC Lab"},
+          {"slot":4,"type":"LAB","G1":"EG Lab","G2":"AC Lab"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"AM"},
+          {"slot":7,"type":"THEORY","subject":"EM"},
+          {"slot":8,"type":"LAB","G1":"ES Lab","G2":"ES Lab"},
+          {"slot":9,"type":"LAB","G1":"ES Lab","G2":"ES Lab"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"CS"},
+          {"slot":2,"type":"THEORY","subject":"AP"},
+          {"slot":3,"type":"THEORY","subject":"AC"},
+          {"slot":4,"type":"THEORY","subject":"ES"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"AM"},
+          {"slot":7,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"AM"},
+          {"slot":2,"type":"THEORY","subject":"ES"},
+          {"slot":3,"type":"THEORY","subject":"EM"},
+          {"slot":4,"type":"THEORY","subject":"AP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"AC Lab","G2":"AP Lab"},
+          {"slot":7,"type":"LAB","G1":"AC Lab","G2":"AP Lab"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"EM"},
+          {"slot":2,"type":"THEORY","subject":"ES"},
+          {"slot":3,"type":"THEORY","subject":"PDP"},
+          {"slot":4,"type":"THEORY","subject":"CS"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"ES Lab","G2":"WP Lab"},
+          {"slot":7,"type":"LAB","G1":"ES Lab","G2":"WP Lab"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
+    },
+
+    {
+      "section": "EEE",
+      "semester": 2,
+      "room": "TBA",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"EM"},
+          {"slot":2,"type":"THEORY","subject":"ES"},
+          {"slot":3,"type":"LAB","G1":"WP Lab","G2":"EG Lab"},
+          {"slot":4,"type":"LAB","G1":"WP Lab","G2":"EG Lab"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"AM"},
+          {"slot":7,"type":"THEORY","subject":"AC"},
+          {"slot":8,"type":"LAB","G1":"AC Lab","G2":"ES Lab"},
+          {"slot":9,"type":"LAB","G1":"AC Lab","G2":"ES Lab"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"LAB","G1":"LIB","G2":"AP Lab"},
+          {"slot":2,"type":"LAB","G1":"LIB","G2":"AP Lab"},
+          {"slot":3,"type":"THEORY","subject":"AC"},
+          {"slot":4,"type":"THEORY","subject":"EM"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"AP"},
+          {"slot":7,"type":"THEORY","subject":"ES"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"AP"},
+          {"slot":2,"type":"THEORY","subject":"EM"},
+          {"slot":3,"type":"THEORY","subject":"AC"},
+          {"slot":4,"type":"THEORY","subject":"ES"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"CS"},
+          {"slot":7,"type":"THEORY","subject":"AM"},
+          {"slot":8,"type":"LAB","G1":"AP Lab","G2":"AC Lab"},
+          {"slot":9,"type":"LAB","G1":"AP Lab","G2":"AC Lab"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"LIB"},
+          {"slot":2,"type":"THEORY","subject":"AP"},
+          {"slot":3,"type":"THEORY","subject":"AM"},
+          {"slot":4,"type":"THEORY","subject":"CS"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"EG Lab","G2":"WP Lab"},
+          {"slot":7,"type":"LAB","G1":"EG Lab","G2":"WP Lab"},
+          {"slot":8,"type":"LAB","G1":"ES Lab","G2":"AC Lab"},
+          {"slot":9,"type":"LAB","G1":"ES Lab","G2":"AC Lab"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"LAB","G1":"AC Lab","G2":"ES Lab"},
+          {"slot":2,"type":"LAB","G1":"AC Lab","G2":"ES Lab"},
+          {"slot":3,"type":"THEORY","subject":"AM"},
+          {"slot":4,"type":"THEORY","subject":"CS"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PDP"},
+          {"slot":7,"type":"THEORY","subject":"LIB"},
+          {"slot":8,"type":"LAB","G1":"ES Lab","G2":"EG Lab"},
+          {"slot":9,"type":"LAB","G1":"ES Lab","G2":"EG Lab"}
+        ]
+      }
+    },
+
     /* ===================== 4th SEM ===================== */
 
     {
@@ -266,6 +520,69 @@ export const TIMETABLE_DATA = {
           {"slot":5,"type":"BREAK","subject":"LUNCH"},
           {"slot":6,"type":"THEORY","subject":"C&S"},
           {"slot":7,"type":"THEORY","subject":"Prob & LP"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
+    },
+
+    {
+      "section": "EEE",
+      "semester": 4,
+      "room": "NB 302",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"PSLP"},
+          {"slot":2,"type":"THEORY","subject":"ELEC-II"},
+          {"slot":3,"type":"THEORY","subject":"PS-I"},
+          {"slot":4,"type":"THEORY","subject":"NAS"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"PSLP Lab (211)","G2":"PS-I Lab (211)"},
+          {"slot":7,"type":"LAB","G1":"PSLP Lab (211)","G2":"PS-I Lab (211)"},
+          {"slot":8,"type":"THEORY","subject":"EM-II"},
+          {"slot":9,"type":"THEORY","subject":"MMM (6B)"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"PS-I"},
+          {"slot":2,"type":"THEORY","subject":"EM-II"},
+          {"slot":3,"type":"THEORY","subject":"NAS"},
+          {"slot":4,"type":"THEORY","subject":"ELEC-II"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"PS-I Lab (9A)","G2":"PSLP Lab (211)"},
+          {"slot":7,"type":"LAB","G1":"PS-I Lab (9A)","G2":"PSLP Lab (211)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"NAS"},
+          {"slot":2,"type":"THEORY","subject":"PS-I"},
+          {"slot":3,"type":"LAB","G1":"NAS Lab (203)","G2":"ELEC-II Lab (07)"},
+          {"slot":4,"type":"LAB","G1":"NAS Lab (203)","G2":"ELEC-II Lab (07)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PSLP"},
+          {"slot":7,"type":"THEORY","subject":"TW"},
+          {"slot":8,"type":"LAB","G2":"EM-II Lab (9A)"},
+          {"slot":9,"type":"LAB","G2":"EM-II Lab (9A)"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"LAB","G1":"ELEC-II Lab (07)","G2":"NAS Lab (203)"},
+          {"slot":2,"type":"LAB","G1":"ELEC-II Lab (07)","G2":"NAS Lab (203)"},
+          {"slot":3,"type":"THEORY","subject":"PSLP"},
+          {"slot":4,"type":"THEORY","subject":"EM-II"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"ELEC-II"},
+          {"slot":7,"type":"THEORY","subject":"PS-I"},
+          {"slot":8,"type":"THEORY","subject":"PDP"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"ELEC-II"},
+          {"slot":2,"type":"THEORY","subject":"TW"},
+          {"slot":3,"type":"THEORY","subject":"EM-II"},
+          {"slot":4,"type":"THEORY","subject":"PSLP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"EM-II Lab (9A)"},
+          {"slot":7,"type":"LAB","G1":"EM-II Lab (9A)"},
           {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
           {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
         ]

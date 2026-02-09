@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { getSemesters, getSectionsForSemester } from '@/lib/data/timetable';
+import UserListModal from '@/components/UserListModal';
 
 import { useRouter } from 'next/navigation';
 
@@ -25,6 +26,12 @@ export default function ProfilePage() {
   const [usernameError, setUsernameError] = useState('');
   const [error, setError] = useState(null);
 
+  // Modal State
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalUsers, setModalUsers] = useState([]);
+  const [modalLoading, setModalLoading] = useState(false);
+
   useEffect(() => {
     // Safety timeout for loading state
     const timer = setTimeout(() => {
@@ -43,7 +50,7 @@ export default function ProfilePage() {
       if (session?.user?.id) {
         fetchUserData();
       } else {
-        console.error('ProfilePage: Authenticated but no User ID found in session');
+        // console.error('ProfilePage: Authenticated but no User ID found in session');
         // setError('User session invalid. Please try logging out and back in.');
         setLoading(false);
       }
@@ -79,6 +86,26 @@ export default function ProfilePage() {
       setError('Network error. Failed to fetch profile.');
     }
     setLoading(false);
+  };
+
+  const fetchFollowDetails = async (type) => {
+    setModalTitle(type === 'followers' ? 'Followers' : 'Following');
+    setModalOpen(true);
+    setModalLoading(true);
+    setModalUsers([]);
+
+    try {
+      const res = await fetch(`/api/users/${session.user.id}/follow-details?type=${type}`);
+      if (res.ok) {
+        const data = await res.json();
+        setModalUsers(data);
+      } else {
+        console.error('Failed to fetch follow details');
+      }
+    } catch (error) {
+      console.error('Error fetching follow details:', error);
+    }
+    setModalLoading(false);
   };
 
   const validateUsername = (username) => {
@@ -413,13 +440,23 @@ export default function ProfilePage() {
             <div style={{ 
               display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '20px'
             }}>
-              <div style={{ textAlign: 'center', cursor: 'pointer' }}>
+              <div 
+                style={{ textAlign: 'center', cursor: 'pointer', transition: 'opacity 0.2s' }}
+                onClick={() => fetchFollowDetails('followers')}
+                onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+              >
                 <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
                   {user.followerCount || 0}
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Followers</div>
               </div>
-              <div style={{ textAlign: 'center', cursor: 'pointer' }}>
+              <div 
+                style={{ textAlign: 'center', cursor: 'pointer', transition: 'opacity 0.2s' }}
+                onClick={() => fetchFollowDetails('following')}
+                onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+              >
                 <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
                   {user.followingCount || 0}
                 </div>
@@ -723,6 +760,13 @@ export default function ProfilePage() {
           }
         }
       `}</style>
+      <UserListModal 
+        isOpen={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        title={modalTitle} 
+        users={modalUsers} 
+        loading={modalLoading}
+      />
     </div>
   );
 }

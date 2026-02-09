@@ -4,6 +4,7 @@ import MobileNav from '@/components/MobileNav';
 import { useState, useEffect, use } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import UserListModal from '@/components/UserListModal';
 
 export default function UserProfile({ params }) {
   // Unwrap params using React.use() or await if async, but in client component with Next 15+ usually direct or hook
@@ -15,12 +16,20 @@ export default function UserProfile({ params }) {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
+
+  // Modal State
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalUsers, setModalUsers] = useState([]);
+  const [modalLoading, setModalLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchUserData(id);
     }
-  }, [id]);
+  }, [id, session?.user?.id]);
 
   const fetchUserData = async (userId) => {
     try {
@@ -28,6 +37,9 @@ export default function UserProfile({ params }) {
       if (res.ok) {
         const data = await res.json();
         setUserData(data);
+        if (session?.user?.id && data.followers) {
+          setIsFollowing(data.followers.includes(session.user.id));
+        }
       } else {
         if (res.status === 404) setError('User not found.');
         else setError('Failed to load profile.');
@@ -38,6 +50,50 @@ export default function UserProfile({ params }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchFollowDetails = async (type) => {
+    setModalTitle(type === 'followers' ? 'Followers' : 'Following');
+    setModalOpen(true);
+    setModalLoading(true);
+    setModalUsers([]);
+
+    try {
+      const res = await fetch(`/api/users/${id}/follow-details?type=${type}`);
+      if (res.ok) {
+        const data = await res.json();
+        setModalUsers(data);
+      } else {
+        console.error('Failed to fetch follow details');
+      }
+    } catch (error) {
+      console.error('Error fetching follow details:', error);
+    }
+    setModalLoading(false);
+  };
+
+  const handleFollow = async () => {
+    if (!session?.user) {
+      router.push('/login');
+      return;
+    }
+
+    setFollowLoading(true);
+    try {
+      const method = isFollowing ? 'DELETE' : 'POST';
+      const res = await fetch(`/api/users/${id}/follow`, { method });
+      
+      if (res.ok) {
+        setIsFollowing(!isFollowing);
+        setUserData(prev => ({
+          ...prev,
+          followerCount: (prev.followerCount || 0) + (isFollowing ? -1 : 1)
+        }));
+      }
+    } catch (error) {
+      console.error('Error following user:', error);
+    }
+    setFollowLoading(false);
   };
 
   if (loading) return (
@@ -101,6 +157,57 @@ export default function UserProfile({ params }) {
                 @{user.username || 'user'} • {typeof user.college === 'object' ? user.college?.name : (user.college || 'No College')}
                 </p>
 
+                {/* Follow Button */}
+                {!isOwner && (
+                  <div style={{ marginBottom: '24px' }}>
+                    <button
+                      onClick={handleFollow}
+                      disabled={followLoading}
+                      style={{
+                        padding: '10px 32px', border: 'none', borderRadius: '12px',
+                        fontWeight: 600, fontSize: '15px', cursor: followLoading ? 'wait' : 'pointer',
+                        background: isFollowing ? 'var(--bg-tertiary)' : '#8b5cf6',
+                        color: isFollowing ? 'var(--text-secondary)' : 'white',
+                        transition: 'all 0.2s',
+                        border: isFollowing ? '1px solid var(--border-color)' : 'none'
+                      }}
+                    >
+                      {followLoading ? '...' : isFollowing ? 'Following ✓' : 'Follow +'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Follower Stats - Clickable */}
+                <div style={{ 
+                  display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '24px',
+                  padding: '16px', background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+                  borderRadius: '14px'
+                }}>
+                  <div 
+                    style={{ textAlign: 'center', cursor: 'pointer', transition: 'opacity 0.2s' }}
+                    onClick={() => fetchFollowDetails('followers')}
+                    onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                  >
+                    <div style={{ fontWeight: 'bold', fontSize: '20px', color: 'var(--text-primary)' }}>
+                      {user.followerCount || user.followers?.length || 0}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Followers</div>
+                  </div>
+                  <div style={{ width: '1px', background: 'var(--border-color)' }} />
+                  <div 
+                    style={{ textAlign: 'center', cursor: 'pointer', transition: 'opacity 0.2s' }}
+                    onClick={() => fetchFollowDetails('following')}
+                    onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+                    onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                  >
+                    <div style={{ fontWeight: 'bold', fontSize: '20px', color: 'var(--text-primary)' }}>
+                      {user.followingCount || user.following?.length || 0}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Following</div>
+                  </div>
+                </div>
+
                 {/* Stats Grid */}
                 <div id="profile-stats-grid" style={{ 
                 display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px',
@@ -117,7 +224,7 @@ export default function UserProfile({ params }) {
                 </div>
                 <div>
                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f87171' }}>{user.totalBunks}</div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Bunks</div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Total Bunks</div>
                 </div>
                 </div>
             </div>
@@ -164,6 +271,14 @@ export default function UserProfile({ params }) {
             )}
         </div>
       </div>
+
+      <UserListModal 
+        isOpen={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        title={modalTitle} 
+        users={modalUsers} 
+        loading={modalLoading}
+      />
     </div>
   );
 }

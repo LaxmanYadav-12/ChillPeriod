@@ -13,16 +13,18 @@ export async function GET() {
     const spots = await Spot.find({}).sort({ upvotes: -1 }).lean();
 
     if (session) {
-      const upvotes = await UserInteraction.find({
+      const interactions = await UserInteraction.find({
         userId: session.user.id,
-        type: 'upvote'
-      }).select('spotId');
+        type: { $in: ['upvote', 'downvote'] }
+      }).select('spotId type');
 
-      const upvotedSpotIds = new Set(upvotes.map(u => u.spotId.toString()));
+      const upvotedIds = new Set(interactions.filter(i => i.type === 'upvote').map(i => i.spotId.toString()));
+      const downvotedIds = new Set(interactions.filter(i => i.type === 'downvote').map(i => i.spotId.toString()));
 
       const enrichedSpots = spots.map(spot => ({
         ...spot,
-        isUpvoted: upvotedSpotIds.has(spot._id.toString())
+        isUpvoted: upvotedIds.has(spot._id.toString()),
+        isDownvoted: downvotedIds.has(spot._id.toString())
       }));
       
       return NextResponse.json(enrichedSpots);

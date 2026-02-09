@@ -19,14 +19,14 @@ export default function MobileNav({ currentPage = 'home' }) {
         borderBottom: '1px solid var(--border-color)',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ maxWidth: '100%', margin: '0 auto', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link href="/" style={{ fontSize: '24px', fontWeight: 'bold', background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-cyan))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', textDecoration: 'none' }}>
             ChillPeriod
           </Link>
           
           {/* Desktop Links */}
           {/* Desktop Links */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }} className="desktop-nav">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '32px', marginLeft: 'auto', justifyContent: 'flex-end' }} className="desktop-nav">
             
             {status === 'authenticated' && (
               <>
@@ -51,18 +51,23 @@ export default function MobileNav({ currentPage = 'home' }) {
 
           {/* Mobile Hamburger */}
           {status === 'authenticated' && (
-            <button 
-              onClick={() => setIsOpen(!isOpen)}
-              style={{ 
-                display: 'none',
-                background: 'none', border: 'none', color: 'var(--text-primary)', 
-                fontSize: '24px', cursor: 'pointer', padding: '8px'
-              }}
-              className="mobile-hamburger"
-              aria-label="Toggle menu"
-            >
-              {isOpen ? '✕' : '☰'}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div className="mobile-theme-toggle" style={{ display: 'none', marginRight: '8px' }}>
+                <ThemeToggle />
+              </div>
+              <button 
+                onClick={() => setIsOpen(!isOpen)}
+                style={{ 
+                  display: 'none',
+                  background: 'none', border: 'none', color: 'var(--text-primary)', 
+                  fontSize: '24px', cursor: 'pointer', padding: '8px'
+                }}
+                className="mobile-hamburger"
+                aria-label="Toggle menu"
+              >
+                {isOpen ? '✕' : '☰'}
+              </button>
+            </div>
           )}
         </div>
       </nav>
@@ -81,6 +86,17 @@ export default function MobileNav({ currentPage = 'home' }) {
           onClick={() => setIsOpen(false)}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <Link 
+              href="/profile" 
+              style={{ 
+                color: currentPage === 'profile' ? '#8b5cf6' : 'white', 
+                fontSize: '20px', fontWeight: 600, textDecoration: 'none',
+                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                borderRadius: '12px', textAlign: 'center'
+              }}
+            >
+              👤 Profile
+            </Link>
             <Link 
               href="/spots" 
               style={{ 
@@ -147,17 +163,7 @@ export default function MobileNav({ currentPage = 'home' }) {
             >
               🔍 Find Friends
             </Link>
-            <Link 
-              href="/profile" 
-              style={{ 
-                color: currentPage === 'profile' ? '#8b5cf6' : 'white', 
-                fontSize: '20px', fontWeight: 600, textDecoration: 'none',
-                padding: '16px', background: 'rgba(255,255,255,0.05)',
-                borderRadius: '12px', textAlign: 'center'
-              }}
-            >
-              👤 Profile
-            </Link>
+
             
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
@@ -196,6 +202,9 @@ export default function MobileNav({ currentPage = 'home' }) {
             display: block !important;
           }
           .mobile-menu {
+            display: block !important;
+          }
+          .mobile-theme-toggle {
             display: block !important;
           }
         }

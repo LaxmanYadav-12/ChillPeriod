@@ -46,36 +46,89 @@ export default function SpotsPage() {
     }
   };
 
-  const upvoteSpot = async (spotId, e) => {
+  const handleVote = async (spotId, action, e) => {
     e.stopPropagation();
     
     // Optimistic Update
     setSpots(prev => prev.map(s => {
         if (s._id === spotId) {
-            const wasUpvoted = s.isUpvoted;
+            let newUpvotes = s.upvotes || 0;
+            let newDownvotes = s.downvotes || 0;
+            let newIsUpvoted = s.isUpvoted;
+            let newIsDownvoted = s.isDownvoted;
+
+            if (action === 'upvote') {
+                if (newIsUpvoted) {
+                    newUpvotes--;
+                    newIsUpvoted = false;
+                } else {
+                    newUpvotes++;
+                    newIsUpvoted = true;
+                    if (newIsDownvoted) {
+                        newDownvotes--;
+                        newIsDownvoted = false;
+                    }
+                }
+            } else if (action === 'downvote') {
+                if (newIsDownvoted) {
+                    newDownvotes--;
+                    newIsDownvoted = false;
+                } else {
+                    newDownvotes++;
+                    newIsDownvoted = true;
+                    if (newIsUpvoted) {
+                        newUpvotes--;
+                        newIsUpvoted = false;
+                    }
+                }
+            }
+
             return {
                 ...s,
-                upvotes: wasUpvoted ? s.upvotes - 1 : s.upvotes + 1,
-                isUpvoted: !wasUpvoted
+                upvotes: newUpvotes,
+                downvotes: newDownvotes,
+                isUpvoted: newIsUpvoted,
+                isDownvoted: newIsDownvoted
             };
         }
         return s;
     }));
 
+    // Update selectedSpot if open
+    if (selectedSpot && selectedSpot._id === spotId) {
+        setSelectedSpot(prev => {
+            // Simplified logic: just sync with spots state in next render or manually update here
+            // To keep it simple, we'll let the user see the update in the list background or close/reopen
+            // But let's try to update it here too for better UX
+             let newUpvotes = prev.upvotes || 0;
+            let newDownvotes = prev.downvotes || 0;
+            let newIsUpvoted = prev.isUpvoted;
+            let newIsDownvoted = prev.isDownvoted;
+
+            if (action === 'upvote') {
+                if (newIsUpvoted) { newUpvotes--; newIsUpvoted = false; } 
+                else { newUpvotes++; newIsUpvoted = true; if (newIsDownvoted) { newDownvotes--; newIsDownvoted = false; } }
+            } else if (action === 'downvote') {
+                if (newIsDownvoted) { newDownvotes--; newIsDownvoted = false; } 
+                else { newDownvotes++; newIsDownvoted = true; if (newIsUpvoted) { newUpvotes--; newIsUpvoted = false; } }
+            }
+            return { ...prev, upvotes: newUpvotes, downvotes: newDownvotes, isUpvoted: newIsUpvoted, isDownvoted: newIsDownvoted };
+        });
+    }
+
     try {
         const res = await fetch('/api/spots/upvote', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ spotId })
+            body: JSON.stringify({ spotId, action })
         });
         
         if (!res.ok) {
-             // Revert if failed
-             console.error('Upvote failed');
+             console.error('Vote failed');
              // Could revert state here
         }
     } catch (error) {
-        console.error('Upvote error', error);
+        console.error('Vote error', error);
     }
   };
 
@@ -95,13 +148,27 @@ export default function SpotsPage() {
     ];
 
     try {
-      const promises = queries.map(q => 
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q.type}+near+Sector+17+Rohini&limit=5`)
-          .then(res => res.json())
-          .then(items => items.map(item => ({ ...item, mappedCat: q.cat })))
-      );
+      const results = [];
+      for (const q of queries) {
+        try {
+          const res = await fetch(`/api/spots/search?q=${encodeURIComponent(q.type + ' near Sector 17 Rohini')}`);
+          
+          if (!res.ok) {
+             const errorText = await res.text();
+             console.error(`Failed to fetch ${q.type}:`, errorText);
+             continue; // Skip failed requests
+          }
 
-      const results = await Promise.all(promises);
+          const items = await res.json();
+          results.push(items.map(item => ({ ...item, mappedCat: q.cat })));
+          
+          // Respect Nominatim Usage Policy (1 request per second)
+          await new Promise(resolve => setTimeout(resolve, 1200));
+
+        } catch (err) {
+          console.error(`Error querying ${q.type}`, err);
+        }
+      }
       const flatness = results.flat();
       const vibesList = ['quiet', 'social', 'productive', 'romantic', 'late_night', 'nature'];
       const budgetsList = ['free', 'cheap', 'moderate']; // removed broke/expensive/luxury to keep it simple for auto-generated
@@ -115,8 +182,11 @@ export default function SpotsPage() {
             vibe: vibesList[Math.floor(Math.random() * vibesList.length)],
             budget: budgetsList[Math.floor(Math.random() * budgetsList.length)],
             distance: 'Nearby',
-            address: item.display_name.split(',').slice(1, 3).join(', '),
-            upvotes: Math.floor(Math.random() * 5), // Start with low random upvotes
+            address: item.display_name.split(',').slice(1, 4).join(', '),
+            upvotes: 0,
+            downvotes: 0,
+            isUpvoted: false,
+            isDownvoted: false,
             googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name || item.display_name)}`
         }));
       
@@ -304,7 +374,28 @@ export default function SpotsPage() {
                       <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{spot.distance}</p>
                     </div>
                   </div>
-                  <span style={{ color: '#10b981', fontSize: '14px' }}>👍 {spot.upvotes}</span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                        onClick={(e) => handleVote(spot._id, 'upvote', e)}
+                        style={{ 
+                            background: 'transparent', border: 'none', cursor: 'pointer',
+                            color: spot.isUpvoted ? '#10b981' : 'var(--text-secondary)',
+                            fontWeight: spot.isUpvoted ? 700 : 400
+                        }}
+                    >
+                        👍 {spot.upvotes || 0}
+                    </button>
+                    <button
+                        onClick={(e) => handleVote(spot._id, 'downvote', e)}
+                        style={{ 
+                            background: 'transparent', border: 'none', cursor: 'pointer',
+                            color: spot.isDownvoted ? '#ef4444' : 'var(--text-secondary)',
+                            fontWeight: spot.isDownvoted ? 700 : 400
+                        }}
+                    >
+                        👎 {spot.downvotes || 0}
+                    </button>
+                  </div>
                 </div>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '12px', lineHeight: 1.5 }}>{spot.description}</p>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
@@ -524,17 +615,30 @@ export default function SpotsPage() {
                     </div>
 
                     <button
-                    onClick={(e) => upvoteSpot(selectedSpot._id, e)}
-                    style={{ 
-                      display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px',
-                      background: selectedSpot.isUpvoted ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)',
-                      border: selectedSpot.isUpvoted ? '1px solid rgba(16,185,129,0.4)' : '1px solid #2a2a3a',
-                      borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
-                    }}
-                  >
-                    <span style={{ fontSize: '14px' }}>{selectedSpot.isUpvoted ? '💚' : '👍'}</span>
-                    <span style={{ color: selectedSpot.isUpvoted ? '#10b981' : '#9ca3af', fontSize: '13px', fontWeight: 500 }}>{selectedSpot.upvotes}</span>
-                  </button>
+                        onClick={(e) => handleVote(selectedSpot._id, 'upvote', e)}
+                        style={{ 
+                          display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px',
+                          background: selectedSpot.isUpvoted ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)',
+                          border: selectedSpot.isUpvoted ? '1px solid rgba(16,185,129,0.4)' : '1px solid #2a2a3a',
+                          borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
+                        }}
+                    >
+                        <span style={{ fontSize: '14px' }}>{selectedSpot.isUpvoted ? '💚' : '👍'}</span>
+                        <span style={{ color: selectedSpot.isUpvoted ? '#10b981' : '#9ca3af', fontSize: '13px', fontWeight: 500 }}>{selectedSpot.upvotes || 0}</span>
+                    </button>
+
+                    <button
+                        onClick={(e) => handleVote(selectedSpot._id, 'downvote', e)}
+                        style={{ 
+                          display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px',
+                          background: selectedSpot.isDownvoted ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)',
+                          border: selectedSpot.isDownvoted ? '1px solid rgba(239,68,68,0.4)' : '1px solid #2a2a3a',
+                          borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
+                        }}
+                    >
+                        <span style={{ fontSize: '14px' }}>👎</span>
+                        <span style={{ color: selectedSpot.isDownvoted ? '#ef4444' : '#9ca3af', fontSize: '13px', fontWeight: 500 }}>{selectedSpot.downvotes || 0}</span>
+                    </button>
                     <button 
                         onClick={() => openGoogleMaps(selectedSpot)}
                         style={{
