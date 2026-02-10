@@ -13,6 +13,7 @@ const UserSchema = new mongoose.Schema({
   college: String,
   semester: Number,
   section: String,
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
   
   // Social
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

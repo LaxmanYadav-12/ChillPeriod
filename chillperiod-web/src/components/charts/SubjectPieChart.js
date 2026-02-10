@@ -2,9 +2,10 @@
 
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useTheme } from '@/contexts/ThemeContext';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 export default function SubjectPieChart({ courses }) {
   const { theme } = useTheme();
@@ -27,6 +28,8 @@ export default function SubjectPieChart({ courses }) {
         '#10b981', // Green
         '#f59e0b', // Amber
         '#ef4444', // Red
+        '#6366f1', // Indigo
+        '#14b8a6', // Teal
       ],
       borderColor: 'var(--bg-primary)',
       borderWidth: 3,
@@ -67,12 +70,26 @@ export default function SubjectPieChart({ courses }) {
             return `${context.label}: ${context.parsed}%`;
           }
         }
+      },
+      datalabels: {
+        color: '#ffffff',
+        font: {
+            weight: 'bold',
+            size: 14
+        },
+        formatter: (value) => {
+            return value + '%';
+        },
+        display: (context) => {
+            // Hide label if slice is too small (e.g. < 5%)
+            return context.dataset.data[context.dataIndex] > 5; 
+        }
       }
     }
   };
 
   return (
-    <div style={{ height: '300px' }}>
+    <div style={{ height: '300px', width: '100%', position: 'relative' }}>
       <Pie data={data} options={options} />
     </div>
   );

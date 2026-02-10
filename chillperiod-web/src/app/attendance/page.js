@@ -430,6 +430,43 @@ export default function AttendancePage() {
     );
   }
 
+  // Helper to filter attendance log based on a subset of courses
+  const getFilteredLog = (fullLog, subsetCourses) => {
+    const subsetIds = new Set(subsetCourses.map(c => c.id));
+    const newLog = {};
+
+    Object.keys(fullLog).forEach(date => {
+      const dayData = fullLog[date];
+      let attended = 0;
+      let bunked = 0;
+
+      // Recalculate counts based on subset
+      Object.keys(dayData.courses || {}).forEach(cId => {
+        if (subsetIds.has(cId)) {
+          if (dayData.courses[cId].attended) attended++;
+          if (dayData.courses[cId].bunked) bunked++;
+        }
+      });
+
+      // Only add day if there's relevant activity
+      if (attended > 0 || bunked > 0) {
+        newLog[date] = {
+          ...dayData,
+          attended,
+          bunked
+        };
+      }
+    });
+
+    return newLog;
+  };
+
+  const labCourses = courses.filter(c => c.type === 'Lab');
+  const theoryCourses = courses.filter(c => c.type !== 'Lab');
+  
+  const theoryLog = getFilteredLog(attendanceLog, theoryCourses);
+  const labLog = getFilteredLog(attendanceLog, labCourses);
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Navigation */}
@@ -1096,97 +1133,208 @@ export default function AttendancePage() {
           {/* Courses List */}
           {/* Courses List */}
           {/* Courses List - Row Layout */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {courses.map(course => {
-              const stats = getStats(course.totalClasses, course.attendedClasses, course.targetPercentage || 75);
-              
-              // Determine bar color
-              let barColor = '#10b981'; // Green
-              if (stats.percentage < 75) barColor = '#ef4444'; // Red
-              else if (stats.percentage < 85) barColor = '#f59e0b'; // Yellow (Caution)
-
-              return (
-                <div key={course.id} className="animate-scale-in" style={{ 
-                  background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', 
-                  padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  gap: '24px', flexWrap: 'wrap'
-                }}>
-                  
-                  {/* Left Side: Info & Progress */}
-                  <div style={{ flex: 1, minWidth: '300px' }}>
-                    
-                    {/* Header: Dot + Name + Code */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                        <div style={{ 
-                            width: '8px', height: '8px', borderRadius: '50%', 
-                            background: stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444',
-                            boxShadow: `0 0 8px ${stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444'}40`
-                        }} />
-                        <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>{course.name}</h3>
-                        {course.code && <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{course.code}</span>}
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div style={{ width: '100%', height: '6px', background: 'var(--bg-tertiary)', borderRadius: '3px', marginBottom: '10px' }}>
-                        <div style={{ 
-                            height: '100%', borderRadius: '3px', background: barColor, 
-                            width: `${Math.min(100, stats.percentage)}%`, transition: 'width 0.5s',
-                            boxShadow: `0 0 10px ${barColor}40`
-                        }} />
-                    </div>
-
-                    {/* Stats Line */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                        <span>{course.attendedClasses}/{course.totalClasses}</span>
-                        <span style={{ color: 'var(--text-muted)' }}>•</span>
-                        <span style={{ color: barColor, fontWeight: 500 }}>{stats.percentage}%</span>
-                        {stats.safeToBunk > 0 && (
-                            <>
-                                <span style={{ color: 'var(--text-muted)' }}>•</span>
-                                <span style={{ color: '#10b981' }}>Skip {stats.safeToBunk}</span>
-                            </>
-                        )}
-                        {stats.needToAttend > 0 && (
-                            <>
-                                <span style={{ color: 'var(--text-muted)' }}>•</span>
-                                <span style={{ color: '#ef4444' }}>Attend {stats.needToAttend}</span>
-                            </>
-                        )}
-                    </div>
-                  </div>
-
-                  {/* Right Side: Actions */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <button onClick={() => initiateEdit(course)} style={{ 
-                        width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' 
-                    }} title="Edit">✏️</button>
-                    
-                    <button onClick={() => { setCourseToDelete(course); setShowDeleteModal(true); }} style={{ 
-                        width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' 
-                    }} title="Delete">🗑️</button>
-
-                    <button onClick={() => inititateBunk(course)} style={{ 
-                        padding: '10px 16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', 
-                        borderRadius: '10px', color: '#f87171', cursor: 'pointer', fontWeight: 600, fontSize: '13px',
-                        display: 'flex', alignItems: 'center', gap: '6px'
-                    }}>
-                        <span style={{ fontSize: '14px' }}>😴</span> Bunk
-                    </button>
-
-                    <button onClick={() => handleAttend(course.id)} style={{ 
-                        padding: '10px 16px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', 
-                        borderRadius: '10px', color: '#34d399', cursor: 'pointer', fontWeight: 600, fontSize: '13px',
-                        display: 'flex', alignItems: 'center', gap: '6px'
-                    }}>
-                        <span style={{ fontSize: '14px' }}>✅</span> Attend
-                    </button>
-                  </div>
-
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            {/* Theory Section */}
+            {labCourses.length > 0 && theoryCourses.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '-16px' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Theory</h3>
+                    <div style={{ height: '1px', flex: 1, background: 'var(--border-color)' }}></div>
                 </div>
-              );
-            })}
+            )}
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {(labCourses.length > 0 ? theoryCourses : courses).map(course => {
+                  const stats = getStats(course.totalClasses, course.attendedClasses, course.targetPercentage || 75);
+                  
+                  // Determine bar color
+                  let barColor = '#10b981'; // Green
+                  if (stats.percentage < 75) barColor = '#ef4444'; // Red
+                  else if (stats.percentage < 85) barColor = '#f59e0b'; // Yellow (Caution)
+
+                  return (
+                    <div key={course.id} className="animate-scale-in" style={{ 
+                      background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', 
+                      padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      gap: '24px', flexWrap: 'wrap'
+                    }}>
+                      {/* Left Side: Info & Progress */}
+                      <div style={{ flex: 1, minWidth: '300px' }}>
+                        
+                        {/* Header: Dot + Name + Code */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                            <div style={{ 
+                                width: '8px', height: '8px', borderRadius: '50%', 
+                                background: stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444',
+                                boxShadow: `0 0 8px ${stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444'}40`
+                            }} />
+                            <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>{course.name}</h3>
+                            {course.code && <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{course.code}</span>}
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div style={{ width: '100%', height: '6px', background: 'var(--bg-tertiary)', borderRadius: '3px', marginBottom: '10px' }}>
+                            <div style={{ 
+                                height: '100%', borderRadius: '3px', background: barColor, 
+                                width: `${Math.min(100, stats.percentage)}%`, transition: 'width 0.5s',
+                                boxShadow: `0 0 10px ${barColor}40`
+                            }} />
+                        </div>
+
+                        {/* Stats Line */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                            <span>{course.attendedClasses}/{course.totalClasses}</span>
+                            <span style={{ color: 'var(--text-muted)' }}>•</span>
+                            <span style={{ color: barColor, fontWeight: 500 }}>{stats.percentage}%</span>
+                            {stats.safeToBunk > 0 && (
+                                <>
+                                    <span style={{ color: 'var(--text-muted)' }}>•</span>
+                                    <span style={{ color: '#10b981' }}>Skip {stats.safeToBunk}</span>
+                                </>
+                            )}
+                            {stats.needToAttend > 0 && (
+                                <>
+                                    <span style={{ color: 'var(--text-muted)' }}>•</span>
+                                    <span style={{ color: '#ef4444' }}>Attend {stats.needToAttend}</span>
+                                </>
+                            )}
+                        </div>
+                      </div>
+
+                      {/* Right Side: Actions */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button onClick={() => initiateEdit(course)} style={{ 
+                            width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' 
+                        }} title="Edit">✏️</button>
+                        
+                        <button onClick={() => { setCourseToDelete(course); setShowDeleteModal(true); }} style={{ 
+                            width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' 
+                        }} title="Delete">🗑️</button>
+
+                        <button onClick={() => inititateBunk(course)} style={{ 
+                            padding: '10px 16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', 
+                            borderRadius: '10px', color: '#f87171', cursor: 'pointer', fontWeight: 600, fontSize: '13px',
+                            display: 'flex', alignItems: 'center', gap: '6px'
+                        }}>
+                            <span style={{ fontSize: '14px' }}>😴</span> Bunk
+                        </button>
+
+                        <button onClick={() => handleAttend(course.id)} style={{ 
+                            padding: '10px 16px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', 
+                            borderRadius: '10px', color: '#34d399', cursor: 'pointer', fontWeight: 600, fontSize: '13px',
+                            display: 'flex', alignItems: 'center', gap: '6px'
+                        }}>
+                            <span style={{ fontSize: '14px' }}>✅</span> Attend
+                        </button>
+                      </div>
+
+                    </div>
+                  );
+                })}
+            </div>
+
+            {/* Labs Section */}
+            {labCourses.length > 0 && (
+                <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '-16px', marginTop: '16px' }}>
+                        <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Labs / Practicals</h3>
+                        <div style={{ height: '1px', flex: 1, background: 'var(--border-color)' }}></div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {labCourses.map(course => {
+                          const stats = getStats(course.totalClasses, course.attendedClasses, course.targetPercentage || 75);
+                          
+                          // Determine bar color
+                          let barColor = '#10b981'; // Green
+                          if (stats.percentage < 75) barColor = '#ef4444'; // Red
+                          else if (stats.percentage < 85) barColor = '#f59e0b'; // Yellow (Caution)
+
+                          return (
+                            <div key={course.id} className="animate-scale-in" style={{ 
+                              background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', 
+                              padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              gap: '24px', flexWrap: 'wrap'
+                            }}>
+                              {/* Left Side: Info & Progress */}
+                              <div style={{ flex: 1, minWidth: '300px' }}>
+                                
+                                {/* Header: Dot + Name + Code */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                                    <div style={{ 
+                                        width: '8px', height: '8px', borderRadius: '50%', 
+                                        background: stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444',
+                                        boxShadow: `0 0 8px ${stats.status === 'safe' ? '#10b981' : stats.status === 'caution' ? '#f59e0b' : '#ef4444'}40`
+                                    }} />
+                                    <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>{course.name}</h3>
+                                    {course.code && <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{course.code}</span>}
+                                </div>
+
+                                {/* Progress Bar */}
+                                <div style={{ width: '100%', height: '6px', background: 'var(--bg-tertiary)', borderRadius: '3px', marginBottom: '10px' }}>
+                                    <div style={{ 
+                                        height: '100%', borderRadius: '3px', background: barColor, 
+                                        width: `${Math.min(100, stats.percentage)}%`, transition: 'width 0.5s',
+                                        boxShadow: `0 0 10px ${barColor}40`
+                                    }} />
+                                </div>
+
+                                {/* Stats Line */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                    <span>{course.attendedClasses}/{course.totalClasses}</span>
+                                    <span style={{ color: 'var(--text-muted)' }}>•</span>
+                                    <span style={{ color: barColor, fontWeight: 500 }}>{stats.percentage}%</span>
+                                    {stats.safeToBunk > 0 && (
+                                        <>
+                                            <span style={{ color: 'var(--text-muted)' }}>•</span>
+                                            <span style={{ color: '#10b981' }}>Skip {stats.safeToBunk}</span>
+                                        </>
+                                    )}
+                                    {stats.needToAttend > 0 && (
+                                        <>
+                                            <span style={{ color: 'var(--text-muted)' }}>•</span>
+                                            <span style={{ color: '#ef4444' }}>Attend {stats.needToAttend}</span>
+                                        </>
+                                    )}
+                                </div>
+                              </div>
+
+                              {/* Right Side: Actions */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <button onClick={() => initiateEdit(course)} style={{ 
+                                    width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' 
+                                }} title="Edit">✏️</button>
+                                
+                                <button onClick={() => { setCourseToDelete(course); setShowDeleteModal(true); }} style={{ 
+                                    width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' 
+                                }} title="Delete">🗑️</button>
+
+                                <button onClick={() => inititateBunk(course)} style={{ 
+                                    padding: '10px 16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', 
+                                    borderRadius: '10px', color: '#f87171', cursor: 'pointer', fontWeight: 600, fontSize: '13px',
+                                    display: 'flex', alignItems: 'center', gap: '6px'
+                                }}>
+                                    <span style={{ fontSize: '14px' }}>😴</span> Bunk
+                                </button>
+
+                                <button onClick={() => handleAttend(course.id)} style={{ 
+                                    padding: '10px 16px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', 
+                                    borderRadius: '10px', color: '#34d399', cursor: 'pointer', fontWeight: 600, fontSize: '13px',
+                                    display: 'flex', alignItems: 'center', gap: '6px'
+                                }}>
+                                    <span style={{ fontSize: '14px' }}>✅</span> Attend
+                                </button>
+                              </div>
+
+                            </div>
+                          );
+                        })}
+                    </div>
+                </>
+            )}
           </div>
 
           {courses.length === 0 && (
@@ -1199,7 +1347,7 @@ export default function AttendancePage() {
       </div>
 
       {/* Analytics Section */}
-      <div className="animate-fade-in" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 24px' }}>
+      <div className="animate-fade-in analytics-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 24px' }}>
         <div style={{ marginBottom: '32px', textAlign: 'center' }}>
           <h2 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }}>
             📊 Your Attendance Analytics
@@ -1210,7 +1358,7 @@ export default function AttendancePage() {
         </div>
 
         {/* Trend Chart - Full Width */}
-        <div style={{
+        <div className="chart-card" style={{
           background: 'var(--card-bg)',
           border: '1px solid var(--border-color)',
           borderRadius: '16px',
@@ -1221,7 +1369,20 @@ export default function AttendancePage() {
           <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '16px' }}>
             📈 Daily Efficiency (Last 7 Days)
           </h3>
-          <AttendanceTrendChart attendanceLog={attendanceLog} />
+          {labCourses.length > 0 ? (
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                <div>
+                   <h4 style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px', opacity: 0.8 }}>THEORY</h4>
+                   <AttendanceTrendChart attendanceLog={theoryLog} />
+                </div>
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>
+                   <h4 style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px', opacity: 0.8 }}>LABS / PRACTICALS</h4>
+                   <AttendanceTrendChart attendanceLog={labLog} />
+                </div>
+             </div>
+          ) : (
+             <AttendanceTrendChart attendanceLog={attendanceLog} />
+          )}
         </div>
 
         {/* Charts Grid */}
@@ -1232,7 +1393,7 @@ export default function AttendancePage() {
           marginBottom: '24px'
         }}>
           {/* Subject Pie Chart */}
-          <div style={{
+          <div className="chart-card" style={{
             background: 'var(--card-bg)',
             border: '1px solid var(--border-color)',
             borderRadius: '16px',
@@ -1242,11 +1403,24 @@ export default function AttendancePage() {
             <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '16px' }}>
               🥧 Subject Breakdown
             </h3>
-            <SubjectPieChart courses={courses} />
+            {labCourses.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                <div>
+                  <h4 style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Theory</h4>
+                  <SubjectPieChart courses={theoryCourses} />
+                </div>
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>
+                   <h4 style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Labs / Practicals</h4>
+                   <SubjectPieChart courses={labCourses} />
+                </div>
+              </div>
+            ) : (
+              <SubjectPieChart courses={courses} />
+            )}
           </div>
 
           {/* Monthly Bar Chart */}
-          <div style={{
+          <div className="chart-card" style={{
             background: 'var(--card-bg)',
             border: '1px solid var(--border-color)',
             borderRadius: '16px',
@@ -1256,7 +1430,20 @@ export default function AttendancePage() {
             <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '16px' }}>
               📊 Monthly Comparison
             </h3>
-            <MonthlyBarChart attendanceLog={attendanceLog} />
+            {labCourses.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                <div>
+                  <h4 style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Theory</h4>
+                  <MonthlyBarChart attendanceLog={theoryLog} />
+                </div>
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>
+                   <h4 style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Labs / Practicals</h4>
+                   <MonthlyBarChart attendanceLog={labLog} />
+                </div>
+              </div>
+            ) : (
+              <MonthlyBarChart attendanceLog={attendanceLog} />
+            )}
           </div>
         </div>
 
@@ -1271,22 +1458,49 @@ export default function AttendancePage() {
             💡 Quick Insights
           </h3>
           <div id="insights-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+            {/* Overall Percentage - Always same */}
             <div>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#8b5cf6' }}>
                 {overallStats.percentage}%
               </div>
               <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Overall Attendance</div>
             </div>
+
+            {/* Total Subjects - Split if labs exist */}
             <div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#10b981' }}>
-                {courses.length}
-              </div>
+              {labCourses.length > 0 ? (
+                <div>
+                   <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {theoryCourses.length} <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>THEORY</span>
+                   </div>
+                   <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#34d399', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {labCourses.length} <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>LABS</span>
+                   </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#10b981' }}>
+                  {courses.length}
+                </div>
+              )}
               <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Total Subjects</div>
             </div>
+
+            {/* Subjects on Track - Split if labs exist */}
             <div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#06b6d4' }}>
-                {courses.filter(c => ((c.attended / c.total) * 100) >= requiredPercentage).length}/{courses.length}
-              </div>
+              {labCourses.length > 0 ? (
+                <div>
+                   <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#06b6d4', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {theoryCourses.filter(c => ((c.attendedClasses / c.totalClasses) * 100) >= requiredPercentage).length}/{theoryCourses.length} <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>THEORY</span>
+                   </div>
+                   <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#22d3ee', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {labCourses.filter(c => ((c.attendedClasses / c.totalClasses) * 100) >= requiredPercentage).length}/{labCourses.length} <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 'normal' }}>LABS</span>
+                   </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#06b6d4' }}>
+                  {courses.filter(c => ((c.attendedClasses / c.totalClasses) * 100) >= requiredPercentage).length}/{courses.length}
+                </div>
+              )}
               <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Subjects on Track</div>
             </div>
           </div>
@@ -1296,6 +1510,10 @@ export default function AttendancePage() {
       {/* Responsive Styles */}
       <style jsx>{`
         @media (max-width: 768px) {
+          .analytics-container {
+             padding: 24px 16px !important;
+          }
+
           #attendance-grid {
             grid-template-columns: 1fr !important;
           }
@@ -1306,6 +1524,11 @@ export default function AttendancePage() {
           
           #insights-grid {
             grid-template-columns: 1fr !important;
+          }
+
+          .chart-card {
+            padding: 16px !important;
+            min-width: 0; /* Critical for grid/flex child shrinking */
           }
         }
       `}</style>

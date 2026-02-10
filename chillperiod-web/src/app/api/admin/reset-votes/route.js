@@ -3,7 +3,14 @@ import dbConnect from '@/lib/mongodb';
 import Spot from '@/models/Spot';
 import UserInteraction from '@/models/UserInteraction';
 
+import { auth } from '@/auth';
+
 export async function GET() {
+  const session = await auth();
+  if (session?.user?.role !== 'admin') {
+     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+
   try {
     await dbConnect();
 

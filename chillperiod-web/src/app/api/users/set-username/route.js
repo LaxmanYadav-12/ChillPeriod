@@ -1,18 +1,21 @@
+```javascript
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
+import { userProfileSchema } from '@/lib/validators';
 
 export async function POST(request) {
-  try {
-    const session = await auth();
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
+  try {
     await dbConnect();
-    const { username, name,RZ_college, semester, section } = await request.json();
+    const body = await request.json();
+    const validatedData = userProfileSchema.parse(body);
+    const { username, name, RZ_college, semester, section } = validatedData;
 
     // Validate username format
     const regex = /^[a-z0-9_]{3,20}$/;
@@ -50,8 +53,10 @@ export async function POST(request) {
       }
     });
   } catch (error) {
-    console.error('Error setting profile:', error);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    if (error.name === 'ZodError') {
+         return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
+```

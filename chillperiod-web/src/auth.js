@@ -106,6 +106,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 token.followingCount = dbUser.following?.length || 0;
                 token.isDiscordLinked = !!dbUser.discordId;
                 token.isGoogleLinked = !!dbUser.googleId;
+                token.role = dbUser.role || 'user';
             }
 
         } catch (error) {
@@ -128,6 +129,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                token.followingCount = dbUser.following?.length || 0;
                token.isDiscordLinked = !!dbUser.discordId;
                token.isGoogleLinked = !!dbUser.googleId;
+               token.role = dbUser.role || 'user';
             }
           } catch (error) {
              console.error('AUTH DEBUG: Error refreshing token:', error);
@@ -151,6 +153,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       
       session.user.isDiscordLinked = token.isDiscordLinked;
       session.user.isGoogleLinked = token.isGoogleLinked;
+      session.user.role = token.role;
       
       return session;
     },

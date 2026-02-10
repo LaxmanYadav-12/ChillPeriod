@@ -34,7 +34,7 @@ export default function MonthlyBarChart({ attendanceLog }) {
       const d = new Date(today);
       d.setMonth(today.getMonth() - i);
       months.push({
-          name: d.toLocaleString('default', { month: 'long' }),
+          name: d.toLocaleString('default', { month: 'short' }),
           year: d.getFullYear(),
           monthIdx: d.getMonth(), // 0-11
           total: 0,
@@ -137,7 +137,7 @@ export default function MonthlyBarChart({ attendanceLog }) {
   };
 
   return (
-    <div style={{ height: '300px' }}>
+    <div style={{ height: '300px', width: '100%', position: 'relative' }}>
       <Bar data={data} options={options} />
     </div>
   );

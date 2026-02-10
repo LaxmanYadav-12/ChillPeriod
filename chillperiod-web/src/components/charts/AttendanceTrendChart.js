@@ -186,7 +186,7 @@ export default function AttendanceTrendChart({ attendanceLog, overallPercentage 
   };
 
   return (
-    <div style={{ height: '300px' }}>
+    <div style={{ height: '300px', width: '100%', position: 'relative' }}>
       <Line data={data} options={options} />
     </div>
   );
