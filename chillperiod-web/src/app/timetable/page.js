@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import MobileNav from '@/components/MobileNav';
 import { TIMETABLE_DATA, getSemesters, getSectionsForSemester } from '@/lib/data/timetable';
 
 export default function TimetablePage() {
+  const { data: session } = useSession();
   const [selectedSemester, setSelectedSemester] = useState(4);
   const [selectedSection, setSelectedSection] = useState('CSE-A');
   const [currentDay, setCurrentDay] = useState('');
@@ -22,7 +24,15 @@ export default function TimetablePage() {
       setCurrentDay('Monday');
     }
     setTimeSlots(TIMETABLE_DATA.time_slots);
-  }, []);
+
+    // Initialize from session if available
+    if (session?.user?.semester) {
+        setSelectedSemester(session.user.semester);
+    }
+    if (session?.user?.section) {
+        setSelectedSection(session.user.section);
+    }
+  }, [session]);
 
   useEffect(() => {
     // Find the schedule for the selected semester and section

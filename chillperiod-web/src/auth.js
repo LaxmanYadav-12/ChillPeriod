@@ -1,44 +1,24 @@
 import NextAuth from "next-auth";
-import Discord from "next-auth/providers/discord";
-import Google from "next-auth/providers/google";
 import dbConnect from "@/lib/mongodb";
 import User from "@/lib/models/User";
 import mongoose from 'mongoose';
+import { authConfig } from "./auth.config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  debug: true,
-  trustHost: true,
-  cookies: {
-    sessionToken: {
-      name: `authjs.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: false, // Force insecure for debugging
-      },
-    },
-  },
-  providers: [
-    Discord({
-      clientId: process.env.DISCORD_CLIENT_ID,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET,
-      authorization: {
-        params: {
-          scope: "identify email guilds",
-        },
-      },
-    }),
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
+  ...authConfig,
+  debug: false,
   callbacks: {
-    async jwt({ token, account, profile }) {
-      console.log('AUTH DEBUG: JWT Callback', { account: !!account, profile: !!profile, token });
-      // Store provider-specific info in the token
+    ...authConfig.callbacks,
+    async jwt({ token, account, profile, trigger, session }) {
+      
+      // Update token if session is updated (e.g. from client side update())
+      if (trigger === "update" && session) {
+         token = { ...token, ...session };
+      }
+
+      // Initial sign in
       if (account && profile) {
+        // PREPARE TOKEN DATA
         if (account.provider === 'discord') {
           token.discordId = profile.id;
           token.username = profile.username;
@@ -48,71 +28,132 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
         token.accessToken = account.access_token;
         token.provider = account.provider;
+
+        // DB OPERATIONS
+        try {
+            await dbConnect();
+
+            // CASE 1: LINKING (User is already logged in)
+            if (token.id) {
+                console.log('AUTH: Linking account to existing user', token.id);
+                const currentUser = await User.findById(token.id);
+                if (currentUser) {
+                    let updated = false;
+                    if (account.provider === 'discord' && !currentUser.discordId) {
+                        currentUser.discordId = profile.id;
+                        updated = true;
+                    }
+                    if (account.provider === 'google' && !currentUser.googleId) {
+                        currentUser.googleId = profile.sub;
+                        updated = true;
+                    }
+                    
+                    if (updated) await currentUser.save();
+                    
+                    // Refresh token fields
+                    token.isDiscordLinked = !!currentUser.discordId;
+                    token.isGoogleLinked = !!currentUser.googleId;
+                }
+                return token; // Return early, we are done linking
+            }
+
+            // CASE 2: LOGIN / REGISTER (User is not logged in)
+            
+            // Find user by email or provider ID
+            let dbUser = await User.findOne({
+              $or: [
+                { email: token.email },
+                { discordId: token.discordId },
+                { googleId: token.googleId }
+              ].filter(q => Object.values(q)[0])
+            });
+
+            // Create if not exists
+            if (!dbUser && token.email) {
+               const newUser = {
+                 email: token.email,
+                 name: token.name || token.username || 'User',
+                 image: token.picture || token.avatar,
+               };
+               if (token.discordId) newUser.discordId = token.discordId;
+               if (token.googleId) newUser.googleId = token.googleId;
+               
+               dbUser = await User.create(newUser);
+            }
+
+            // If user found/created, update their IDs if missing (Merge by email)
+            if (dbUser) {
+                let updated = false;
+                if (token.discordId && !dbUser.discordId) {
+                    dbUser.discordId = token.discordId;
+                    updated = true;
+                }
+                if (token.googleId && !dbUser.googleId) {
+                    dbUser.googleId = token.googleId;
+                    updated = true;
+                }
+                if (updated) await dbUser.save();
+
+                // Populate token
+                token.id = dbUser._id.toString();
+                token.username = dbUser.username;
+                token.hasCompletedOnboarding = dbUser.hasCompletedOnboarding || false;
+                token.semester = dbUser.semester;
+                token.section = dbUser.section;
+                token.college = dbUser.college;
+                token.totalBunks = dbUser.totalBunks || 0;
+                token.followerCount = dbUser.followers?.length || 0;
+                token.followingCount = dbUser.following?.length || 0;
+                token.isDiscordLinked = !!dbUser.discordId;
+                token.isGoogleLinked = !!dbUser.googleId;
+            }
+
+        } catch (error) {
+            console.error('AUTH DEBUG: Error in JWT callback:', error);
+        }
       }
+
+      // Sync on subsequent visits (if not signing in)
+      if (!account && token.id) {
+          try {
+            await dbConnect();
+            const dbUser = await User.findById(token.id);
+            if (dbUser) {
+               token.hasCompletedOnboarding = dbUser.hasCompletedOnboarding || false;
+               token.semester = dbUser.semester;
+               token.section = dbUser.section;
+               token.college = dbUser.college;
+               token.totalBunks = dbUser.totalBunks || 0;
+               token.followerCount = dbUser.followers?.length || 0;
+               token.followingCount = dbUser.following?.length || 0;
+               token.isDiscordLinked = !!dbUser.discordId;
+               token.isGoogleLinked = !!dbUser.googleId;
+            }
+          } catch (error) {
+             console.error('AUTH DEBUG: Error refreshing token:', error);
+          }
+      }
+
       return token;
     },
     async session({ session, token }) {
-      console.log('AUTH DEBUG: Session Callback Start', { token });
-      // Add provider info to the session
-      session.user.discordId = token.discordId;
-      session.user.googleId = token.googleId;
-      session.user.avatar = token.avatar;
+      // Pass data from token to session
+      session.user.id = token.id;
+      session.user.username = token.username;
+      session.user.hasCompletedOnboarding = token.hasCompletedOnboarding || false;
+      session.user.semester = token.semester;
+      session.user.section = token.section;
+      session.user.college = token.college;
+      session.user.totalBunks = token.totalBunks;
+      session.user.followerCount = token.followerCount;
+      session.user.followingCount = token.followingCount;
       session.user.provider = token.provider;
-      session.accessToken = token.accessToken;
       
-      // Get or create user in database
-      try {
-        console.log('AUTH DEBUG: Connecting to DB...');
-        await dbConnect();
-        console.log('AUTH DEBUG: DB Connected. Finding user...');
-        let dbUser = await User.findOne({
-          $or: [
-            { discordId: token.discordId },
-            { googleId: token.googleId },
-            { email: session.user.email }
-          ].filter(q => Object.values(q)[0])
-        });
-        
-        console.log('AUTH DEBUG: DB User found:', !!dbUser);
-
-        if (!dbUser) {
-          console.log('AUTH DEBUG: Creating new user...');
-          const newUser = {
-            email: session.user.email,
-            name: session.user.name || token.username || 'User',
-            image: session.user.image,
-          };
-          if (token.discordId) newUser.discordId = token.discordId;
-          if (token.googleId) newUser.googleId = token.googleId;
-
-          dbUser = await User.create(newUser);
-          console.log('AUTH DEBUG: New user created');
-        }
-        session.user.id = dbUser._id.toString();
-        session.user.username = dbUser.username;
-        session.user.totalBunks = dbUser.totalBunks;
-        session.user.hasCompletedOnboarding = dbUser.hasCompletedOnboarding || false;
-        session.user.followerCount = dbUser.followers?.length || 0;
-        session.user.followingCount = dbUser.following?.length || 0;
-        session.user.semester = dbUser.semester;
-        session.user.section = dbUser.section;
-      } catch (error) {
-        console.error('AUTH DEBUG: Error syncing user to database:', error);
-        session.error = error.message;
-        // Safely check mongoose connection state
-        try {
-            session.dbState = mongoose.connection.readyState;
-        } catch (e) {
-            session.dbState = 'unknown';
-        }
-      }
+      session.user.isDiscordLinked = token.isDiscordLinked;
+      session.user.isGoogleLinked = token.isGoogleLinked;
       
-      console.log('AUTH DEBUG: Session Callback End', { session });
       return session;
     },
-  },
-  pages: {
-    signIn: "/login",
   },
 });
 

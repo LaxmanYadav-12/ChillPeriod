@@ -4,7 +4,7 @@ import MobileNav from '@/components/MobileNav';
 import ThemeToggle from '@/components/ThemeToggle';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession, signOut, signIn } from 'next-auth/react';
 import { getSemesters, getSectionsForSemester } from '@/lib/data/timetable';
 import UserListModal from '@/components/UserListModal';
 
@@ -695,7 +695,7 @@ export default function ProfilePage() {
             {/* Target Percentage (placeholder) */}
             <div style={{ 
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '12px'
+              padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '12px'
             }}>
               <div>
                 <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>Target Attendance</div>
@@ -705,7 +705,95 @@ export default function ProfilePage() {
                 padding: '8px 16px', background: 'rgba(139,92,246,0.2)', 
                 borderRadius: '8px', color: '#a78bfa', fontWeight: 600, fontSize: '14px'
               }}>
-                75%
+                {user.targetPercentage || 75}%
+              </div>
+            </div>
+
+            {/* Connected Accounts */}
+            <div style={{ 
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '12px'
+            }}>
+              <div>
+                <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>Connected Accounts</div>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Login methods linked</div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {/* Google Badge */}
+                {session?.user?.isGoogleLinked ? (
+                  <div style={{ 
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    padding: '8px 12px', borderRadius: '12px',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    border: '1px solid rgba(16, 185, 129, 0.2)'
+                  }}>
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M23.766 12.2764C23.766 11.4607 23.6999 10.6406 23.5588 9.83807H12.24V14.4591H18.7217C18.4528 15.9494 17.5885 17.2678 16.323 18.1056V21.1039H20.19C22.4608 19.0139 23.766 15.9274 23.766 12.2764Z" fill="#10B981" />
+                        <path d="M12.24 24.0008C15.4765 24.0008 18.2059 22.9382 20.1945 21.1039L16.3275 18.1055C15.2517 18.8375 13.8627 19.252 12.2445 19.252C9.11388 19.252 6.45946 17.1399 5.50705 14.3003H1.5166V17.3912C3.55371 21.4434 7.7029 24.0008 12.24 24.0008Z" fill="#10B981" />
+                        <path d="M5.50253 14.3003C5.00309 12.8099 5.00309 11.1961 5.50253 9.70575V6.61481H1.5166C-0.18551 10.0056 -0.18551 14.0004 1.5166 17.3912L5.50253 14.3003Z" fill="#10B981" />
+                        <path d="M12.24 4.74966C13.9509 4.7232 15.6044 5.36697 16.8434 6.54867L20.2695 3.12262C18.1001 1.0855 15.2208 -0.0344664 12.24 0.000808666C7.7029 0.000808666 3.55371 2.55822 1.5166 6.61481L5.50253 9.70575C6.45064 6.86173 9.10947 4.74966 12.24 4.74966Z" fill="#10B981" />
+                     </svg>
+                     <span style={{ fontSize: '14px', fontWeight: 500, color: '#e5e7eb' }}>Google</span>
+                     <span style={{ color: '#10b981', fontSize: '16px' }}>✓</span>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => signIn('google')}
+                    style={{ 
+                      display: 'flex', alignItems: 'center', gap: '8px',
+                      padding: '8px 12px', borderRadius: '12px', cursor: 'pointer',
+                      background: 'transparent',
+                      border: '1px solid var(--border-color)',
+                      color: 'var(--text-secondary)',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = '#10b981'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                  >
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M23.7669 12.2764C23.7669 11.4607 23.7008 10.6406 23.5597 9.83807H12.2408V14.4591H18.7225C18.4537 15.9494 17.5894 17.2678 16.3239 18.1056V21.1039H20.1908C22.4617 19.0139 23.7669 15.9274 23.7669 12.2764Z" fill="currentColor" />
+                        <path d="M12.2409 24.0008C15.4774 24.0008 18.2068 22.9382 20.1954 21.1039L16.3284 18.1055C15.2526 18.8375 13.8636 19.252 12.2454 19.252C9.11479 19.252 6.46037 17.1399 5.50796 14.3003H1.51751V17.3912C3.55462 21.4434 7.70381 24.0008 12.2409 24.0008Z" fill="currentColor" />
+                        <path d="M5.5034 14.3003C5.00396 12.8099 5.00396 11.1961 5.5034 9.70575V6.61481H1.51751C-0.184643 10.0056 -0.184643 14.0004 1.51751 17.3912L5.5034 14.3003Z" fill="currentColor" />
+                        <path d="M12.2409 4.74966C13.9517 4.7232 15.6053 5.36697 16.8443 6.54867L20.2704 3.12262C18.101 1.0855 15.2217 -0.0344664 12.2409 0.000808666C7.70381 0.000808666 3.55462 2.55822 1.51751 6.61481L5.5034 9.70575C6.45151 6.86173 9.11033 4.74966 12.2409 4.74966Z" fill="currentColor" />
+                     </svg>
+                     <span style={{ fontSize: '14px', fontWeight: 500 }}>Link Google</span>
+                  </button>
+                )}
+
+                {/* Discord Badge */}
+                {session?.user?.isDiscordLinked ? (
+                  <div style={{ 
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    padding: '8px 12px', borderRadius: '12px',
+                    background: 'rgba(88, 101, 242, 0.1)',
+                    border: '1px solid rgba(88, 101, 242, 0.2)'
+                  }}>
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.2 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08.01-.1c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09 0 .1c-.52.29-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.48-1.33 5.2-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z" fill="#5865F2"/>
+                     </svg>
+                     <span style={{ fontSize: '14px', fontWeight: 500, color: '#e5e7eb' }}>Discord</span>
+                     <span style={{ color: '#5865F2', fontSize: '16px' }}>✓</span>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => signIn('discord')}
+                    style={{ 
+                      display: 'flex', alignItems: 'center', gap: '8px',
+                      padding: '8px 12px', borderRadius: '12px', cursor: 'pointer',
+                      background: 'transparent',
+                      border: '1px solid var(--border-color)',
+                      color: 'var(--text-secondary)',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = '#5865F2'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                  >
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.2 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08.01-.1c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09 0 .1c-.52.29-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.48-1.33 5.2-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z" fill="currentColor"/>
+                     </svg>
+                     <span style={{ fontSize: '14px', fontWeight: 500 }}>Link Discord</span>
+                  </button>
+                )}
               </div>
             </div>
 

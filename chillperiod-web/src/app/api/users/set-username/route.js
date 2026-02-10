@@ -12,7 +12,7 @@ export async function POST(request) {
     }
 
     await dbConnect();
-    const { username } = await request.json();
+    const { username, name,RZ_college, semester, section } = await request.json();
 
     // Validate username format
     const regex = /^[a-z0-9_]{3,20}$/;
@@ -26,11 +26,15 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Username already taken' }, { status: 409 });
     }
 
-    // Update user with username
+    // Update user with username and profile details
     const user = await User.findOneAndUpdate(
       { email: session.user.email },
       { 
         username,
+        name,
+        college: RZ_college,
+        semester: parseInt(semester),
+        section,
         hasCompletedOnboarding: true 
       },
       { new: true, upsert: true }
@@ -41,11 +45,13 @@ export async function POST(request) {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        hasCompletedOnboarding: true
       }
     });
   } catch (error) {
-    console.error('Error setting username:', error);
+    console.error('Error setting profile:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+

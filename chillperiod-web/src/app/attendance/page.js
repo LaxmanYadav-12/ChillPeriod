@@ -11,6 +11,7 @@ import AttendanceTrendChart from '@/components/charts/AttendanceTrendChart';
 import SubjectPieChart from '@/components/charts/SubjectPieChart';
 import MonthlyBarChart from '@/components/charts/MonthlyBarChart';
 import { excusesData } from '@/lib/data/excuses';
+import { TIMETABLE_DATA } from '@/lib/data/timetable';
 
 const initialCourses = [
   { id: 1, name: "Data Structures", code: "CS201", total: 15, attended: 12 },
@@ -20,13 +21,12 @@ const initialCourses = [
   { id: 5, name: "Soft Skills", code: "HS101", total: 8, attended: 8 },
 ];
 
-const initialChillSpots = [
-  { id: 1, name: 'Sector 17/18 Park', emoji: '🌳', distance: '3 min walk', vibe: 'Chill outdoors', upvotes: 25, lat: 28.7372, lng: 77.1173 },
-  { id: 2, name: 'Bhagya Vihar Market', emoji: '☕', distance: '10 min walk', vibe: 'Coffee & WiFi', upvotes: 12, lat: 28.7298, lng: 77.1089 },
-  { id: 3, name: 'Garg Trade Centre', emoji: '🍕', distance: '12 min walk', vibe: 'Eat with friends', upvotes: 18, lat: 28.7356, lng: 77.1056 },
-  { id: 4, name: 'Japanese Park Rohini', emoji: '🌳', distance: '8 min walk', vibe: 'Quiet space', upvotes: 15, lat: 28.7328, lng: 77.1147 },
-  { id: 5, name: 'Unity One Mall', emoji: '🛍️', distance: '15 min walk', vibe: 'Mall hangout', upvotes: 8, lat: 28.7388, lng: 77.1131 },
-];
+const categoryEmojis = {
+  cafe: '☕', restaurant: '🍕', street_food: '🌭',
+  park: '🌳', library: '📚', shopping: '🛍️',
+  gaming: '🎮', sweet_shop: '🍬', other: '📍',
+  arcade: '🕹️', mall: '🏬'
+};
 
 function getStats(total, attended, required) {
   const percentage = total > 0 ? Math.round((attended / total) * 100) : 100;
@@ -70,19 +70,35 @@ export default function AttendancePage() {
   const [massBunkSelection, setMassBunkSelection] = useState(new Set());
   const [bunkingCourse, setBunkingCourse] = useState(null);
   const [newCourse, setNewCourse] = useState({ name: '', code: '', type: 'Theory', total: 0, attended: 0 });
-  const [chillSpots, setChillSpots] = useState(initialChillSpots);
+  const [chillSpots, setChillSpots] = useState([]);
   
   const today = new Date();
   const [calendarMonth, setCalendarMonth] = useState(today.getMonth());
   const [calendarYear, setCalendarYear] = useState(today.getFullYear());
   const [attendanceLog, setAttendanceLog] = useState({});
-  const [upvotedSpots, setUpvotedSpots] = useState(new Set());
   const [selectedDate, setSelectedDate] = useState(null);
   const [showDateModal, setShowDateModal] = useState(false);
   
   // Excuse Generator State
   const [excuseTone, setExcuseTone] = useState('funny');
   const [generatedExcuse, setGeneratedExcuse] = useState('');
+
+  const [todaysClasses, setTodaysClasses] = useState([]);
+
+  useEffect(() => {
+    if (session?.user?.semester && session?.user?.section) {
+        const { semester, section } = session.user;
+        const dayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+        
+        const sectionData = TIMETABLE_DATA.sections.find(
+            s => s.semester === semester && s.section === section
+        );
+
+        if (sectionData && sectionData.schedule[dayName]) {
+            setTodaysClasses(sectionData.schedule[dayName]);
+        }
+    }
+  }, [session]);
 
   const generateExcuse = () => {
     const tones = excusesData.tones[excuseTone];
@@ -94,11 +110,26 @@ export default function AttendancePage() {
   useEffect(() => {
     if (status === 'authenticated') {
       fetchCourses();
+      fetchSpots();
     } else if (status === 'unauthenticated') {
       // Keep demo data for guests if needed, or clear it
       setLoading(false);
+      // We could seed some dummy spots for guest mode if desired, or just leave empty
     }
   }, [status]);
+
+  const fetchSpots = async () => {
+    try {
+      const res = await fetch('/api/spots');
+      if (res.ok) {
+        const data = await res.json();
+        // Map _id to id for consistency
+        setChillSpots(data.map(s => ({ ...s, id: s._id })));
+      }
+    } catch (error) {
+      console.error('Failed to fetch spots', error);
+    }
+  };
 
   const fetchCourses = async () => {
     try {
@@ -210,8 +241,14 @@ export default function AttendancePage() {
         // Revert optimistic update if needed (omitted for brevity)
     }
 
-    if (spot && spot.lat && spot.lng) {
-      window.open(`https://www.google.com/maps/search/?api=1&query=${spot.lat},${spot.lng}`, '_blank');
+    if (spot) {
+      if (spot.googleMapsUrl) {
+        window.open(spot.googleMapsUrl, '_blank');
+      } else if (spot.coordinates && spot.coordinates.lat && spot.coordinates.lng) {
+        window.open(`https://www.google.com/maps/search/?api=1&query=${spot.coordinates.lat},${spot.coordinates.lng}`, '_blank');
+      } else {
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name + ' ' + (spot.address || ''))}`, '_blank');
+      }
     }
   };
 
@@ -321,23 +358,69 @@ export default function AttendancePage() {
     }
   };
 
-  const upvoteSpot = (spotId, e) => {
+  const upvoteSpot = async (spotId, e) => {
     e.stopPropagation();
-    if (upvotedSpots.has(spotId)) {
-      // Remove upvote
-      setChillSpots(prev => prev.map(s => s.id === spotId ? { ...s, upvotes: s.upvotes - 1 } : s));
-      setUpvotedSpots(prev => { const next = new Set(prev); next.delete(spotId); return next; });
-    } else {
-      // Add upvote
-      setChillSpots(prev => prev.map(s => s.id === spotId ? { ...s, upvotes: s.upvotes + 1 } : s));
-      setUpvotedSpots(prev => new Set(prev).add(spotId));
+    
+    // Find spot to check current status
+    const spot = chillSpots.find(s => s.id === spotId);
+    if (!spot) return;
+
+    // Optimistic Update
+    setChillSpots(prev => prev.map(s => {
+        if (s.id === spotId) {
+            let newUpvotes = s.upvotes || 0;
+            let newIsUpvoted = s.isUpvoted;
+
+            if (newIsUpvoted) {
+                 newUpvotes--;
+                 newIsUpvoted = false;
+            } else {
+                 newUpvotes++;
+                 newIsUpvoted = true;
+            }
+            return { ...s, upvotes: newUpvotes, isUpvoted: newIsUpvoted };
+        }
+        return s;
+    }));
+
+    try {
+        const res = await fetch('/api/spots/upvote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ spotId, action: 'upvote' })
+        });
+        
+        if (!res.ok) {
+            console.error('Vote failed');
+            // Revert if needed
+        }
+    } catch (error) {
+        console.error('Vote error', error);
     }
   };
 
   // Sort spots by upvotes (highest first)
-  const sortedSpots = [...chillSpots].sort((a, b) => b.upvotes - a.upvotes);
+  const sortedSpots = [...chillSpots].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
 
   const statusColor = overallStats.status === 'danger' ? '#ef4444' : overallStats.status === 'caution' ? '#f59e0b' : '#10b981';
+
+  // Auto-sync subjects if list is empty
+  useEffect(() => {
+    if (status === 'authenticated' && !loading && courses.length === 0) {
+        const syncCourses = async () => {
+            try {
+                const res = await fetch('/api/courses/sync', { method: 'POST' });
+                const data = await res.json();
+                if (data.success && data.added > 0) {
+                    fetchCourses(); // Refresh list
+                }
+            } catch (err) {
+                console.error("Failed to sync courses", err);
+            }
+        };
+        syncCourses();
+    }
+  }, [status, loading, courses.length]);
 
   if (status === 'loading') {
     return (
@@ -471,22 +554,24 @@ export default function AttendancePage() {
                     transition: 'all 0.2s'
                   }}
                 >
-                  <span style={{ fontSize: '28px' }}>{spot.emoji}</span>
+                  <span style={{ fontSize: '28px' }}>{categoryEmojis[spot.category] || '📍'}</span>
                   <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => confirmBunk(spot)}>
                     <div style={{ color: 'white', fontWeight: 500, fontSize: '14px' }}>{spot.name}</div>
-                    <div style={{ color: '#6b7280', fontSize: '12px' }}>{spot.distance} • {spot.vibe}</div>
+                    <div style={{ color: '#6b7280', fontSize: '12px', textTransform: 'capitalize' }}>
+                      {spot.distance} • {spot.vibe?.replace('_', ' ')}
+                    </div>
                   </div>
                   <button
                     onClick={(e) => upvoteSpot(spot.id, e)}
                     style={{ 
                       display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px',
-                      background: upvotedSpots.has(spot.id) ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)',
-                      border: upvotedSpots.has(spot.id) ? '1px solid rgba(16,185,129,0.4)' : '1px solid #2a2a3a',
+                      background: spot.isUpvoted ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)',
+                      border: spot.isUpvoted ? '1px solid rgba(16,185,129,0.4)' : '1px solid #2a2a3a',
                       borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
                     }}
                   >
-                    <span style={{ fontSize: '14px' }}>{upvotedSpots.has(spot.id) ? '💚' : '👍'}</span>
-                    <span style={{ color: upvotedSpots.has(spot.id) ? '#10b981' : '#9ca3af', fontSize: '13px', fontWeight: 500 }}>{spot.upvotes}</span>
+                    <span style={{ fontSize: '14px' }}>{spot.isUpvoted ? '💚' : '👍'}</span>
+                    <span style={{ color: spot.isUpvoted ? '#10b981' : '#9ca3af', fontSize: '13px', fontWeight: 500 }}>{spot.upvotes || 0}</span>
                   </button>
                   <span 
                     style={{ color: '#8b5cf6', fontSize: '18px', cursor: 'pointer', padding: '4px' }}
@@ -494,7 +579,14 @@ export default function AttendancePage() {
                   >→</span>
                 </div>
               ))}
+              {sortedSpots.length === 0 && (
+                 <div style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
+                    No chill spots found. <br /> 
+                    <Link href="/spots" style={{ color: '#8b5cf6', textDecoration: 'underline' }}>Add some first!</Link>
+                 </div>
+              )}
             </div>
+
 
             {/* Modal Actions */}
             <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
@@ -841,6 +933,42 @@ export default function AttendancePage() {
             <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }}>Attendance Tracker</h1>
             <p style={{ color: 'var(--text-secondary)' }}>Required: {requiredPercentage}%</p>
           </div>
+
+          {/* Today's Schedule Banner */}
+          {todaysClasses.length > 0 && (
+            <div className="animate-fade-in" style={{ 
+                marginBottom: '32px', padding: '24px', borderRadius: '24px',
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(6,182,212,0.15))',
+                border: '1px solid rgba(139,92,246,0.3)'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        📅 Today's Schedule <span style={{ fontSize: '12px', fontWeight: 'normal', opacity: 0.7, padding: '4px 8px', background: 'var(--bg-tertiary)', borderRadius: '8px' }}>{session?.user?.section}</span>
+                    </h3>
+                    <Link href="/timetable" style={{ fontSize: '13px', color: '#8b5cf6', fontWeight: 600 }}>View Full →</Link>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none' }}>
+                    {todaysClasses.map((cls, i) => (
+                        <div key={i} style={{ 
+                            minWidth: '140px', padding: '12px', borderRadius: '14px',
+                            background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)',
+                            opacity: cls.type === 'BREAK' ? 0.6 : 1
+                        }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                                {TIMETABLE_DATA.time_slots.find(t => t.slot === cls.slot)?.time}
+                            </div>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px', marginBottom: '4px' }}>
+                                {cls.type === 'LAB' ? `LAB (G1/G2)` : cls.subject}
+                            </div>
+                            <div style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', display: 'inline-block', background: cls.type === 'BREAK' ? '#e5e7eb' : 'rgba(139,92,246,0.1)', color: cls.type === 'BREAK' ? 'black' : '#8b5cf6' }}>
+                                {cls.type}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+          )}
 
           {/* Friends Activity */}
           <FriendsActivity />

@@ -6,26 +6,26 @@ import Link from 'next/link';
 
 export default function FriendsActivity() {
   const { data: session } = useSession();
-  const [friends, setFriends] = useState([]);
+  const [friendsAbove80, setFriendsAbove80] = useState([]);
+  const [friendsBunking, setFriendsBunking] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock data for demo - in production would fetch from API
-  const mockFriends = [
-    { id: '1', name: 'Rahul', image: null, attendancePercentage: 82, status: 'attended', favoriteSpot: { name: 'Sector 17 Park', emoji: '🌳' } },
-    { id: '2', name: 'Priya', image: null, attendancePercentage: 78, status: 'bunked', favoriteSpot: { name: 'CCD', emoji: '☕' } },
-    { id: '3', name: 'Amit', image: null, attendancePercentage: 91, status: 'attended', favoriteSpot: { name: 'Library', emoji: '📚' } },
-  ];
-
   useEffect(() => {
-    // In production, fetch from /api/users/friends/activity
-    setFriends(mockFriends);
-    setLoading(false);
-  }, []);
+    if (session) {
+      fetch('/api/users/friends/activity')
+        .then(res => res.json())
+        .then(data => {
+            if (data.friendsAbove80) setFriendsAbove80(data.friendsAbove80);
+            if (data.friendsBunking) setFriendsBunking(data.friendsBunking);
+        })
+        .catch(err => console.error(err))
+        .finally(() => setLoading(false));
+    } else {
+        setLoading(false);
+    }
+  }, [session]);
 
   if (!session) return null;
-
-  const friendsAbove80 = friends.filter(f => f.attendancePercentage >= 80).length;
-  const friendsBunking = friends.filter(f => f.status === 'bunked');
 
   if (loading) {
     return (
@@ -38,57 +38,85 @@ export default function FriendsActivity() {
     );
   }
 
+  // If no activity, maybe show a prompt to follow people?
+  if (friendsAbove80.length === 0 && friendsBunking.length === 0) {
+      return (
+        <div style={{ marginBottom: '24px' }}>
+            <div style={{ 
+                padding: '16px', background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)',
+                borderRadius: '16px', textAlign: 'center'
+            }}>
+                <div style={{ fontSize: '24px', marginBottom: '8px' }}>👋</div>
+                <div style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>
+                    No activity yet
+                </div>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '12px' }}>
+                    Follow friends to see their stats here!
+                </div>
+                <Link href="/leaderboard" style={{ 
+                    display: 'inline-block', padding: '8px 16px', background: '#8b5cf6', color: 'white',
+                    borderRadius: '8px', textDecoration: 'none', fontSize: '12px', fontWeight: 600
+                }}>
+                    Find Friends
+                </Link>
+            </div>
+        </div>
+      );
+  }
+
   return (
     <div style={{ marginBottom: '24px' }}>
-      {/* Summary Card */}
-      <div style={{ 
-        background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(6,182,212,0.15))',
-        border: '1px solid rgba(139,92,246,0.2)',
-        borderRadius: '16px', padding: '20px', marginBottom: '16px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-          <span style={{ fontSize: '24px' }}>👥</span>
-          <div>
-            <div style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '15px' }}>
-              {friendsAbove80} of your friends attended 80%+ this week
+      {/* Summary Card - Friends above 80% */}
+      {friendsAbove80.length > 0 && (
+        <div style={{ 
+            background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(6,182,212,0.15))',
+            border: '1px solid rgba(139,92,246,0.2)',
+            borderRadius: '16px', padding: '20px', marginBottom: '16px'
+        }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+            <span style={{ fontSize: '24px' }}>👥</span>
+            <div>
+                <div style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '15px' }}>
+                {friendsAbove80.length} of your friends attended 80%+ this week
+                </div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
+                Keep up with their progress!
+                </div>
             </div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
-              Keep up with their progress!
             </div>
-          </div>
-        </div>
 
-        {/* Friend avatars */}
-        <div style={{ display: 'flex', marginLeft: '36px' }}>
-          {friends.slice(0, 5).map((friend, i) => (
-            <div 
-              key={friend.id}
-              style={{ 
+            {/* Friend avatars */}
+            <div style={{ display: 'flex', marginLeft: '36px' }}>
+            {friendsAbove80.slice(0, 5).map((friend, i) => (
+                <div 
+                key={friend.id}
+                style={{ 
+                    width: '32px', height: '32px', borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
+                    border: '2px solid var(--bg-primary)',
+                    marginLeft: i > 0 ? '-8px' : 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '14px', color: 'white', fontWeight: 600
+                }}
+                >
+                {friend.image ? (
+                    <img src={friend.image} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
+                ) : friend.name[0]}
+                </div>
+            ))}
+            {friendsAbove80.length > 5 && (
+                <div style={{ 
                 width: '32px', height: '32px', borderRadius: '50%',
-                background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)',
-                border: '2px solid var(--bg-primary)',
-                marginLeft: i > 0 ? '-8px' : 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '14px', color: 'white', fontWeight: 600
-              }}
-            >
-              {friend.image ? (
-                <img src={friend.image} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
-              ) : friend.name[0]}
+                background: 'var(--bg-tertiary)', border: '2px solid var(--bg-primary)',
+                marginLeft: '-8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '11px', color: 'var(--text-muted)'
+                }}>
+                +{friendsAbove80.length - 5}
+                </div>
+            )}
             </div>
-          ))}
-          {friends.length > 5 && (
-            <div style={{ 
-              width: '32px', height: '32px', borderRadius: '50%',
-              background: 'var(--bg-tertiary)', border: '2px solid var(--bg-primary)',
-              marginLeft: '-8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '11px', color: 'var(--text-muted)'
-            }}>
-              +{friends.length - 5}
-            </div>
-          )}
         </div>
-      </div>
+      )}
 
       {/* Bunking Now */}
       {friendsBunking.length > 0 && (
@@ -120,14 +148,20 @@ export default function FriendsActivity() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '14px', color: 'white', fontWeight: 600
                 }}>
-                  {friend.name[0]}
+                  {friend.image ? (
+                    <img src={friend.image} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
+                  ) : friend.name[0]}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>
                     {friend.name}
                   </div>
                   <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>
-                    at {friend.favoriteSpot?.emoji} {friend.favoriteSpot?.name}
+                    {(friend.favoriteSpot && friend.favoriteSpot.name) ? (
+                        <>at {friend.favoriteSpot.emoji || '📍'} {friend.favoriteSpot.name}</>
+                    ) : (
+                        <>bunking nearby</>
+                    )}
                   </div>
                 </div>
                 <span style={{ color: 'var(--text-muted)', fontSize: '18px' }}>→</span>
