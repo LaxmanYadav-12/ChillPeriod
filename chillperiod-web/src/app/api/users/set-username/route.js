@@ -2,7 +2,15 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
-import { userProfileSchema } from '@/lib/validators';
+import { z } from 'zod';
+
+const userProfileSchema = z.object({
+  username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+  name: z.string().min(1).max(50),
+  RZ_college: z.string().min(1),
+  semester: z.number().int().min(1).max(8),
+  section: z.string().min(1).max(10),
+});
 
 export async function POST(request) {
   const session = await auth();
