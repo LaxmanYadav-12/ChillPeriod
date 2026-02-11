@@ -1,5 +1,5 @@
 // SyllabusX API integration — https://api.syllabusx.live
-const SYLLABUSX_API = 'https://api.syllabusx.live';
+const SYLLABUSX_API = '/api/proxy/syllabus';
 
 export const semesters = [
   { value: "firstsemesters",   label: "1st Semester", short: "1st" },
@@ -40,12 +40,21 @@ export const syllabusPdfs = {
  */
 export async function fetchSubjects(semesterValue, branch) {
   try {
-    const res = await fetch(`${SYLLABUSX_API}/btech/${semesterValue}/${branch}`, {
-      next: { revalidate: 86400 }, // cache for 24h
+    const url = `${SYLLABUSX_API}/btech/${semesterValue}/${branch}`;
+    console.log('[Syllabus] Fetching:', url);
+    const res = await fetch(url, {
+      cache: 'no-store',
+      next: { revalidate: 0 },
     });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
+    if (!res.ok) {
+        console.error('[Syllabus] Error:', res.status, res.statusText);
+        return [];
+    }
+    const data = await res.json();
+    console.log('[Syllabus] Data received:', data);
+    return data;
+  } catch (error) {
+    console.error('[Syllabus] Fetch Failed:', error);
     return [];
   }
 }

@@ -4,6 +4,8 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { userProfileSchema } from '@/lib/validators';
 
+export const dynamic = 'force-dynamic';
+
 // POST /api/users/set-username — set profile during onboarding (auth + validated)
 export async function POST(request) {
   const session = await auth();
