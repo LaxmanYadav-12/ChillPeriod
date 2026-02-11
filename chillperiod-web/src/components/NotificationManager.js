@@ -1,20 +1,42 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { TIMETABLE_DATA, getSchedule } from '@/lib/data/timetable';
+import { playNotificationSound } from '@/lib/notification-sound';
 
 export default function NotificationManager() {
   const { data: session } = useSession();
+  const lastUnreadCount = useRef(0);
 
   useEffect(() => {
-    // Check permission immediately
-    if (Notification.permission === 'default') {
-      // Logic handled in Profile toggle, but good to know
-    }
+    // Poll for new in-app notifications and play sound
+    const pollNotifications = async () => {
+      if (!session?.user?.id) return;
+      try {
+        const res = await fetch('/api/notifications?unread=true');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.unreadCount > lastUnreadCount.current && lastUnreadCount.current !== 0) {
+            // New notification arrived — play sound
+            playNotificationSound();
+          }
+          lastUnreadCount.current = data.unreadCount;
+        }
+      } catch (e) {
+        // Silently ignore polling errors
+      }
+    };
 
+    // Initial poll
+    pollNotifications();
+    // Poll every 30 seconds
+    const pollInterval = setInterval(pollNotifications, 30000);
+
+    // Class schedule notifications
     const checkSchedule = async () => {
       if (!session?.user?.id) return;
+      if (typeof Notification === 'undefined') return;
       if (Notification.permission !== 'granted') return;
 
       // Fetch fresh user data to get latest semester/section
@@ -62,11 +84,14 @@ export default function NotificationManager() {
         // Notify if exactly 5 minutes left (or within a small window to avoid missing it)
         if (diff === 5) {
           const key = `notified_${dayName}_${classSlot.slot}_${now.toDateString()}`;
-          if (!sessionStorage.getItem(key)) {
-            // Send Notification
+          if (typeof sessionStorage !== 'undefined' && !sessionStorage.getItem(key)) {
+            // Play chime sound
+            playNotificationSound();
+            
+            // Send browser Notification
             new Notification(`Class Alert: ${classSlot.subject || 'Lab'}`, {
               body: `Starts in 5 minutes! Room: ${sectionData.room || 'N/A'}\n${timeSlot.time}`,
-              icon: '/icon.png' // Optional
+              icon: '/icon.png'
             });
             
             sessionStorage.setItem(key, 'true');
@@ -76,12 +101,15 @@ export default function NotificationManager() {
     };
 
     // Check every minute
-    const interval = setInterval(checkSchedule, 60000);
+    const scheduleInterval = setInterval(checkSchedule, 60000);
     
     // Initial check
     checkSchedule();
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(pollInterval);
+      clearInterval(scheduleInterval);
+    };
   }, [session]);
 
   return null; // Headless component

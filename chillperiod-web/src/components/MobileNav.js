@@ -2,12 +2,31 @@
 
 import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ThemeToggle from './ThemeToggle';
+import NotificationPanel from './NotificationPanel';
 
 export default function MobileNav({ currentPage = 'home' }) {
   const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    const fetchUnread = async () => {
+      try {
+        const res = await fetch('/api/notifications?unread=true');
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadCount(data.unreadCount || 0);
+        }
+      } catch (e) { /* ignore */ }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, [status]);
 
   return (
     <>
@@ -37,6 +56,14 @@ export default function MobileNav({ currentPage = 'home' }) {
                 <Link href="/syllabus" style={{ color: currentPage === 'syllabus' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'syllabus' ? 500 : 400, textDecoration: 'none' }}>Syllabus</Link>
                 <Link href="/leaderboard" style={{ color: currentPage === 'leaderboard' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'leaderboard' ? 500 : 400, textDecoration: 'none' }}>🏆</Link>
                 <Link href="/search" style={{ color: currentPage === 'search' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'search' ? 500 : 400, textDecoration: 'none' }}>🔍</Link>
+                <button onClick={() => setIsNotifOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', position: 'relative', fontSize: '16px', padding: '4px' }}>
+                  🔔
+                  {unreadCount > 0 && (
+                    <span style={{ position: 'absolute', top: '-6px', right: '-8px', background: '#ef4444', color: 'white', fontSize: '10px', fontWeight: 700, width: '16px', height: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
                 <Link href="/profile" style={{ color: currentPage === 'profile' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'profile' ? 500 : 400, textDecoration: 'none' }}>Profile</Link>
                 
                 {session?.user && (
@@ -163,6 +190,24 @@ export default function MobileNav({ currentPage = 'home' }) {
             >
               🔍 Find Friends
             </Link>
+            <button 
+              onClick={() => { setIsOpen(false); setIsNotifOpen(true); }}
+              style={{ 
+                color: 'white', width: '100%',
+                fontSize: '20px', fontWeight: 600,
+                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                borderRadius: '12px', textAlign: 'center',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                border: 'none', cursor: 'pointer'
+              }}
+            >
+              🔔 Notifications
+              {unreadCount > 0 && (
+                <span style={{ background: '#ef4444', color: 'white', fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px' }}>
+                  {unreadCount}
+                </span>
+              )}
+            </button>
 
             
             <button
@@ -209,6 +254,8 @@ export default function MobileNav({ currentPage = 'home' }) {
           }
         }
       `}</style>
+
+      <NotificationPanel isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
     </>
   );
 }

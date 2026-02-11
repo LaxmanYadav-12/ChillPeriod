@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
+import Notification from '@/models/Notification';
 
 // POST /api/users/[id]/follow - Follow a user
 export async function POST(request, { params }) {
@@ -28,6 +29,20 @@ export async function POST(request, { params }) {
     await User.findByIdAndUpdate(targetUserId, {
       $addToSet: { followers: currentUserId }
     });
+
+    // Create a follow notification for the target user
+    try {
+      await Notification.create({
+        userId: targetUserId,
+        type: 'follow',
+        title: 'New Follower',
+        message: `${session.user.name || 'Someone'} started following you`,
+        fromUserId: currentUserId,
+      });
+    } catch (notifErr) {
+      console.error('Failed to create follow notification:', notifErr);
+      // Don't fail the follow operation just because notification failed
+    }
     
     return NextResponse.json({ success: true, message: 'Followed successfully' });
   } catch (error) {

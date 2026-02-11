@@ -248,7 +248,6 @@ export default function ProfilePage() {
     currentStreak: 0,
     longestStreak: 0,
     notificationsEnabled: userData?.notificationsEnabled ?? true,
-    notificationsEnabled: userData?.notificationsEnabled ?? true,
     followerCount: 0,
     followingCount: 0,
     semester: session?.user?.semester || 4,
@@ -665,32 +664,35 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Notifications (placeholder) */}
+            {/* Notifications */}
             <div style={{ 
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '12px'
             }}>
               <div>
-                <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>Notifications</div>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Get alerts when attendance drops</div>
+                <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>Class Alerts</div>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Get notified 5 min before each class</div>
               </div>
-              <div 
-                onClick={handleToggleNotifications}
-                style={{ 
-                  width: '44px', height: '24px', 
-                  background: user.notificationsEnabled ? '#8b5cf6' : 'var(--text-muted)', 
-                  borderRadius: '12px', 
-                  position: 'relative', cursor: 'pointer',
-                  transition: 'background 0.3s'
-                }}>
-                <div style={{ 
-                  width: '18px', height: '18px', background: 'white', borderRadius: '50%', 
-                  position: 'absolute', top: '3px', 
-                  left: user.notificationsEnabled ? '23px' : '3px',
-                  transition: 'left 0.3s'
-                }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div 
+                  onClick={handleToggleNotifications}
+                  style={{ 
+                    width: '44px', height: '24px', 
+                    background: user.notificationsEnabled ? '#8b5cf6' : 'var(--text-muted)', 
+                    borderRadius: '12px', 
+                    position: 'relative', cursor: 'pointer',
+                    transition: 'background 0.3s'
+                  }}>
+                  <div style={{ 
+                    width: '18px', height: '18px', background: 'white', borderRadius: '50%', 
+                    position: 'absolute', top: '3px', 
+                    left: user.notificationsEnabled ? '23px' : '3px',
+                    transition: 'left 0.3s'
+                  }} />
+                </div>
               </div>
             </div>
+
 
             {/* Target Percentage (placeholder) */}
             <div style={{ 
