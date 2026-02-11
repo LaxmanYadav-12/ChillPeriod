@@ -35,7 +35,7 @@ export default auth((req) => {
     
     // 1. Rate Limiting (Tiered)
     const isAuthPath = nextUrl.pathname.startsWith('/api/auth');
-    const LIMIT = isAuthPath ? 10 : 100; // Stricter for auth endpoints
+    const LIMIT = isAuthPath ? 20 : 500; // Increased limit for dev/testing
     const WINDOW = 60 * 1000;
     
     // Run cleanup periodically
