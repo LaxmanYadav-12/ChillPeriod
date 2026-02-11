@@ -663,6 +663,388 @@ export const TIMETABLE_DATA = {
           {"slot":8,"type":"ACTIVITY","subject":"Enrichment"}
         ]
       }
+    },
+
+    /* ===================== IT 4th SEM ===================== */
+
+    {
+      "section": "IT-A",
+      "semester": 4,
+      "room": "301",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"C&S"},
+          {"slot":2,"type":"THEORY","subject":"C&S"},
+          {"slot":3,"type":"THEORY","subject":"TOC"},
+          {"slot":4,"type":"THEORY","subject":"PSLP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"TW"},
+          {"slot":7,"type":"THEORY","subject":"JAVA"},
+          {"slot":8,"type":"THEORY","subject":"MMM"},
+          {"slot":9,"type":"THEORY","subject":"PDP"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"LAB","G1":"PSLP Lab (102-A)","G2":"CS Lab (208)"},
+          {"slot":2,"type":"LAB","G1":"PSLP Lab (102-A)","G2":"CS Lab (208)"},
+          {"slot":3,"type":"THEORY","subject":"TOC"},
+          {"slot":4,"type":"THEORY","subject":"DBMS (220)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"C&S"},
+          {"slot":7,"type":"THEORY","subject":"JAVA"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"TOC"},
+          {"slot":2,"type":"THEORY","subject":"JAVA"},
+          {"slot":3,"type":"THEORY","subject":"PSLP"},
+          {"slot":4,"type":"THEORY","subject":"DBMS (220)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"CS Lab (208)","G2":"PSLP Lab (102-A)"},
+          {"slot":7,"type":"LAB","G1":"CS Lab (208)","G2":"PSLP Lab (102-A)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"C&S"},
+          {"slot":2,"type":"THEORY","subject":"JAVA"},
+          {"slot":3,"type":"THEORY","subject":"PSLP"},
+          {"slot":4,"type":"THEORY","subject":"DBMS (220)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"DBMS Lab (102-A)","G2":"JAVA Lab (102-B)"},
+          {"slot":7,"type":"LAB","G1":"DBMS Lab (102-A)","G2":"JAVA Lab (102-B)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"LAB","G1":"DBMS Lab (102-A)","G2":"JAVA Lab (102-B)"},
+          {"slot":2,"type":"LAB","G1":"DBMS Lab (102-A)","G2":"JAVA Lab (102-B)"},
+          {"slot":3,"type":"THEORY","subject":"TW"},
+          {"slot":4,"type":"THEORY","subject":"DBMS (220)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"TOC"},
+          {"slot":7,"type":"THEORY","subject":"PSLP"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
+    },
+
+    {
+      "section": "IT-B",
+      "semester": 4,
+      "room": "302",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"LAB","G1":"DBMS Lab (313-B)","G2":"JAVA Lab (102-C)"},
+          {"slot":2,"type":"LAB","G1":"DBMS Lab (313-B)","G2":"JAVA Lab (102-C)"},
+          {"slot":3,"type":"THEORY","subject":"DBMS"},
+          {"slot":4,"type":"THEORY","subject":"JAVA"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"C&S"},
+          {"slot":7,"type":"THEORY","subject":"PSLP"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"TOC"},
+          {"slot":2,"type":"THEORY","subject":"JAVA"},
+          {"slot":3,"type":"THEORY","subject":"TW"},
+          {"slot":4,"type":"THEORY","subject":"C&S"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PSLP"},
+          {"slot":7,"type":"THEORY","subject":"DBMS"},
+          {"slot":8,"type":"THEORY","subject":"PDP"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"LAB","G1":"PSLP Lab (102-B)","G2":"CS Lab (208)"},
+          {"slot":2,"type":"LAB","G1":"PSLP Lab (102-B)","G2":"CS Lab (208)"},
+          {"slot":3,"type":"THEORY","subject":"PSLP"},
+          {"slot":4,"type":"THEORY","subject":"DBMS"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"JAVA"},
+          {"slot":7,"type":"THEORY","subject":"TOC"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"TOC"},
+          {"slot":2,"type":"THEORY","subject":"C&S"},
+          {"slot":3,"type":"THEORY","subject":"DBMS"},
+          {"slot":4,"type":"THEORY","subject":"TW"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"JAVA Lab (102-C)","G2":"DBMS Lab (313-B)"},
+          {"slot":7,"type":"LAB","G1":"JAVA Lab (102-C)","G2":"DBMS Lab (313-B)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"PSLP"},
+          {"slot":2,"type":"THEORY","subject":"TOC"},
+          {"slot":3,"type":"THEORY","subject":"C&S"},
+          {"slot":4,"type":"THEORY","subject":"JAVA"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"PSLP Lab (102-B)","G2":"CS Lab (208)"},
+          {"slot":7,"type":"LAB","G1":"PSLP Lab (102-B)","G2":"CS Lab (208)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
+    },
+
+    {
+      "section": "IT-C",
+      "semester": 4,
+      "room": "303",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"TW"},
+          {"slot":2,"type":"THEORY","subject":"TOC"},
+          {"slot":3,"type":"THEORY","subject":"C&S"},
+          {"slot":4,"type":"THEORY","subject":"JAVA"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"TOC"},
+          {"slot":7,"type":"THEORY","subject":"PSLP"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"C&S"},
+          {"slot":2,"type":"THEORY","subject":"DBMS"},
+          {"slot":3,"type":"THEORY","subject":"JAVA"},
+          {"slot":4,"type":"THEORY","subject":"PSLP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"PSLP Lab (102-B)","G2":"CS Lab (208)"},
+          {"slot":7,"type":"LAB","G1":"PSLP Lab (102-B)","G2":"CS Lab (208)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"TW"},
+          {"slot":2,"type":"THEORY","subject":"DBMS"},
+          {"slot":3,"type":"THEORY","subject":"C&S"},
+          {"slot":4,"type":"THEORY","subject":"TOC"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"JAVA Lab (102-C)","G2":"DBMS Lab (102-B)"},
+          {"slot":7,"type":"LAB","G1":"JAVA Lab (102-C)","G2":"DBMS Lab (102-B)"},
+          {"slot":8,"type":"THEORY","subject":"PDP"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"LAB","G1":"JAVA Lab (102-C)","G2":"DBMS Lab (102-B)"},
+          {"slot":2,"type":"LAB","G1":"JAVA Lab (102-C)","G2":"DBMS Lab (102-B)"},
+          {"slot":3,"type":"THEORY","subject":"JAVA"},
+          {"slot":4,"type":"THEORY","subject":"DBMS"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PSLP"},
+          {"slot":7,"type":"THEORY","subject":"C&S"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"LAB","G1":"PSLP Lab (102-C)","G2":"CS Lab (208)"},
+          {"slot":2,"type":"LAB","G1":"PSLP Lab (102-C)","G2":"CS Lab (208)"},
+          {"slot":3,"type":"THEORY","subject":"TOC"},
+          {"slot":4,"type":"THEORY","subject":"PSLP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"DBMS"},
+          {"slot":7,"type":"THEORY","subject":"JAVA"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
+    },
+
+    /* ===================== IT 6th SEM ===================== */
+
+    {
+      "section": "IT-A",
+      "semester": 6,
+      "room": "304",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"WT (304)"},
+          {"slot":2,"type":"THEORY","subject":"PME (304)"},
+          {"slot":3,"type":"LAB","G1":"AI Lab (102-C)","G2":"AI&ML Lab (102-A)"},
+          {"slot":4,"type":"LAB","G1":"AI Lab (102-C)","G2":"AI&ML Lab (102-A)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"PIP Lab (102-A)","G2":"WT Lab (102-B)"},
+          {"slot":7,"type":"LAB","G1":"PIP Lab (102-A)","G2":"WT Lab (102-B)"},
+          {"slot":8,"type":"THEORY","subject":"PIP (304)"},
+          {"slot":9,"type":"THEORY","subject":"AIML (304)"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"PIP (304)"},
+          {"slot":2,"type":"THEORY","subject":"PME (304)"},
+          {"slot":3,"type":"THEORY","subject":"DMD (304)"},
+          {"slot":4,"type":"LAB","G1":"SPM (304)","G2":"SSMDA (310)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"SMMM (304)"},
+          {"slot":7,"type":"THEORY","subject":"WT (304)"},
+          {"slot":8,"type":"THEORY","subject":"AI (303)"},
+          {"slot":9,"type":"LAB","G1":"AI Lab (102-C)","G2":"AI Lab (102-C)"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"SMMM (304)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (304)"},
+          {"slot":3,"type":"LAB","G1":"PIP Lab (102-A)","G2":"WT Lab (102-B)"},
+          {"slot":4,"type":"LAB","G1":"PIP Lab (102-A)","G2":"WT Lab (102-B)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"SPM (304)"},
+          {"slot":7,"type":"THEORY","subject":"WT (304)"},
+          {"slot":8,"type":"THEORY","subject":"AI (301)"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"UHV (304)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (304)"},
+          {"slot":3,"type":"LAB","G1":"SMMM Lab (102-A)","G2":"SPM Lab (102-C)"},
+          {"slot":4,"type":"LAB","G1":"SSMDA Lab (313-B)","G2":"AI&ML Lab (102-B)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PME (304)"},
+          {"slot":7,"type":"THEORY","subject":"SPM (304)"},
+          {"slot":8,"type":"THEORY","subject":"SSMDA (301)"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"PIP (304)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (304)"},
+          {"slot":3,"type":"LAB","G1":"SMMM Lab (102-A)","G2":"SPM Lab (102-C)"},
+          {"slot":4,"type":"LAB","G1":"SMMM Lab (102-A)","G2":"SPM Lab (102-C)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"SSMDA Lab (313-A)","G2":"SSMDA Lab (313-A)"},
+          {"slot":7,"type":"THEORY","subject":"SMMM (304)"},
+          {"slot":8,"type":"THEORY","subject":"LIB"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
+    },
+
+    {
+      "section": "IT-B",
+      "semester": 6,
+      "room": "309",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"WT (309)"},
+          {"slot":2,"type":"THEORY","subject":"PIP (309)"},
+          {"slot":3,"type":"LAB","G1":"AI Lab (102-C)","G2":"AI&ML Lab (102-A)"},
+          {"slot":4,"type":"LAB","G1":"AI Lab (102-C)","G2":"AI&ML Lab (102-A)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"PIP Lab (102-C)","G2":"PIP Lab (102-C)"},
+          {"slot":7,"type":"THEORY","subject":"PME (309)"},
+          {"slot":8,"type":"THEORY","subject":"AIML (304)"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"PIP (309)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (309)"},
+          {"slot":3,"type":"LAB","G1":"SMMM Lab (102-B)","G2":"SPM Lab (102-C)"},
+          {"slot":4,"type":"LAB","G1":"SMMM Lab (102-B)","G2":"SPM Lab (102-C)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PME (309)"},
+          {"slot":7,"type":"THEORY","subject":"WT (309)"},
+          {"slot":8,"type":"THEORY","subject":"AI (303)"},
+          {"slot":9,"type":"LAB","G1":"AI Lab (102-C)","G2":"AI Lab (102-C)"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"SMMM (309)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (309)"},
+          {"slot":3,"type":"LAB","G1":"PIP Lab (102-C)","G2":"WT Lab (313-B)"},
+          {"slot":4,"type":"LAB","G1":"PIP Lab (102-C)","G2":"WT Lab (313-B)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"SPM (309)"},
+          {"slot":7,"type":"THEORY","subject":"WT (309)"},
+          {"slot":8,"type":"THEORY","subject":"AI (301)"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"PIP (309)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (309)"},
+          {"slot":3,"type":"LAB","G1":"SSMDA Lab (313-B)","G2":"AI&ML Lab (102-B)"},
+          {"slot":4,"type":"LAB","G1":"SSMDA Lab (313-B)","G2":"AI&ML Lab (102-B)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"UHV (309)"},
+          {"slot":7,"type":"THEORY","subject":"SPM (309)"},
+          {"slot":8,"type":"THEORY","subject":"SSMDA (301)"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"PME (309)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (309)"},
+          {"slot":3,"type":"LAB","G1":"SMMM Lab (102-B)","G2":"SPM Lab (313-B)"},
+          {"slot":4,"type":"LAB","G1":"SMMM Lab (102-B)","G2":"SPM Lab (313-B)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"SSMDA Lab (313-A)","G2":"SSMDA Lab (313-A)"},
+          {"slot":7,"type":"THEORY","subject":"SPM (309)"},
+          {"slot":8,"type":"THEORY","subject":"SMMM (309)"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
+    },
+
+    {
+      "section": "IT-C",
+      "semester": 6,
+      "room": "310",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"WT (310)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (310)"},
+          {"slot":3,"type":"LAB","G1":"AI Lab (102-C)","G2":"AI&ML Lab (102-A)"},
+          {"slot":4,"type":"LAB","G1":"AI Lab (102-C)","G2":"AI&ML Lab (102-A)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"PIP Lab (313-A)","G2":"WT Lab (313-B)"},
+          {"slot":7,"type":"LAB","G1":"PIP Lab (313-A)","G2":"WT Lab (313-B)"},
+          {"slot":8,"type":"THEORY","subject":"PME (310)"},
+          {"slot":9,"type":"THEORY","subject":"AIML (304)"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"LAB","G1":"PIP Lab (102-B)","G2":"WT Lab (313-B)"},
+          {"slot":2,"type":"LAB","G1":"PIP Lab (102-B)","G2":"WT Lab (313-B)"},
+          {"slot":3,"type":"LAB","G1":"SMMM Lab (102-A)","G2":"SPM Lab (110)"},
+          {"slot":4,"type":"LAB","G1":"SMMM Lab (102-A)","G2":"SPM Lab (110)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PIP (310)"},
+          {"slot":7,"type":"THEORY","subject":"WT (310)"},
+          {"slot":8,"type":"THEORY","subject":"AI (303)"},
+          {"slot":9,"type":"LAB","G1":"AI Lab (102-C)","G2":"AI Lab (102-C)"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"SMMM (310)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (310)"},
+          {"slot":3,"type":"THEORY","subject":"PME (310)"},
+          {"slot":4,"type":"THEORY","subject":"UHV (310)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"SPM (310)"},
+          {"slot":7,"type":"THEORY","subject":"WT (310)"},
+          {"slot":8,"type":"THEORY","subject":"AI (301)"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"SPM (310)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (310)"},
+          {"slot":3,"type":"LAB","G1":"SSMDA Lab (313-B)","G2":"AI&ML Lab (102-B)"},
+          {"slot":4,"type":"LAB","G1":"SSMDA Lab (313-B)","G2":"AI&ML Lab (102-B)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PIP (310)"},
+          {"slot":7,"type":"THEORY","subject":"SPM (310)"},
+          {"slot":8,"type":"THEORY","subject":"SSMDA (301)"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"PIP (310)"},
+          {"slot":2,"type":"THEORY","subject":"DMD (310)"},
+          {"slot":3,"type":"THEORY","subject":"PME (310)"},
+          {"slot":4,"type":"THEORY","subject":"SMMM (310)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"SMMM Lab (102-C)","G2":"SPM Lab (313-B)"},
+          {"slot":7,"type":"LAB","G1":"SSMDA Lab (313-A)","G2":"SSMDA Lab (313-A)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
     }
 
   ]
