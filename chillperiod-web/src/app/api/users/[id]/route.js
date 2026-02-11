@@ -1,12 +1,20 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
+import { auth } from '@/auth';
+import { isValidObjectId } from '@/lib/security/sanitize';
+import { userUpdateSchema } from '@/lib/validators';
 
-// GET /api/users/[id] - Get user profile
+// GET /api/users/[id] — Get user profile (public)
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
     
+    // SECURITY: Validate ObjectId format before querying
+    if (!isValidObjectId(id)) {
+      return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
+    }
+
     await dbConnect();
     
     const user = await User.findById(id)
@@ -19,12 +27,11 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     
-    // Add computed fields
-    // Calculate stats dynamically from courses to ensure they are always in sync
+    // Calculate stats dynamically from courses
     if (user.courses && Array.isArray(user.courses)) {
-        user.totalClasses = user.courses.reduce((sum, course) => sum + (course.totalClasses || 0), 0);
-        user.attendedClasses = user.courses.reduce((sum, course) => sum + (course.attendedClasses || 0), 0);
-        user.totalBunks = user.totalClasses - user.attendedClasses; // Approximate, or sum bunks if tracked differently
+      user.totalClasses = user.courses.reduce((sum, course) => sum + (course.totalClasses || 0), 0);
+      user.attendedClasses = user.courses.reduce((sum, course) => sum + (course.attendedClasses || 0), 0);
+      user.totalBunks = user.totalClasses - user.attendedClasses;
     }
 
     user.attendancePercentage = user.totalClasses > 0 
@@ -35,41 +42,64 @@ export async function GET(request, { params }) {
     
     return NextResponse.json(user);
   } catch (error) {
-    console.error('Error fetching user:', error);
+    console.error('[user GET]', error);
     return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });
   }
 }
 
-// PATCH /api/users/[id] - Update user profile
+// PATCH /api/users/[id] — Update user profile (auth + ownership required)
+// SECURITY: Only the user themselves (or an admin) can update their profile
 export async function PATCH(request, { params }) {
   try {
+    const session = await auth();
+    // SECURITY: Require authentication
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
     await dbConnect();
     const { id } = await params;
+
+    // SECURITY: Validate ObjectId format
+    if (!isValidObjectId(id)) {
+      return NextResponse.json({ error: 'Invalid user ID' }, { status: 400 });
+    }
+
+    // SECURITY: Ownership check — only allow users to update their own profile (or admin)
+    if (session.user.id !== id && session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden: you can only update your own profile' }, { status: 403 });
+    }
+
     const body = await request.json();
-    
+
+    // SECURITY: Validate body with Zod schema (rejects unexpected fields via .strict())
+    const result = userUpdateSchema.safeParse(body);
+    if (!result.success) {
+      const fieldErrors = result.error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+      }));
+      return NextResponse.json({ error: 'Validation failed', details: fieldErrors }, { status: 400 });
+    }
+
+    const validatedData = result.data;
     const updates = {};
 
     // Handle username update with uniqueness check
-    if (body.username) {
-      // Validate format
-      if (!/^[a-z0-9_]{3,20}$/.test(body.username)) {
-        return NextResponse.json({ error: 'Invalid username format' }, { status: 400 });
-      }
-
-      // Check if taken by another user
-      const existingUser = await User.findOne({ username: body.username });
+    if (validatedData.username) {
+      const existingUser = await User.findOne({ username: validatedData.username });
       if (existingUser && existingUser._id.toString() !== id) {
         return NextResponse.json({ error: 'Username already taken' }, { status: 400 });
       }
-      updates.username = body.username;
+      updates.username = validatedData.username;
     }
     
-    // Only allow updating certain fields
+    // Only allow updating whitelisted fields
     const allowedFields = ['name', 'college', 'semester', 'section', 'favoriteSpot', 'isPublic', 'notificationsEnabled', 'targetPercentage'];
     
     for (const field of allowedFields) {
-      if (body[field] !== undefined) {
-        updates[field] = body[field];
+      if (validatedData[field] !== undefined) {
+        updates[field] = validatedData[field];
       }
     }
     
@@ -84,7 +114,7 @@ export async function PATCH(request, { params }) {
     if (error.code === 11000) {
       return NextResponse.json({ error: 'Username already taken' }, { status: 400 });
     }
-    console.error('Error updating user:', error);
+    console.error('[user PATCH]', error);
     return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
   }
 }

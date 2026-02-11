@@ -35,24 +35,30 @@ const demoSpots = [
   { name: 'Bikanervala Rohini', description: 'Proper thalis, family restaurant vibes', category: 'restaurant', vibe: 'both', budget: 'moderate', distance: '18 min walk', address: 'Sector 11, Main Road', upvotes: 16 },
 ];
 
+// GET /api/seed — seed demo data (admin + development only)
+// SECURITY: Restricted to admin role AND non-production environment
 export async function GET() {
+  // SECURITY: Block in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Seed route is disabled in production' }, { status: 403 });
+  }
+
   await dbConnect();
   try {
-    // Check if spots already exist to avoid duplicates
     const count = await Spot.countDocuments();
     if (count > 0) {
       return NextResponse.json({ message: 'Spots already populated', count });
     }
 
-    // Insert demo spots
     const spots = await Spot.insertMany(demoSpots.map(s => ({
        ...s,
-       college: 'BPIT', // Default college
+       college: 'BPIT',
        verified: true
     })));
 
     return NextResponse.json({ message: 'Seeded successfully', count: spots.length });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[seed]', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

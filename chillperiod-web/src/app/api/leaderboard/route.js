@@ -2,13 +2,15 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
 
-// GET /api/leaderboard - Get bunk leaderboard
+// GET /api/leaderboard — Get bunk leaderboard (public)
+// SECURITY: Limit clamped to max 100 to prevent excessive data retrieval
 export async function GET(request) {
   try {
     await dbConnect();
     
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit')) || 50;
+    // SECURITY: Clamp limit to prevent excessive data retrieval
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit')) || 50, 1), 100);
     
     const users = await User.find({ isPublic: true, totalBunks: { $gt: 0 } })
       .select('name username image totalBunks attendedClasses totalClasses favoriteSpot')
@@ -16,7 +18,6 @@ export async function GET(request) {
       .limit(limit)
       .lean();
     
-    // Add rank and title to each user
     const leaderboard = users.map((user, index) => {
       const bunks = user.totalBunks;
       let title, emoji;
@@ -41,7 +42,7 @@ export async function GET(request) {
     
     return NextResponse.json(leaderboard);
   } catch (error) {
-    console.error('Error fetching leaderboard:', error);
+    console.error('[leaderboard]', error);
     return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
   }
 }

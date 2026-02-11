@@ -2,16 +2,9 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
-import { z } from 'zod';
+import { userProfileSchema } from '@/lib/validators';
 
-const userProfileSchema = z.object({
-  username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-  name: z.string().min(1).max(50),
-  RZ_college: z.string().min(1),
-  semester: z.number().int().min(1).max(8),
-  section: z.string().min(1).max(10),
-});
-
+// POST /api/users/set-username — set profile during onboarding (auth + validated)
 export async function POST(request) {
   const session = await auth();
   if (!session) {
@@ -21,17 +14,28 @@ export async function POST(request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const validatedData = userProfileSchema.parse(body);
-    const { username, name, RZ_college, semester, section } = validatedData;
 
-    // Validate username format
+    // SECURITY: Validate with Zod schema (.strict() rejects unexpected fields)
+    const result = userProfileSchema.safeParse(body);
+    if (!result.success) {
+      const fieldErrors = result.error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+      }));
+      return NextResponse.json({ error: 'Validation failed', details: fieldErrors }, { status: 400 });
+    }
+
+    const { username, name, RZ_college, semester, section } = result.data;
+
+    // Validate username format (lowercase only for storage)
+    const lowerUsername = username.toLowerCase();
     const regex = /^[a-z0-9_]{3,20}$/;
-    if (!regex.test(username)) {
+    if (!regex.test(lowerUsername)) {
       return NextResponse.json({ error: 'Invalid username format' }, { status: 400 });
     }
 
     // Check if username is taken
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ username: lowerUsername });
     if (existingUser && existingUser.email !== session.user.email) {
       return NextResponse.json({ error: 'Username already taken' }, { status: 409 });
     }
@@ -40,7 +44,7 @@ export async function POST(request) {
     const user = await User.findOneAndUpdate(
       { email: session.user.email },
       { 
-        username,
+        username: lowerUsername,
         name,
         college: RZ_college,
         semester: parseInt(semester),
@@ -61,8 +65,9 @@ export async function POST(request) {
     });
   } catch (error) {
     if (error.name === 'ZodError') {
-         return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.errors }, { status: 400 });
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[set-username]', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

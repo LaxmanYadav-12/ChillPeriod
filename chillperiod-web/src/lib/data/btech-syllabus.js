@@ -1,60 +1,79 @@
+// SyllabusX API integration — https://api.syllabusx.live
+const SYLLABUSX_API = 'https://api.syllabusx.live';
+
 export const semesters = [
-  { value: "1", label: "1st Semester" },
-  { value: "2", label: "2nd Semester" },
-  { value: "3", label: "3rd Semester" },
-  { value: "4", label: "4th Semester" },
-  { value: "5", label: "5th Semester" },
-  { value: "6", label: "6th Semester" },
-  { value: "7", label: "7th Semester" },
-  { value: "8", label: "8th Semester" },
+  { value: "firstsemesters",   label: "1st Semester", short: "1st" },
+  { value: "secondsemesters",  label: "2nd Semester", short: "2nd" },
+  { value: "thirdsemesters",   label: "3rd Semester", short: "3rd" },
+  { value: "fourthsemesters",  label: "4th Semester", short: "4th" },
+  { value: "fifthsemesters",   label: "5th Semester", short: "5th" },
+  { value: "sixthsemesters",   label: "6th Semester", short: "6th" },
+  { value: "seventhsemesters", label: "7th Semester", short: "7th" },
+  { value: "eighthsemesters",  label: "8th Semester", short: "8th" },
 ];
 
 export const branches = [
-  { value: "CSE", label: "Computer Science & Engineering" },
-  { value: "IT", label: "Information Technology" },
-  { value: "ECE", label: "Electronics & Communication" },
-  { value: "CSE-AI", label: "CSE (Artificial Intelligence)" },
-  { value: "CSE-DS", label: "CSE (Data Science)" },
-  { value: "EEE", label: "Electrical & Electronics" },
-  { value: "MAE", label: "Mechanical & Automation" },
-  { value: "CE", label: "Civil Engineering" },
+  { value: "CSE",  label: "Computer Science & Engineering" },
+  { value: "IT",   label: "Information Technology" },
+  { value: "ECE",  label: "Electronics & Communication" },
+  { value: "EE",   label: "Electrical Engineering" },
+  { value: "EEE",  label: "Electrical & Electronics" },
+  { value: "ME",   label: "Mechanical Engineering" },
+  { value: "CE",   label: "Civil Engineering" },
+  { value: "MAE",  label: "Mechanical & Automation" },
+  { value: "ICE",  label: "Instrumentation & Control" },
+  { value: "CST",  label: "Computer Science & Technology" },
+  { value: "ITE",  label: "Information Technology & Engineering" },
 ];
 
 export const syllabusPdfs = {
-  "CSE": "http://www.ipu.ac.in/syllabus/btech2025/Annexure%20-%206a%20--%20USS%20CSE%20-%202025.pdf",
-  "IT": "http://www.ipu.ac.in/syllabus/btech2025/Annexure%20-%206b%20--%20USS%20IT%20-%202025.pdf",
-  "ECE": "http://www.ipu.ac.in/syllabus/btech2025/Annexure%20-%206c%20--%20USS%20ECE%20-%202025.pdf",
+  "CSE":    "http://www.ipu.ac.in/syllabus/btech2025/Annexure%20-%206a%20--%20USS%20CSE%20-%202025.pdf",
+  "IT":     "http://www.ipu.ac.in/syllabus/btech2025/Annexure%20-%206b%20--%20USS%20IT%20-%202025.pdf",
+  "ECE":    "http://www.ipu.ac.in/syllabus/btech2025/Annexure%20-%206c%20--%20USS%20ECE%20-%202025.pdf",
   "CSE-AI": "http://www.ipu.ac.in/syllabus/btech2025/Annexure%20-%206d%20--%20USS%20-%20CSE%20-%20AI%20-%202025.pdf",
   "CSE-DS": "http://www.ipu.ac.in/syllabus/Annexure%20-%206e%20--%20USS%20CSE%20-%20DS%20-%202025.pdf",
 };
 
-// Key format: "{semester}_{branch}"
-export const syllabusData = {
-  // Keeping existing manual data as fallback/hybrid
-  "1_CSE": [
-    { name: "Applied Mathematics-I", code: "BS-101", credits: 4 },
-    { name: "Applied Physics-I", code: "BS-103", credits: 3 },
-    { name: "Manufacturing Processes", code: "ES-105", credits: 3 },
-    { name: "Electrical Technology", code: "ES-107", credits: 3 },
-    { name: "Human Values & Professional Ethics", code: "HS-109", credits: 1 },
-    { name: "Fundamentals of Computing", code: "ES-111", credits: 2 },
-    { name: "Applied Chemistry", code: "BS-113", credits: 3 },
-  ],
-  "4_CSE": [
-    { name: "Database Management System", code: "CIC-210", credits: 4 },
-    { name: "Theory of Computation", code: "CIC-206", credits: 4 },
-    { name: "Technical Writing", code: "HS-204", credits: 3 },
-    { name: "Operating Systems", code: "CIC-204", credits: 4 },
-    { name: "Computer Graphics", code: "CIC-208", credits: 4 },
-    { name: "Communication Systems", code: "ECE-212", credits: 4 },
-  ],
-};
+/**
+ * Fetch subject list from SyllabusX API.
+ * Returns array of slug strings like ["database-management-system", "theory-of-computation"]
+ */
+export async function fetchSubjects(semesterValue, branch) {
+  try {
+    const res = await fetch(`${SYLLABUSX_API}/btech/${semesterValue}/${branch}`, {
+      next: { revalidate: 86400 }, // cache for 24h
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
 
-export const getSubjects = (semester, branch) => {
-  const key = `${semester}_${branch}`;
-  return syllabusData[key] || [];
-};
+/**
+ * Fetch full details for a single subject.
+ * Returns rich object with theory units, lab experiments, paper codes, credits, etc.
+ */
+export async function fetchSubjectDetails(semesterValue, branch, subjectName) {
+  try {
+    const res = await fetch(
+      `${SYLLABUSX_API}/btech/${semesterValue}/${branch}/${subjectName}`,
+      { next: { revalidate: 86400 } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return Array.isArray(data) ? data[0] : data;
+  } catch {
+    return null;
+  }
+}
 
-export const getPdfLink = (branch) => {
-  return syllabusPdfs[branch] || null;
-};
+/**
+ * Build a SyllabusX web link for a subject (notes/PYQ/books).
+ */
+export function getSyllabusXLink(semesterShort, branch, subjectSlug) {
+  return `https://syllabusx.live/courses/btech/${semesterShort}/${branch.toLowerCase()}/${subjectSlug}`;
+}
+
+// Legacy helpers (still used by existing code)
+export const getPdfLink = (branch) => syllabusPdfs[branch] || null;

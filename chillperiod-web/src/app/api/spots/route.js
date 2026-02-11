@@ -3,13 +3,15 @@ import dbConnect from '@/lib/mongodb';
 import Spot from '@/models/Spot';
 import UserInteraction from '@/models/UserInteraction';
 import { auth } from '@/auth';
+import { withApi } from '@/lib/security/apiHandler';
+import { spotCreateSchema } from '@/lib/validators';
 
+// GET /api/spots — list all spots (public, rate-limited)
 export async function GET() {
   try {
     await dbConnect();
     const session = await auth();
     
-    // Sort by upvotes desc by default
     const spots = await Spot.find({}).sort({ upvotes: -1 }).lean();
 
     if (session) {
@@ -32,28 +34,21 @@ export async function GET() {
 
     return NextResponse.json(spots);
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[spots GET]', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
-export async function POST(req) {
-  try {
+// POST /api/spots — create a new spot (auth required, validated)
+// SECURITY: Requires authentication, validates body with Zod, whitelists fields
+export const POST = withApi(
+  async (req, { session, validatedData }) => {
     await dbConnect();
-    const body = await req.json();
 
-    // Basic validation
-    if (!body.name || !body.category) {
-      return NextResponse.json(
-        { error: 'Name and Category are required' }, 
-        { status: 400 }
-      );
-    }
-
-    // Attempt to extract coordinates from google maps link if provided in address
-    let coordinates = body.coordinates || {};
-    if (body.googleMapsUrl) {
-      // Regex to find @lat,lng
-      const match = body.googleMapsUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    // Extract coordinates from Google Maps URL if provided
+    let coordinates = validatedData.coordinates || {};
+    if (validatedData.googleMapsUrl) {
+      const match = validatedData.googleMapsUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
       if (match) {
         coordinates = {
           lat: parseFloat(match[1]),
@@ -62,16 +57,23 @@ export async function POST(req) {
       }
     }
 
+    // SECURITY: Only use validated/whitelisted fields — never spread raw body
     const newSpot = await Spot.create({
-      ...body,
+      name: validatedData.name,
+      description: validatedData.description,
+      category: validatedData.category,
+      vibe: validatedData.vibe,
+      budget: validatedData.budget,
+      distance: validatedData.distance,
+      address: validatedData.address,
       coordinates,
       upvotes: 0,
       downvotes: 0,
-      verified: false // User submissions need verification
+      verified: false,  // User submissions need admin verification
+      submittedBy: session.user.id,
     });
 
     return NextResponse.json(newSpot, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
+  },
+  { auth: true, schema: spotCreateSchema, rateLimit: 'write' }
+);

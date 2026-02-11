@@ -1,22 +1,27 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
+import { escapeRegex } from '@/lib/security/sanitize';
 
-// GET /api/users - Search users
+// GET /api/users — search/list public users
+// SECURITY: Regex escape, limit capped to 100
 export async function GET(request) {
   try {
     await dbConnect();
     
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search');
-    const limit = parseInt(searchParams.get('limit')) || 20;
+    // SECURITY: Clamp limit to prevent excessive data retrieval
+    const limit = Math.min(parseInt(searchParams.get('limit')) || 20, 100);
     
     let query = { isPublic: true };
     
     if (search) {
+      // SECURITY: Escape regex special characters to prevent injection
+      const safeSearch = escapeRegex(search);
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { username: { $regex: search, $options: 'i' } }
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { username: { $regex: safeSearch, $options: 'i' } }
       ];
     }
     
@@ -27,7 +32,7 @@ export async function GET(request) {
     
     return NextResponse.json(users);
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('[users GET]', error);
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
   }
 }

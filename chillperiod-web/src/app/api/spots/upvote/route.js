@@ -2,22 +2,15 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Spot from '@/models/Spot';
 import UserInteraction from '@/models/UserInteraction';
-import { auth } from '@/auth';
+import { withApi } from '@/lib/security/apiHandler';
+import { voteActionSchema } from '@/lib/validators';
 
-export async function POST(req) {
-  try {
-    const session = await auth();
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+// POST /api/spots/upvote — vote on a spot (auth required, validated)
+export const POST = withApi(
+  async (req, { session, validatedData }) => {
     await dbConnect();
-    const { spotId, action } = await req.json(); // action: 'upvote' or 'downvote'
+    const { spotId, action } = validatedData;
     const userId = session.user.id;
-
-    if (!['upvote', 'downvote'].includes(action)) {
-       return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
-    }
 
     // Check for existing interaction (vote)
     const existingInteraction = await UserInteraction.findOne({
@@ -31,24 +24,21 @@ export async function POST(req) {
 
     if (existingInteraction) {
       if (existingInteraction.type === action) {
-        // Same action? Toggle OFF (Remove vote)
+        // Same action → toggle OFF (remove vote)
         await UserInteraction.findByIdAndDelete(existingInteraction._id);
         spot = await Spot.findByIdAndUpdate(
           spotId,
-          { $inc: { [action + 's']: -1 } }, // decrements upvotes or downvotes
+          { $inc: { [action + 's']: -1 } },
           { new: true }
         );
       } else {
-        // Different action? Switch Vote (e.g. up -> down)
-        // 1. Remove old vote
+        // Different action → switch vote
         await UserInteraction.findByIdAndDelete(existingInteraction._id);
-        // 2. Add new vote interaction
         await UserInteraction.create({ userId, spotId, type: action });
         
-        // 3. Update Spot counts
         const incUpdate = { 
-            [existingInteraction.type + 's']: -1, // decrement old
-            [action + 's']: 1 // increment new
+          [existingInteraction.type + 's']: -1,
+          [action + 's']: 1
         };
 
         spot = await Spot.findByIdAndUpdate(
@@ -59,7 +49,7 @@ export async function POST(req) {
         newInteractionType = action;
       }
     } else {
-      // No existing vote? Add new vote
+      // No existing vote → add new
       await UserInteraction.create({ userId, spotId, type: action });
       spot = await Spot.findByIdAndUpdate(
         spotId,
@@ -69,15 +59,16 @@ export async function POST(req) {
       newInteractionType = action;
     }
 
+    if (!spot) {
+      return NextResponse.json({ error: 'Spot not found' }, { status: 404 });
+    }
+
     return NextResponse.json({ 
       success: true, 
       upvotes: spot.upvotes, 
       downvotes: spot.downvotes,
-      userVote: newInteractionType // 'upvote', 'downvote', or null
+      userVote: newInteractionType
     });
-
-  } catch (error) {
-    console.error('Upvote error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
+  },
+  { auth: true, schema: voteActionSchema, rateLimit: 'write' }
+);

@@ -1,29 +1,41 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Spot from '@/models/Spot';
+import { withApi } from '@/lib/security/apiHandler';
+import { spotImportSchema } from '@/lib/validators';
+import { escapeRegex } from '@/lib/security/sanitize';
 
-export async function POST(req) {
-  try {
+// POST /api/spots/import — bulk import spots (admin only, validated)
+// SECURITY: Admin-only, Zod validation, regex-safe duplicate check
+export const POST = withApi(
+  async (req, { validatedData }) => {
     await dbConnect();
-    const { spots } = await req.json();
-
-    if (!Array.isArray(spots) || spots.length === 0) {
-      return NextResponse.json({ savedSpots: [] });
-    }
+    const { spots } = validatedData;
 
     const savedSpots = [];
     
     for (const spotData of spots) {
-      // Check for duplicates by name (case-insensitive)
+      // SECURITY: Escape name before using in regex to prevent ReDoS / injection
+      const escapedName = escapeRegex(spotData.name);
       const existing = await Spot.findOne({ 
-        name: { $regex: new RegExp(`^${spotData.name}$`, 'i') } 
+        name: { $regex: new RegExp(`^${escapedName}$`, 'i') } 
       });
 
       if (!existing) {
+        // SECURITY: Whitelist fields — never spread raw input
         const newSpot = await Spot.create({
-          ...spotData,
+          name: spotData.name,
+          description: spotData.description || '',
+          category: spotData.category,
+          vibe: spotData.vibe,
+          budget: spotData.budget,
+          distance: spotData.distance || '',
+          address: spotData.address || '',
+          coordinates: spotData.coordinates,
           college: 'BPIT',
-          verified: true // Auto-verify map spots? Maybe.
+          verified: true,
+          upvotes: 0,
+          downvotes: 0,
         });
         savedSpots.push(newSpot);
       } else {
@@ -32,8 +44,6 @@ export async function POST(req) {
     }
 
     return NextResponse.json({ savedSpots });
-  } catch (error) {
-    console.error('Import error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
+  },
+  { auth: true, role: 'admin', schema: spotImportSchema, rateLimit: 'write' }
+);

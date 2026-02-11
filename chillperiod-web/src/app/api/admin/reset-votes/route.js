@@ -2,16 +2,13 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Spot from '@/models/Spot';
 import UserInteraction from '@/models/UserInteraction';
+import { withApi } from '@/lib/security/apiHandler';
 
-import { auth } from '@/auth';
-
-export async function GET() {
-  const session = await auth();
-  if (session?.user?.role !== 'admin') {
-     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
-
-  try {
+// POST /api/admin/reset-votes — reset all votes (admin only)
+// SECURITY: Changed from GET to POST — destructive operations must not use GET
+// (browsers prefetch, crawlers follow GET links, etc.)
+export const POST = withApi(
+  async () => {
     await dbConnect();
 
     // 1. Reset all spots to 0
@@ -26,7 +23,6 @@ export async function GET() {
       message: 'All votes reset successfully', 
       modifiedCount: result.modifiedCount 
     });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
+  },
+  { auth: true, role: 'admin', rateLimit: 'write' }
+);

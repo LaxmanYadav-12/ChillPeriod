@@ -1,27 +1,26 @@
-
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
-import { auth } from '@/auth';
+import { escapeRegex } from '@/lib/security/sanitize';
 
+// GET /api/users/search — search users by username (public)
+// SECURITY: Regex escape prevents injection, limit capped
 export async function GET(req) {
   try {
-    const session = await auth();
-    // Allow public search for now, or restrict to logged in users:
-    // if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('q');
 
-    if (!query || query.length < 2) {
+    if (!query || query.length < 2 || query.length > 50) {
       return NextResponse.json({ users: [] });
     }
 
     await dbConnect();
 
-    // Case-insensitive regex search
+    // SECURITY: Escape regex special characters to prevent ReDoS / injection
+    const safeQuery = escapeRegex(query);
+
     const users = await User.find({
-      username: { $regex: query, $options: 'i' }
+      username: { $regex: safeQuery, $options: 'i' }
     })
     .select('name username image totalBunks college')
     .limit(10)
@@ -29,7 +28,7 @@ export async function GET(req) {
 
     return NextResponse.json({ users });
   } catch (error) {
-    console.error('Search error:', error);
+    console.error('[user search]', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -4,17 +4,42 @@ import NextAuth from "next-auth";
 
 const { auth } = NextAuth(authConfig);
 
-// Simple in-memory rate limiting map for Edge (LRU cache is Node-only usually, simpler map for edge middleware)
+/**
+ * Middleware rate limiting with automatic cleanup.
+ * 
+ * OWASP: Prevents brute-force attacks and resource exhaustion.
+ * Uses tiered limits: stricter for /api/auth paths.
+ */
 const rateLimitMap = new Map();
+
+// SECURITY: Periodic cleanup to prevent unbounded memory growth
+const CLEANUP_INTERVAL = 60_000; // 60 seconds
+let lastCleanup = Date.now();
+
+function cleanupStaleEntries() {
+  const now = Date.now();
+  if (now - lastCleanup < CLEANUP_INTERVAL) return;
+  lastCleanup = now;
+  
+  for (const [key, data] of rateLimitMap) {
+    if (now - data.lastReset > 120_000) { // 2 minutes stale
+      rateLimitMap.delete(key);
+    }
+  }
+}
 
 export default auth((req) => {
     const { nextUrl } = req;
     const isLoggedIn = !!req.auth;
-    const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1';
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '127.0.0.1';
     
-    // 1. Rate Limiting (Simple Window)
-    const LIMIT = 100; // requests per minute
+    // 1. Rate Limiting (Tiered)
+    const isAuthPath = nextUrl.pathname.startsWith('/api/auth');
+    const LIMIT = isAuthPath ? 10 : 100; // Stricter for auth endpoints
     const WINDOW = 60 * 1000;
+    
+    // Run cleanup periodically
+    cleanupStaleEntries();
     
     if (!rateLimitMap.has(ip)) {
         rateLimitMap.set(ip, { count: 1, lastReset: Date.now() });
@@ -28,25 +53,28 @@ export default auth((req) => {
         }
         
         if (data.count > LIMIT) {
-             return new NextResponse('Too Many Requests', { status: 429 });
+            const retryAfter = Math.ceil((data.lastReset + WINDOW - Date.now()) / 1000);
+            // OWASP: Return JSON 429 with Retry-After header  
+            return NextResponse.json(
+                { error: 'Too many requests. Please try again later.', retryAfter },
+                { 
+                    status: 429,
+                    headers: { 'Retry-After': String(retryAfter) }
+                }
+            );
         }
     }
 
-    // 2. Security Headers
+    // 2. Security Headers (OWASP recommended)
     const response = NextResponse.next();
-    response.headers.set('X-Frame-Options', 'DENY');
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-    response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+    response.headers.set('X-Frame-Options', 'DENY');                              // Clickjacking protection
+    response.headers.set('X-Content-Type-Options', 'nosniff');                    // MIME-sniffing protection
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');   // Referrer leakage protection
+    response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload'); // HTTPS enforcement
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)'); // Feature restrictions
+    response.headers.set('X-DNS-Prefetch-Control', 'off');                        // DNS prefetch control
 
-    // 3. Auth Logic (from processed auth response or custom logic)
-    // Note: 'auth' wrapper handles the session check internal logic, we just modify the response here if needed,
-    // but we need to respect the redirects from the auth logic.
-    // However, the auth wrapper doesn't expose the response object easily to modify headers AFTER auth check logic
-    // unless we duplicate the logic.
-    // Simpler approach: We use the auth middleware functionality mainly for the redirects.
-    
-    // Re-implementing the specific redirect logic here to allow header injection on the returned response
+    // 3. Auth & Routing Logic
     const isOnboarding = nextUrl.pathname.startsWith('/onboarding');
     const isApi = nextUrl.pathname.startsWith('/api');
     const isAuth = nextUrl.pathname.startsWith('/auth') || nextUrl.pathname.startsWith('/login');
@@ -68,7 +96,7 @@ export default auth((req) => {
         }
     } else {
         if (!isPublic && !isOnboarding) {
-            return NextResponse.redirect(new URL('/login', nextUrl)); // Redirect to login
+            return NextResponse.redirect(new URL('/login', nextUrl));
         }
     }
 
