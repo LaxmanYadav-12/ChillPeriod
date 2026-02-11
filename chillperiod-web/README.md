@@ -8,34 +8,44 @@ ChillPeriod is your go-to companion for managing academic life without the stres
 
 ## 🚀 Key Features
 
+### 📚 SyllabusX Integration
+*   **Real-time Syllabus**: Access the latest B.Tech syllabus directly from [SyllabusX](https://syllabusx.live).
+*   **Progress Tracking**: Mark topics as completed with interactive checkboxes that persist across sessions.
+*   **Unit-wise Breakdown**: View theory and lab subjects organized by units for structured study.
+*   **Study Materials**: One-click access to notes, PYQs, and books for each subject.
+
 ### 📊 Attendance Tracker
 *   **Per-Course Progress**: Visual bars show exactly where you stand.
 *   **Bunk Calculator**: Know instantly how many classes you can skip ("bunk") while staying safe (e.g., above 75%).
 *   **Mass Bunk**: Quickly mark multiple classes as bunked for those "planned sick days".
 *   **Smart Alerts**: Get warnings when you're entering the "Danger Zone".
 
-### 📅 Automatic Timetable Sync
-*   **Seamless Integration**: Just select your Semester & Section, and your schedule is auto-populated.
-*   **Today's View**: See your daily schedule at a glance on the dashboard.
-
-### 📍 Chill Spots Discovery
+### 📍 Chill Spots Discovery & Voting
 *   **Crowdsourced Gems**: Find the best cafes, parks, and gaming zones near campus.
-*   **Live Activity**: See where your friends are chilling right now (Friends Activity).
-*   **Voting System**: Upvote the best spots and see what's trending.
+*   **Vote System**: Upvote (🔥) or Downvote (👎) spots to highlight the best places to chill.
+*   **Live Activity**: See where your friends are chilling right now.
+*   **Admin Controls**: Moderators can reset vote counts to keep the leaderboard fresh.
 
-### 👥 Social Features
+### 👥 Enhanced Social Profile
+*   **Social Stats**: Track your Followers and Following counts.
 *   **Profile Sync**: Link **Google** & **Discord** to sync your data across devices.
-*   **Friends Activity**: Keep up with your squad's bunking status.
+*   **Friends Activity**: Keep up with your squad's bunking status and current location.
+*   **Onboarding Flow**: Set your unique username and profile details seamlessly.
+
+### 📅 Timetable Sync
+*   **Automatic Population**: Select your Semester & Section to instantly load your schedule.
+*   **Today's View**: See your daily schedule at a glance on the dashboard.
 
 ---
 
 ## 🛠️ Tech Stack
 
-*   **Frontend**: Next.js 14 (App Router), React, Tailwind CSS
+*   **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS
 *   **Backend**: Next.js API Routes, Node.js
 *   **Database**: MongoDB (Mongoose)
-*   **Auth**: NextAuth.js (Google & Discord)
+*   **Auth**: NextAuth.js v5 (Google & Discord)
 *   **Styling**: CSS Modules & Vanilla CSS Variables
+*   **Deployment**: Vercel
 
 ---
 
