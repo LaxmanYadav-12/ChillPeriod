@@ -32,13 +32,36 @@ ChillPeriod is your go-to companion for managing academic life without the stres
 *   **Friends Activity**: Keep up with your squad's bunking status and current location.
 *   **Onboarding Flow**: Set your unique username and profile details seamlessly.
 
-### 📅 Timetable Sync
+### � Smart Notifications
+*   **Bunk Alerts**: Get notified if a bunk will drop your attendance below the safe threshold.
+*   **Friend Activity**: Know when your friends are bunking or chilling.
+*   **Class Reminders**: Never miss a lecture with timely notifications.
+*   **Engagement**: Get alerts for new followers and profile interactions.
+
+### �📅 Timetable Sync
 *   **Automatic Population**: Select your Semester & Section to instantly load your schedule.
 *   **Today's View**: See your daily schedule at a glance on the dashboard.
 
 ---
 
-## 🛠️ Tech Stack
+## � Project Structure
+
+```bash
+src/
+├── app/              # Next.js App Router pages & API
+│   ├── api/          # Backend API routes (Auth, Proxy, Users)
+│   ├── syllabus/     # Syllabus page with proxy integration
+│   └── ...
+├── components/       # Reusable UI components
+├── lib/              # Utilities, DB models, & validators
+│   ├── data/         # Static data & API clients
+│   └── models/       # Mongoose schemas
+└── ...
+```
+
+---
+
+## �🛠️ Tech Stack
 
 *   **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS
 *   **Backend**: Next.js API Routes, Node.js
