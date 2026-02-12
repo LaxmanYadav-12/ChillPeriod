@@ -18,7 +18,7 @@ export async function GET() {
       const interactions = await UserInteraction.find({
         userId: session.user.id,
         type: { $in: ['upvote', 'downvote'] }
-      }).select('spotId type');
+      }).select('spotId type').lean();
 
       const upvotedIds = new Set(interactions.filter(i => i.type === 'upvote').map(i => i.spotId.toString()));
       const downvotedIds = new Set(interactions.filter(i => i.type === 'downvote').map(i => i.spotId.toString()));
