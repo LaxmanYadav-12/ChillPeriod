@@ -1045,8 +1045,316 @@ export const TIMETABLE_DATA = {
           {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
         ]
       }
-    }
+    },
 
+    /* ===================== ECE 6th SEM ===================== */
+    {
+      "section": "ECE-A",
+      "semester": 6,
+      "room": "NB 201",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"LAB","G1":"DSA Lab (305)","G2":"C++ Lab (314)"},
+          {"slot":2,"type":"THEORY","subject":"PME"},
+          {"slot":3,"type":"THEORY","subject":"PME"},
+          {"slot":4,"type":"THEORY","subject":"WSN"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"IITC"},
+          {"slot":7,"type":"THEORY","subject":"DSA"},
+          {"slot":8,"type":"THEORY","subject":"ML"},
+          {"slot":9,"type":"THEORY","subject":"ML"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"PME"},
+          {"slot":2,"type":"THEORY","subject":"IITC"},
+          {"slot":3,"type":"LAB","G1":"WSN Lab (305)","G2":"EDSAD Lab (313A)"},
+          {"slot":4,"type":"LAB","G1":"WSN Lab (305)","G2":"EDSAD Lab (313A)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"WSN"},
+          {"slot":7,"type":"THEORY","subject":"MC"},
+          {"slot":8,"type":"LAB","G1":"VHDL Lab (313A)"},
+          {"slot":9,"type":"LAB","G1":"VHDL Lab (313A)"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"LAB","G1":"ML Lab (305)","G2":"DIP Lab (313A)"},
+          {"slot":2,"type":"LAB","G1":"ML Lab (305)","G2":"DIP Lab (313A)"},
+          {"slot":3,"type":"THEORY","subject":"MC"},
+          {"slot":4,"type":"THEORY","subject":"MC"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"MC"},
+          {"slot":7,"type":"THEORY","subject":"DSA"},
+          {"slot":8,"type":"LAB","G2":"OCSN Lab (316)"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"LAB","G1":"C++ Lab (211)","G2":"DSA Lab (313B)"},
+          {"slot":2,"type":"LAB","G1":"C++ Lab (211)","G2":"DSA Lab (313B)"},
+          {"slot":3,"type":"THEORY","subject":"DIP"},
+          {"slot":4,"type":"THEORY","subject":"VLSI"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PME"},
+          {"slot":7,"type":"THEORY","subject":"C++"},
+          {"slot":8,"type":"THEORY","subject":"C++"},
+          {"slot":9,"type":"LAB","G1":"PIP Lab (305)"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"MC"},
+          {"slot":2,"type":"THEORY","subject":"ML"},
+          {"slot":3,"type":"THEORY","subject":"WSN"},
+          {"slot":4,"type":"THEORY","subject":"UHV"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"IITC"},
+          {"slot":7,"type":"THEORY","subject":"C++"},
+          {"slot":8,"type":"THEORY","subject":"DSA"}
+        ]
+      }
+    },
+    {
+      "section": "ECE-B",
+      "semester": 6,
+      "room": "NB 202",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"UHV"},
+          {"slot":2,"type":"THEORY","subject":"PME"},
+          {"slot":3,"type":"THEORY","subject":"C++"},
+          {"slot":4,"type":"THEORY","subject":"ML"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"IITC"},
+          {"slot":7,"type":"THEORY","subject":"DSA"},
+          {"slot":8,"type":"LAB","G1":"DSA Lab (305)","G2":"C++ Lab (313B)"},
+          {"slot":9,"type":"LAB","G1":"DSA Lab (305)","G2":"C++ Lab (313B)"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"IITC"},
+          {"slot":2,"type":"THEORY","subject":"C++"},
+          {"slot":3,"type":"LAB","G2":"ML Lab (314)"},
+          {"slot":4,"type":"LAB","G2":"ML Lab (314)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"ML"},
+          {"slot":7,"type":"THEORY","subject":"WSN"},
+          {"slot":8,"type":"THEORY","subject":"MC"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"LAB","G1":"ML Lab (313B)"},
+          {"slot":2,"type":"LAB","G1":"ML Lab (313B)"},
+          {"slot":3,"type":"THEORY","subject":"IITC"},
+          {"slot":4,"type":"THEORY","subject":"OCS&N"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"MC"},
+          {"slot":7,"type":"THEORY","subject":"VHDL"},
+          {"slot":8,"type":"THEORY","subject":"DSA"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"LAB","G1":"C++ Lab (314)","G2":"C++ Lab (313)"},
+          {"slot":2,"type":"LAB","G1":"C++ Lab (314)","G2":"C++ Lab (313)"},
+          {"slot":3,"type":"THEORY","subject":"MC"},
+          {"slot":4,"type":"THEORY","subject":"MC"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"IITC"},
+          {"slot":7,"type":"THEORY","subject":"SDM"},
+          {"slot":8,"type":"THEORY","subject":"DSA"},
+          {"slot":9,"type":"THEORY","subject":"DSA"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"ML"},
+          {"slot":2,"type":"THEORY","subject":"PME"},
+          {"slot":3,"type":"THEORY","subject":"ESAD"},
+          {"slot":4,"type":"THEORY","subject":"UHV"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"IITC"},
+          {"slot":7,"type":"THEORY","subject":"C++"},
+          {"slot":8,"type":"THEORY","subject":"DSA"},
+          {"slot":9,"type":"THEORY","subject":"VLSI"}
+        ]
+      }
+    },
+
+    /* ===================== ECE 2nd SEM ===================== */
+    {
+      "section": "ECE-A",
+      "semester": 2,
+      "room": "311",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"LAB","G1":"AP Lab (101)","G2":"LIB"},
+          {"slot":2,"type":"LAB","G1":"AP Lab (101)","G2":"LIB"},
+          {"slot":3,"type":"THEORY","subject":"AM"},
+          {"slot":4,"type":"THEORY","subject":"AP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"EM"},
+          {"slot":7,"type":"THEORY","subject":"EVS"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"AP"},
+          {"slot":2,"type":"THEORY","subject":"EVS"},
+          {"slot":3,"type":"THEORY","subject":"PC"},
+          {"slot":4,"type":"THEORY","subject":"EM"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"PC Lab (313 A)","G2":"EG Lab (8)"},
+          {"slot":7,"type":"LAB","G1":"PC Lab (313 A)","G2":"EG Lab (8)"},
+          {"slot":8,"type":"THEORY","subject":"PDP"},
+          {"slot":9,"type":"THEORY","subject":"LIB"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"EVS"},
+          {"slot":2,"type":"THEORY","subject":"AM"},
+          {"slot":3,"type":"LAB","G1":"LIB","G2":"EVS Lab (116)"},
+          {"slot":4,"type":"LAB","G1":"LIB","G2":"EVS Lab (116)"},
+          {"slot":5,"type":"THEORY","subject":"HVE"},
+          {"slot":6,"type":"BREAK","subject":"LUNCH"},
+          {"slot":7,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"LAB","G1":"EVS Lab (116)","G2":"WP Lab (9)"},
+          {"slot":2,"type":"LAB","G1":"EVS Lab (116)","G2":"WP Lab (9)"},
+          {"slot":3,"type":"THEORY","subject":"HVE"},
+          {"slot":4,"type":"THEORY","subject":"PC"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"AP"},
+          {"slot":7,"type":"THEORY","subject":"AM"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"PC"},
+          {"slot":2,"type":"THEORY","subject":"EM"},
+          {"slot":3,"type":"THEORY","subject":"LIB"},
+          {"slot":4,"type":"THEORY","subject":"AM"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G2":"AP Lab (101)"},
+          {"slot":7,"type":"LAB","G2":"AP Lab (101)"},
+          {"slot":8,"type":"LAB","G1":"WP Lab (9)","G2":"PC Lab (313 A)"},
+          {"slot":9,"type":"LAB","G1":"WP Lab (9)","G2":"PC Lab (313 A)"}
+        ]
+      }
+    },
+
+    /* ===================== ECE 4th SEM ===================== */
+    {
+      "section": "ECE-A",
+      "semester": 4,
+      "room": "NB 301",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"EMFT"},
+          {"slot":2,"type":"THEORY","subject":"AE-II"},
+          {"slot":3,"type":"THEORY","subject":"MPMC"},
+          {"slot":4,"type":"THEORY","subject":"PSLP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"PSLP Lab (314)","G2":"DC Lab (305)"},
+          {"slot":7,"type":"LAB","G1":"PSLP Lab (314)","G2":"DC Lab (305)"},
+          {"slot":8,"type":"THEORY","subject":"TW"},
+          {"slot":9,"type":"THEORY","subject":"PDP"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"THEORY","subject":"NAS"},
+          {"slot":2,"type":"THEORY","subject":"AE-II"},
+          {"slot":3,"type":"THEORY","subject":"MPMC"},
+          {"slot":4,"type":"THEORY","subject":"DC"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"DC Lab (305)","G2":"MPMC Lab (314)"},
+          {"slot":7,"type":"LAB","G1":"DC Lab (305)","G2":"MPMC Lab (314)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"PSLP"},
+          {"slot":2,"type":"THEORY","subject":"DC"},
+          {"slot":3,"type":"THEORY","subject":"MPMC"},
+          {"slot":4,"type":"THEORY","subject":"NAS"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"AE-II Lab (07)","G2":"PSLP Lab (314)"},
+          {"slot":7,"type":"LAB","G1":"AE-II Lab (07)","G2":"PSLP Lab (314)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"DC"},
+          {"slot":2,"type":"THEORY","subject":"EMFT"},
+          {"slot":3,"type":"LAB","G1":"NAS Lab (203)","G2":"AE-II Lab (07)"},
+          {"slot":4,"type":"LAB","G1":"NAS Lab (203)","G2":"AE-II Lab (07)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"PSLP"},
+          {"slot":7,"type":"THEORY","subject":"NAS"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"AE-II"},
+          {"slot":2,"type":"THEORY","subject":"PSLP"},
+          {"slot":3,"type":"LAB","G1":"MPMC Lab (314)","G2":"NAS Lab (203)"},
+          {"slot":4,"type":"LAB","G1":"MPMC Lab (314)","G2":"NAS Lab (203)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"EMFT"},
+          {"slot":7,"type":"THEORY","subject":"TW"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
+    },
+    {
+      "section": "ECE-B",
+      "semester": 4,
+      "room": "NB 102",
+      "schedule": {
+        "Monday": [
+          {"slot":1,"type":"THEORY","subject":"NAS"},
+          {"slot":2,"type":"THEORY","subject":"PSLP"},
+          {"slot":3,"type":"LAB","G1":"MPMC Lab (314)","G2":"NAS Lab (203)"},
+          {"slot":4,"type":"LAB","G1":"MPMC Lab (314)","G2":"NAS Lab (203)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"EMFT"},
+          {"slot":7,"type":"THEORY","subject":"DC"},
+          {"slot":8,"type":"THEORY","subject":"PDP"},
+          {"slot":9,"type":"THEORY","subject":"TW"}
+        ],
+        "Tuesday": [
+          {"slot":1,"type":"LAB","G1":"AE-II Lab (07)","G2":"PSLP Lab (314)"},
+          {"slot":2,"type":"LAB","G1":"AE-II Lab (07)","G2":"PSLP Lab (314)"},
+          {"slot":3,"type":"THEORY","subject":"EMFT"},
+          {"slot":4,"type":"THEORY","subject":"PSLP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"AE-II"},
+          {"slot":7,"type":"THEORY","subject":"NAS"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Wednesday": [
+          {"slot":1,"type":"THEORY","subject":"AE-II"},
+          {"slot":2,"type":"THEORY","subject":"PSLP"},
+          {"slot":3,"type":"LAB","G1":"DC Lab (305)","G2":"MPMC Lab (314)"},
+          {"slot":4,"type":"LAB","G1":"DC Lab (305)","G2":"MPMC Lab (314)"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"THEORY","subject":"TW"},
+          {"slot":7,"type":"THEORY","subject":"MPMC"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Thursday": [
+          {"slot":1,"type":"THEORY","subject":"EMFT"},
+          {"slot":2,"type":"THEORY","subject":"DC"},
+          {"slot":3,"type":"THEORY","subject":"MPMC"},
+          {"slot":4,"type":"THEORY","subject":"PSLP"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"NAS Lab (203)","G2":"AE-II Lab (07)"},
+          {"slot":7,"type":"LAB","G1":"NAS Lab (203)","G2":"AE-II Lab (07)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ],
+        "Friday": [
+          {"slot":1,"type":"THEORY","subject":"MPMC"},
+          {"slot":2,"type":"THEORY","subject":"NAS"},
+          {"slot":3,"type":"THEORY","subject":"AE-II"},
+          {"slot":4,"type":"THEORY","subject":"DC"},
+          {"slot":5,"type":"BREAK","subject":"LUNCH"},
+          {"slot":6,"type":"LAB","G1":"PSLP Lab (314)","G2":"DC Lab (305)"},
+          {"slot":7,"type":"LAB","G1":"PSLP Lab (314)","G2":"DC Lab (305)"},
+          {"slot":8,"type":"ACTIVITY","subject":"Enrichment"},
+          {"slot":9,"type":"ACTIVITY","subject":"Enrichment"}
+        ]
+      }
+    },
   ]
 };
 

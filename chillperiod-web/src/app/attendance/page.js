@@ -1158,7 +1158,7 @@ export default function AttendancePage() {
                       gap: '24px', flexWrap: 'wrap'
                     }}>
                       {/* Left Side: Info & Progress */}
-                      <div style={{ flex: 1, minWidth: '300px' }}>
+                      <div style={{ flex: 1, minWidth: '200px' }}>
                         
                         {/* Header: Dot + Name + Code */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
@@ -1201,7 +1201,7 @@ export default function AttendancePage() {
                       </div>
 
                       {/* Right Side: Actions */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         <button onClick={() => initiateEdit(course)} style={{ 
                             width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' 
@@ -1258,7 +1258,7 @@ export default function AttendancePage() {
                               gap: '24px', flexWrap: 'wrap'
                             }}>
                               {/* Left Side: Info & Progress */}
-                              <div style={{ flex: 1, minWidth: '300px' }}>
+                              <div style={{ flex: 1, minWidth: '200px' }}>
                                 
                                 {/* Header: Dot + Name + Code */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
@@ -1301,7 +1301,7 @@ export default function AttendancePage() {
                               </div>
 
                               {/* Right Side: Actions */}
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                 <button onClick={() => initiateEdit(course)} style={{ 
                                     width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     background: 'var(--bg-tertiary)', border: 'none', borderRadius: '10px', color: 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.2s' 

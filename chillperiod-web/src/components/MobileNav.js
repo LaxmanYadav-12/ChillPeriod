@@ -116,9 +116,9 @@ export default function MobileNav({ currentPage = 'home' }) {
             <Link 
               href="/profile" 
               style={{ 
-                color: currentPage === 'profile' ? '#8b5cf6' : 'white', 
+                color: currentPage === 'profile' ? '#8b5cf6' : 'var(--text-primary)', 
                 fontSize: '20px', fontWeight: 600, textDecoration: 'none',
-                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                padding: '16px', background: 'var(--bg-tertiary)',
                 borderRadius: '12px', textAlign: 'center'
               }}
             >
@@ -127,9 +127,9 @@ export default function MobileNav({ currentPage = 'home' }) {
             <Link 
               href="/spots" 
               style={{ 
-                color: currentPage === 'spots' ? '#8b5cf6' : 'white', 
+                color: currentPage === 'spots' ? '#8b5cf6' : 'var(--text-primary)', 
                 fontSize: '20px', fontWeight: 600, textDecoration: 'none',
-                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                padding: '16px', background: 'var(--bg-tertiary)',
                 borderRadius: '12px', textAlign: 'center'
               }}
             >
@@ -138,9 +138,9 @@ export default function MobileNav({ currentPage = 'home' }) {
             <Link 
               href="/attendance" 
               style={{ 
-                color: currentPage === 'attendance' ? '#8b5cf6' : 'white', 
+                color: currentPage === 'attendance' ? '#8b5cf6' : 'var(--text-primary)', 
                 fontSize: '20px', fontWeight: 600, textDecoration: 'none',
-                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                padding: '16px', background: 'var(--bg-tertiary)',
                 borderRadius: '12px', textAlign: 'center'
               }}
             >
@@ -149,9 +149,9 @@ export default function MobileNav({ currentPage = 'home' }) {
             <Link 
               href="/timetable" 
               style={{ 
-                color: currentPage === 'timetable' ? '#8b5cf6' : 'white', 
+                color: currentPage === 'timetable' ? '#8b5cf6' : 'var(--text-primary)', 
                 fontSize: '20px', fontWeight: 600, textDecoration: 'none',
-                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                padding: '16px', background: 'var(--bg-tertiary)',
                 borderRadius: '12px', textAlign: 'center'
               }}
             >
@@ -160,9 +160,9 @@ export default function MobileNav({ currentPage = 'home' }) {
             <Link 
               href="/syllabus" 
               style={{ 
-                color: currentPage === 'syllabus' ? '#8b5cf6' : 'white', 
+                color: currentPage === 'syllabus' ? '#8b5cf6' : 'var(--text-primary)', 
                 fontSize: '20px', fontWeight: 600, textDecoration: 'none',
-                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                padding: '16px', background: 'var(--bg-tertiary)',
                 borderRadius: '12px', textAlign: 'center'
               }}
             >
@@ -171,9 +171,9 @@ export default function MobileNav({ currentPage = 'home' }) {
             <Link 
               href="/leaderboard" 
               style={{ 
-                color: currentPage === 'leaderboard' ? '#8b5cf6' : 'white', 
+                color: currentPage === 'leaderboard' ? '#8b5cf6' : 'var(--text-primary)', 
                 fontSize: '20px', fontWeight: 600, textDecoration: 'none',
-                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                padding: '16px', background: 'var(--bg-tertiary)',
                 borderRadius: '12px', textAlign: 'center'
               }}
             >
@@ -182,9 +182,9 @@ export default function MobileNav({ currentPage = 'home' }) {
             <Link 
               href="/search" 
               style={{ 
-                color: currentPage === 'search' ? '#8b5cf6' : 'white', 
+                color: currentPage === 'search' ? '#8b5cf6' : 'var(--text-primary)', 
                 fontSize: '20px', fontWeight: 600, textDecoration: 'none',
-                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                padding: '16px', background: 'var(--bg-tertiary)',
                 borderRadius: '12px', textAlign: 'center'
               }}
             >
@@ -193,9 +193,9 @@ export default function MobileNav({ currentPage = 'home' }) {
             <button 
               onClick={() => { setIsOpen(false); setIsNotifOpen(true); }}
               style={{ 
-                color: 'white', width: '100%',
+                color: 'var(--text-primary)', width: '100%',
                 fontSize: '20px', fontWeight: 600,
-                padding: '16px', background: 'rgba(255,255,255,0.05)',
+                padding: '16px', background: 'var(--bg-tertiary)',
                 borderRadius: '12px', textAlign: 'center',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                 border: 'none', cursor: 'pointer'

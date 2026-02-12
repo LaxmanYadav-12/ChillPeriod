@@ -556,7 +556,7 @@ export default function ProfilePage() {
 
             {/* Theme Toggle */}
             <div style={{ 
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
               padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '12px'
             }}>
               <div>
@@ -568,7 +568,7 @@ export default function ProfilePage() {
 
             {/* Academic Details (Semester / Section) */}
             <div style={{ 
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
               padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '12px'
             }}>
               <div>
@@ -666,7 +666,7 @@ export default function ProfilePage() {
 
             {/* Notifications */}
             <div style={{ 
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
               padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '12px'
             }}>
               <div>
@@ -696,7 +696,7 @@ export default function ProfilePage() {
 
             {/* Target Percentage (placeholder) */}
             <div style={{ 
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
               padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '12px'
             }}>
               <div>
@@ -713,14 +713,14 @@ export default function ProfilePage() {
 
             {/* Connected Accounts */}
             <div className="connected-accounts-card" style={{ 
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
               padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '12px'
             }}>
               <div>
                 <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>Connected Accounts</div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>Login methods linked</div>
               </div>
-              <div className="connected-accounts-buttons" style={{ display: 'flex', gap: '8px' }}>
+              <div className="connected-accounts-buttons" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                 {/* Google Badge */}
                 {session?.user?.isGoogleLinked ? (
                   <div style={{ 
