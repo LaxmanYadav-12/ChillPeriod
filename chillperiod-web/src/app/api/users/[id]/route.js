@@ -95,7 +95,7 @@ export async function PATCH(request, { params }) {
     }
     
     // Only allow updating whitelisted fields
-    const allowedFields = ['name', 'college', 'semester', 'section', 'favoriteSpot', 'isPublic', 'notificationsEnabled', 'targetPercentage'];
+    const allowedFields = ['name', 'college', 'semester', 'section', 'group', 'favoriteSpot', 'isPublic', 'notificationsEnabled', 'targetPercentage'];
     
     for (const field of allowedFields) {
       if (validatedData[field] !== undefined) {

@@ -50,8 +50,9 @@ export const voteActionSchema = z.object({
 
 export const attendanceSchema = z.object({
   courseId: mongoIdSchema,
-  status: z.enum(['attended', 'bunked']),
+  status: z.enum(['attended', 'bunked', 'none']),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)'),
+  occurrenceIndex: z.number().int().min(0).optional(),
 }).strict();
 
 // ============================================================
@@ -86,6 +87,7 @@ export const userUpdateSchema = z.object({
   college: z.string().min(1).max(100).optional(),
   semester: z.number().int().min(1).max(8).optional(),
   section: z.string().min(1).max(10).optional(),
+  group: z.enum(['G1', 'G2']).optional().nullable(),
   favoriteSpot: z.object({
     name: z.string().max(100),
     emoji: z.string().max(10),
@@ -101,6 +103,7 @@ export const userProfileSchema = z.object({
   RZ_college: z.string().min(1).max(100),
   semester: z.number().int().min(1).max(8),
   section: z.string().min(1).max(10),
+  group: z.enum(['G1', 'G2']),
 }).strict();
 
 // ============================================================

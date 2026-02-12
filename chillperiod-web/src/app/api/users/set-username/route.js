@@ -27,7 +27,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Validation failed', details: fieldErrors }, { status: 400 });
     }
 
-    const { username, name, RZ_college, semester, section } = result.data;
+    const { username, name, RZ_college, semester, section, group } = result.data;
 
     // Validate username format (lowercase only for storage)
     const lowerUsername = username.toLowerCase();
@@ -51,6 +51,7 @@ export async function POST(request) {
         college: RZ_college,
         semester: parseInt(semester),
         section,
+        group,
         hasCompletedOnboarding: true 
       },
       { new: true, upsert: true }

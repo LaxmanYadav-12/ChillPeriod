@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema({
   semester: Number,
   section: String,
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
-  
+  group: { type: String, enum: ['G1', 'G2'], default: null }, // Null means not set  
   // Social
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

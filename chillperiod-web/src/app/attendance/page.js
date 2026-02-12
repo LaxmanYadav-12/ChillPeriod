@@ -176,7 +176,8 @@ export default function AttendancePage() {
                     logMap[dateKey] = {
                         attended: attendedCount,
                         bunked: bunkedCount,
-                        courses: courseStatus
+                        courses: courseStatus,
+                        actions: activeActions // Store raw actions for detailed modal view
                     };
                 }
             });
@@ -249,6 +250,86 @@ export default function AttendancePage() {
       } else {
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name + ' ' + (spot.address || ''))}`, '_blank');
       }
+    }
+  };
+
+  const handleDateEdit = async (courseId, newStatus, dateObj, occurrenceIndex = 0) => {
+    const dateStr = `${dateObj.year}-${String(dateObj.month + 1).padStart(2, '0')}-${String(dateObj.day).padStart(2, '0')}`;
+    
+    // Optimistic Update
+    const prevSelectedDate = selectedDate;
+    
+    const newSelectedDate = { 
+        ...selectedDate, 
+        log: { 
+            ...selectedDate.log, 
+            actions: [...(selectedDate.log?.actions || [])] 
+        } 
+    };
+    
+    // Find actions for this course
+    const courseActionsIndices = [];
+    newSelectedDate.log.actions.forEach((action, idx) => {
+        if (action.courseId === courseId) {
+            courseActionsIndices.push(idx);
+        }
+    });
+    
+    const targetActionIndex = courseActionsIndices[occurrenceIndex];
+    
+    // Check current status to toggle
+    let finalStatus = newStatus;
+    if (targetActionIndex !== undefined) {
+         const currentStatus = newSelectedDate.log.actions[targetActionIndex].status;
+         if (currentStatus === newStatus) {
+             finalStatus = 'none'; // Toggle off
+         }
+    }
+    
+    if (finalStatus === 'none') {
+        // Remove action if it exists
+        if (targetActionIndex !== undefined) {
+             newSelectedDate.log.actions.splice(targetActionIndex, 1);
+        }
+    } else {
+        // Update or Add
+        if (targetActionIndex !== undefined) {
+            // Update existing
+            newSelectedDate.log.actions[targetActionIndex] = {
+                ...newSelectedDate.log.actions[targetActionIndex],
+                status: finalStatus
+            };
+        } else {
+            // Add new
+            newSelectedDate.log.actions.push({
+                courseId,
+                status: finalStatus,
+                timestamp: new Date().toISOString()
+            });
+        }
+    }
+    
+    setSelectedDate(newSelectedDate); // Update UI immediately
+
+    // API Call
+    try {
+        await fetch('/api/attendance/mark', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                courseId, 
+                status: finalStatus, 
+                date: dateStr,
+                occurrenceIndex
+            })
+        });
+        
+        // Refresh data to ensure consistency and update global stats
+        fetchCourses();
+        
+    } catch (error) {
+        console.error('Failed to update attendance', error);
+        setSelectedDate(prevSelectedDate); // Revert on error
     }
   };
 
@@ -499,38 +580,143 @@ export default function AttendancePage() {
               </h3>
             </div>
 
-            {/* Classes for this day */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-              {courses.map(course => {
-                // Demo: we'll show placeholder data per course for this date
-                // In a real app, you'd store per-date attendance
-                const attended = selectedDate.log?.courses?.[course.id]?.attended || false;
-                const bunked = selectedDate.log?.courses?.[course.id]?.bunked || false;
-                const hasClass = true; // In real app, check if course has class on this day
-                
-                return (
-                  <div key={course.id} style={{ 
-                    display: 'flex', alignItems: 'center', gap: '12px', padding: '14px',
-                    background: 'var(--bg-tertiary)', borderRadius: '12px'
-                  }}>
-                    <div style={{ 
-                      width: '12px', height: '12px', borderRadius: '50%',
-                      background: attended ? '#10b981' : bunked ? '#ef4444' : 'var(--border-color)'
-                    }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>{course.name}</div>
-                      <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{course.code}</div>
-                    </div>
-                    <div style={{ 
-                      fontSize: '12px', padding: '4px 10px', borderRadius: '8px',
-                      background: attended ? 'rgba(16,185,129,0.2)' : bunked ? 'rgba(239,68,68,0.2)' : 'var(--bg-primary)',
-                      color: attended ? '#10b981' : bunked ? '#ef4444' : 'var(--text-muted)'
-                    }}>
-                      {attended ? '✓ Attended' : bunked ? '✗ Bunked' : '—'}
-                    </div>
+            {/* Classes for this day - SCHEDULE BASED */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px', maxHeight: '400px', overflowY: 'auto' }}>
+              {(() => {
+                  // Determine day name
+                  const dateObj = new Date(selectedDate.year, selectedDate.month, selectedDate.day);
+                  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+                  
+                  // Get schedule for user's semester/section
+                  let schedule = [];
+                  if (session?.user?.semester && session?.user?.section) {
+                      const sectionData = TIMETABLE_DATA.sections.find(
+                          s => s.semester === session.user.semester && s.section === session.user.section
+                      );
+                      if (sectionData && sectionData.schedule[dayName]) {
+                          schedule = sectionData.schedule[dayName].map(slot => {
+                            // Filter labs based on group
+                            if (slot.type === 'LAB') {
+                                let subject = null;
+                                const group = session?.user?.group;
+                                
+                                if (group === 'G1') subject = slot.G1;
+                                else if (group === 'G2') subject = slot.G2;
+                                else subject = `${slot.G1 || ''} / ${slot.G2 || ''}`; // Show both if no group set
+                                
+                                return { ...slot, subject }; // Override subject
+                            }
+                            return slot;
+                          }).filter(slot => slot.subject); // Remove slots with no subject (e.g. empty lab for that group)
+                      }
+                  }
+
+                  // Count occurrences to map specific slots
+                  const courseOccurrences = {}; 
+                  
+                  // Helper to get status from complex log structure (which we need to fetch properly)
+                  // Since we are not storing array-based status in `attendanceLog` yet, we need to RELY on `attendanceLog`
+                  // containing the RAW actions to be accurate.
+                  // Current `fetchCourses` doesn't populate raw actions into `attendanceLog`.
+                  // For this to work perfectly, we need `fetchCourses` to store `actions` in `logMap`.
+                  
+                  // Temporary Workaround:
+                  // The `selectedDate.log` comes from `attendanceLog`.
+                  // We need to update `fetchCourses` to include `actions`.
+                  // Assuming `selectedDate.log.actions` exists (it doesn't yet).
+                  
+                  // Let's assume we will update `fetchCourses` in a moment.
+                  // For now, let's write the rendering logic assuming `selectedDate.log.actions` is available.
+                  const dayActions = selectedDate.log?.actions || [];
+                  
+                  // Combine Schedule + Extra (filtering strictly schedule for now for simplicity, extras can be tricky)
+                  
+                  return schedule.map((slot, idx) => {
+                      if (slot.type === 'BREAK') return null;
+                      
+                      // Find course details
+                      // Slot only has subject name, e.g. "Math". We match by `name` or `code`?
+                      // TIMETABLE_DATA usage of subject name might not match DB course name 1:1.
+                      // We need fuzzy match or user mapping.
+                      // For now, let's try to find a course that includes the subject string.
+                      
+                      const course = courses.find(c => 
+                          (c.name && slot.subject && c.name.toLowerCase().includes(slot.subject.toLowerCase())) ||
+                          (c.code && slot.subject && c.code.toLowerCase().includes(slot.subject.toLowerCase())) ||
+                          (c.name && slot.subject && slot.subject.toLowerCase().includes(c.name.toLowerCase()))
+                      );
+                      
+                      if (!course) {
+                           // Allow handling unknown courses?
+                           return (
+                               <div key={idx} style={{ padding: '10px', background: 'var(--bg-tertiary)', borderRadius: '10px', opacity: 0.5 }}>
+                                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{slot.subject} (Not linked)</div>
+                               </div>
+                           );
+                      }
+
+                      // Determine occurrence index
+                      const occIdx = courseOccurrences[course.id] || 0;
+                      courseOccurrences[course.id] = occIdx + 1;
+                      
+                      // Find status for this specific occurrence
+                      // We filter actions for this course, then take the one at occIdx
+                      const relevantActions = dayActions.filter(a => a.courseId === course.id);
+                      const action = relevantActions[occIdx];
+                      const status = action ? action.status : 'none';
+                      const attended = status === 'attended';
+                      const bunked = status === 'bunked';
+
+                      return (
+                          <div key={`${course.id}-${occIdx}`} style={{ 
+                            display: 'flex', alignItems: 'center', gap: '12px', padding: '14px',
+                            background: 'var(--bg-tertiary)', borderRadius: '12px'
+                          }}>
+                            <div style={{ 
+                              width: '12px', height: '12px', borderRadius: '50%',
+                              background: attended ? '#10b981' : bunked ? '#ef4444' : 'var(--border-color)'
+                            }} />
+                            <div style={{ flex: 1 }}>
+                              <div style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: '14px' }}>
+                                 {course.name} <span style={{fontSize:'10px', opacity:0.7, marginLeft:'4px'}}>({slot.type})</span>
+                              </div>
+                              <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{course.code} • Slot {slot.slot}</div>
+                            </div>
+                            
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                              <button
+                                onClick={() => handleDateEdit(course.id, 'attended', selectedDate, occIdx)}
+                                style={{
+                                  padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                  background: attended ? 'rgba(16,185,129,0.2)' : 'var(--bg-primary)',
+                                  color: attended ? '#10b981' : 'var(--text-muted)',
+                                  fontSize: '12px', fontWeight: 500, transition: 'all 0.2s'
+                                }}
+                              >
+                                Present
+                              </button>
+                              <button
+                                onClick={() => handleDateEdit(course.id, 'bunked', selectedDate, occIdx)}
+                                style={{
+                                  padding: '6px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                  background: bunked ? 'rgba(239,68,68,0.2)' : 'var(--bg-primary)',
+                                  color: bunked ? '#ef4444' : 'var(--text-muted)',
+                                  fontSize: '12px', fontWeight: 500, transition: 'all 0.2s'
+                                }}
+                              >
+                                Bunked
+                              </button>
+                            </div>
+                          </div>
+                      );
+                  });
+              })()}
+              
+              {(!session?.user?.semester || !session?.user?.section) && (
+                  <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
+                      Please update your profile with Semester & Section to see the schedule.
                   </div>
-                );
-              })}
+              )}
             </div>
 
             {/* Summary */}

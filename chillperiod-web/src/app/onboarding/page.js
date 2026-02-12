@@ -19,6 +19,7 @@ export default function OnboardingPage() {
     college: '',
     semester: 4,
     section: 'CSE-A',
+    group: 'G1',
     username: ''
   });
 
@@ -95,7 +96,8 @@ export default function OnboardingPage() {
             name: formData.name,
             RZ_college: formData.college, // Using mapped Key from backend
             semester: formData.semester,
-            section: formData.section
+            section: formData.section,
+            group: formData.group
         })
       });
 
@@ -209,6 +211,21 @@ export default function OnboardingPage() {
                             {SECTIONS.map(sec => (
                                 <option key={sec} value={sec}>{sec}</option>
                             ))}
+                        </select>
+                    </div>
+                     <div style={{ flex: 1 }}>
+                        <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '8px' }}>Group</label>
+                        <select
+                            value={formData.group}
+                            onChange={(e) => handleChange('group', e.target.value)}
+                            style={{
+                                width: '100%', padding: '14px', borderRadius: '12px',
+                                background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)',
+                                color: 'var(--text-primary)', outline: 'none'
+                            }}
+                        >
+                            <option value="G1">G1</option>
+                            <option value="G2">G2</option>
                         </select>
                     </div>
                 </div>

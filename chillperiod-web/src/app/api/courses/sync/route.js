@@ -19,12 +19,12 @@ export async function POST(req) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const { semester, section } = user;
+    const { semester, section, group } = user;
     if (!semester || !section) {
         return NextResponse.json({ error: 'Profile incomplete' }, { status: 400 });
     }
 
-    const subjects = getSubjectsForSection(semester, section);
+    const subjects = getSubjectsForSection(semester, section, group);
     
     if (subjects.length === 0) {
          return NextResponse.json({ message: 'No subjects found in timetable', count: 0 });

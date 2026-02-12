@@ -3,10 +3,14 @@
 import MobileNav from '@/components/MobileNav';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const [currentEmoji, setCurrentEmoji] = useState(0);
   const emojis = ['😎', '🎉', '🔥', '✨', '🚀'];
+
+  const getStartedLink = status === 'authenticated' ? '/attendance' : '/login';
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentEmoji(prev => (prev + 1) % emojis.length), 2000);
@@ -50,10 +54,9 @@ export default function Home() {
           </p>
 
           {/* CTA Buttons */}
-          {/* CTA Buttons */}
           <div id="cta-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center', width: 'fit-content', margin: '0 auto' }}>
             <div style={{ display: 'flex', gap: '16px', width: '100%' }}>
-              <Link href="/login" style={{ 
+              <Link href={getStartedLink} style={{ 
                 flex: 1, padding: '16px 24px', background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', 
                 color: 'white', borderRadius: '14px', fontWeight: 600, fontSize: '16px',
                 textDecoration: 'none', boxShadow: '0 8px 32px rgba(139,92,246,0.3)',
@@ -146,7 +149,7 @@ export default function Home() {
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎓</div>
           <h2 id="cta-heading" style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', marginBottom: '16px' }}>Ready to chill responsibly?</h2>
           <p style={{ color: '#6b7280', marginBottom: '32px' }}>Join students who never stress about attendance again.</p>
-          <Link href="/attendance" style={{ 
+          <Link href={getStartedLink} style={{ 
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             padding: '16px 32px', background: 'white', color: 'black', 
             borderRadius: '14px', fontWeight: 600, textDecoration: 'none'

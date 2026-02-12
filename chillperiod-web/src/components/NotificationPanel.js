@@ -19,6 +19,21 @@ export default function NotificationPanel({ isOpen, onClose }) {
     if (!isOpen || !session?.user?.id) return;
     setLoading(true);
 
+    // Check for missing group
+    if (!session.user.group && !notifications.some(n => n.id === 'missing-group')) {
+        setNotifications(prev => [
+            {
+                _id: 'missing-group',
+                type: 'system',
+                message: '⚠️ Please set your Group (G1/G2) in Profile to get accurate lab schedules!',
+                read: false,
+                link: '/profile',
+                createdAt: new Date().toISOString()
+            },
+            ...prev
+        ]);
+    }
+
     const fetchAll = async () => {
       try {
         // Fetch in-app notifications
@@ -229,11 +244,39 @@ export default function NotificationPanel({ isOpen, onClose }) {
             </div>
           ) : (
             <>
-              {/* Followers */}
+              {/* System/Followers */}
               {(activeTab === 'all' || activeTab === 'followers') && (
                 <div style={{ marginBottom: '16px' }}>
-                  {activeTab === 'all' && followNotifications.length > 0 && (
+                  {activeTab === 'all' && (
                     <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      📢 Notifications
+                    </div>
+                  )}
+                  
+                  {/* System Notifications (Manual Injection) */}
+                  {notifications.filter(n => n.type === 'system').map(notif => (
+                     <Link 
+                        key={notif._id}
+                        href={notif.link || '#'}
+                        onClick={onClose}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '12px',
+                            padding: '12px', background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            borderRadius: '12px', textDecoration: 'none',
+                            marginBottom: '8px'
+                        }}
+                     >
+                        <div style={{ fontSize: '20px' }}>⚠️</div>
+                        <div style={{ flex: 1, color: '#ef4444', fontWeight: 500, fontSize: '13px' }}>
+                            {notif.message}
+                        </div>
+                        <div style={{ color: '#ef4444', fontSize: '12px', fontWeight: 600 }}>Fix →</div>
+                     </Link>
+                  ))}
+
+                  {activeTab === 'all' && followNotifications.length > 0 && (
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '12px' }}>
                       👥 Followers
                     </div>
                   )}

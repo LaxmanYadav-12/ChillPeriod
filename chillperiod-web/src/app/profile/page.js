@@ -23,6 +23,7 @@ export default function ProfilePage() {
   const [editCollege, setEditCollege] = useState('');
   const [editSemester, setEditSemester] = useState(4);
   const [editSection, setEditSection] = useState('CSE-A');
+  const [editGroup, setEditGroup] = useState('G1');
   const [usernameError, setUsernameError] = useState('');
   const [error, setError] = useState(null);
 
@@ -75,6 +76,7 @@ export default function ProfilePage() {
         setEditCollege(data.college || '');
         setEditSemester(data.semester || 4);
         setEditSection(data.section || 'CSE-A');
+        setEditGroup(data.group || 'G1');
       } else {
         const errorData = await res.json().catch(() => ({}));
         console.error('ProfilePage: API error:', res.status, errorData);
@@ -136,7 +138,8 @@ export default function ProfilePage() {
           username: editUsername,
           college: editCollege,
           semester: editSemester,
-          section: editSection
+          section: editSection,
+          group: editGroup
         })
       });
 
@@ -333,7 +336,7 @@ export default function ProfilePage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Semester</label>
                   <select 
@@ -369,6 +372,21 @@ export default function ProfilePage() {
                     {getSectionsForSemester(editSemester).map(sec => (
                       <option key={sec} value={sec}>{sec}</option>
                     ))}
+                  </select>
+                </div>
+                 <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Group</label>
+                  <select 
+                    value={editGroup} 
+                    onChange={e => setEditGroup(e.target.value)}
+                    style={{ 
+                      width: '100%', padding: '12px', background: 'var(--bg-tertiary)', 
+                      border: '1px solid var(--border-color)', borderRadius: '10px', 
+                      color: 'var(--text-primary)', fontSize: '14px', outline: 'none'
+                    }}
+                  >
+                    <option value="G1">G1</option>
+                    <option value="G2">G2</option>
                   </select>
                 </div>
               </div>
@@ -432,7 +450,7 @@ export default function ProfilePage() {
               </p>
             )}
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>
-              📍 {user.college || 'No college set'} • {user.semester ? `${user.semester}th Sem` : ''} {user.section ? `(${user.section})` : ''}
+              📍 {user.college || 'No college set'} • {user.semester ? `${user.semester}th Sem` : ''} {user.section ? `(${user.section})` : ''} {user.group ? `• ${user.group}` : ''}
             </p>
 
             {/* Follower/Following Counts - Real Data */}
