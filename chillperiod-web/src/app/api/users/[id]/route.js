@@ -36,7 +36,7 @@ export async function GET(request, { params }) {
 
     user.attendancePercentage = user.totalClasses > 0 
       ? Math.round((user.attendedClasses / user.totalClasses) * 100) 
-      : 100;
+      : 0;
     user.followerCount = user.followers?.length || 0;
     user.followingCount = user.following?.length || 0;
     

@@ -29,7 +29,10 @@ const categoryEmojis = {
 };
 
 function getStats(total, attended, required) {
-  const percentage = total > 0 ? Math.round((attended / total) * 100) : 100;
+  if (total === 0) {
+    return { percentage: 0, safeToBunk: 0, needToAttend: 0, status: 'neutral' };
+  }
+  const percentage = Math.round((attended / total) * 100);
   const safeToBunk = Math.max(0, Math.floor((attended * 100 / required) - total));
   const needToAttend = percentage >= required ? 0 : Math.ceil((required * total - 100 * attended) / (100 - required));
   let status = 'safe';
@@ -483,7 +486,7 @@ export default function AttendancePage() {
   // Sort spots by upvotes (highest first)
   const sortedSpots = [...chillSpots].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
 
-  const statusColor = overallStats.status === 'danger' ? '#ef4444' : overallStats.status === 'caution' ? '#f59e0b' : '#10b981';
+  const statusColor = overallStats.status === 'neutral' ? 'var(--text-secondary)' : overallStats.status === 'danger' ? '#ef4444' : overallStats.status === 'caution' ? '#f59e0b' : '#10b981';
 
   // Auto-sync subjects if list is empty
   useEffect(() => {
@@ -1241,12 +1244,12 @@ export default function AttendancePage() {
 
               <div style={{ 
                 display: 'inline-block', padding: '12px 24px', borderRadius: '12px',
-                background: overallStats.status === 'safe' ? 'rgba(16,185,129,0.1)' : overallStats.status === 'caution' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)',
+                background: overallStats.status === 'neutral' ? 'var(--bg-tertiary)' : overallStats.status === 'safe' ? 'rgba(16,185,129,0.1)' : overallStats.status === 'caution' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)',
                 border: `1px solid ${statusColor}33`
               }}>
-                <span style={{ fontSize: '28px' }}>{overallStats.status === 'safe' ? '😎' : overallStats.status === 'caution' ? '😰' : '😱'}</span>
+                <span style={{ fontSize: '28px' }}>{overallStats.status === 'neutral' ? '☁️' : overallStats.status === 'safe' ? '😎' : overallStats.status === 'caution' ? '😰' : '😱'}</span>
                 <div style={{ fontWeight: 'bold', color: statusColor, fontSize: '12px', marginTop: '4px' }}>
-                  {overallStats.status === 'safe' ? 'SAFE TO CHILL' : overallStats.status === 'caution' ? 'BE CAREFUL' : 'DANGER ZONE'}
+                  {overallStats.status === 'neutral' ? 'MOOD: CHILL' : overallStats.status === 'safe' ? 'SAFE TO CHILL' : overallStats.status === 'caution' ? 'BE CAREFUL' : 'DANGER ZONE'}
                 </div>
               </div>
             </div>
@@ -1334,7 +1337,8 @@ export default function AttendancePage() {
                   
                   // Determine bar color
                   let barColor = '#10b981'; // Green
-                  if (stats.percentage < 75) barColor = '#ef4444'; // Red
+                  if (stats.status === 'neutral') barColor = 'var(--text-secondary)';
+                  else if (stats.percentage < 75) barColor = '#ef4444'; // Red
                   else if (stats.percentage < 85) barColor = '#f59e0b'; // Yellow (Caution)
 
                   return (
