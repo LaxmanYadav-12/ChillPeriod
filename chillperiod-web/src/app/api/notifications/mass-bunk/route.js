@@ -21,19 +21,26 @@ export async function POST(req) {
     await dbConnect();
 
     // 1. Get current user's details and followers
+    // 1. Get current user's details and followers
     const user = await User.findById(session.user.id).select('name followers');
+    console.log('[MassBunk] Request from User:', session.user.id);
     
     if (!user) {
+      console.log('[MassBunk] User not found');
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    if (!user.followers || user.followers.length === 0) {
+    // Ensure we have a valid array of IDs
+    const followerIds = user.followers ? user.followers.map(f => f.toString()) : [];
+    console.log('[MassBunk] Found followers:', followerIds.length);
+
+    if (followerIds.length === 0) {
       return NextResponse.json({ message: 'No followers to notify', count: 0 });
     }
 
     // 2. Create notifications for all followers
-    const notifications = user.followers.map(followerId => ({
-      userId: followerId,
+    const notifications = followerIds.map(followerId => ({
+      userId: followerId, // Mongoose handles string -> ObjectId conversion
       type: 'mass_bunk',
       title: 'Mass Bunk Alert! 🚨',
       message: `${user.name} is bunking ${subject} (${type || 'Class'}). Want to join?`,
@@ -50,7 +57,8 @@ export async function POST(req) {
     }));
 
     if (notifications.length > 0) {
-      await Notification.insertMany(notifications);
+      const result = await Notification.insertMany(notifications);
+      console.log('[MassBunk] Notifications inserted:', result.length);
     }
 
     return NextResponse.json({ 
