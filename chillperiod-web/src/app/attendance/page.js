@@ -85,6 +85,10 @@ export default function AttendancePage() {
   // Excuse Generator State
   const [excuseTone, setExcuseTone] = useState('funny');
   const [generatedExcuse, setGeneratedExcuse] = useState('');
+  
+  // Success Modal State
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const [todaysClasses, setTodaysClasses] = useState([]);
 
@@ -1104,7 +1108,11 @@ export default function AttendancePage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px', maxHeight: '250px', overflowY: 'auto' }}>
               {courses.map(course => {
                 const isSelected = massBunkSelection.has(course.id);
-                const stats = getStats(course.total, course.attended, requiredPercentage);
+                const stats = getStats(
+                    course.totalClasses || course.total || 0, 
+                    course.attendedClasses || course.attended || 0, 
+                    requiredPercentage
+                );
                 return (
                   <div 
                     key={course.id}
@@ -1161,8 +1169,30 @@ export default function AttendancePage() {
                 style={{ flex: 1, padding: '14px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 500 }}
               >Cancel</button>
               <button 
-                onClick={() => {
-                  // Bunk all selected courses
+                onClick={async () => {
+                  // 1. Notify for selected courses
+                  const selectedCourses = courses.filter(c => massBunkSelection.has(c.id));
+                  let notifiedCount = 0;
+
+                  // Notify for each selected course
+                  // We'll run these in parallel for speed
+                  await Promise.all(selectedCourses.map(async (course) => {
+                      try {
+                          await fetch('/api/notifications/mass-bunk', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ 
+                                  subject: course.name,
+                                  type: course.type || 'Theory' 
+                              })
+                          });
+                          notifiedCount++;
+                      } catch (e) {
+                          console.error('Failed to notify for', course.name, e);
+                      }
+                  }));
+
+                  // 2. Update local state (existing logic)
                   setCourses(prev => prev.map(c => 
                     massBunkSelection.has(c.id) ? { ...c, total: c.total + 1 } : c
                   ));
@@ -1171,6 +1201,13 @@ export default function AttendancePage() {
                     ...prev, 
                     [dateKey]: { ...prev[dateKey], bunked: (prev[dateKey]?.bunked || 0) + massBunkSelection.size } 
                   }));
+                  
+                  // 3. Feedback
+                  if (notifiedCount > 0) {
+                      setSuccessMessage(`Bunked & Notified followers about ${notifiedCount} classes! 📢`);
+                      setShowSuccessModal(true);
+                  }
+
                   setShowMassBunkModal(false);
                   setMassBunkSelection(new Set());
                 }}
@@ -1184,6 +1221,42 @@ export default function AttendancePage() {
                 }}
               >🎉 Confirm Bunks</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mass Bunk Success Modal */}
+      {showSuccessModal && (
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 200,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+        }} onClick={() => setShowSuccessModal(false)}>
+          <div style={{ 
+            background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '24px', 
+            padding: '32px', maxWidth: '400px', width: '100%', textAlign: 'center',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+            transform: 'scale(1)', animation: 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: '56px', marginBottom: '16px' }}>🚀</div>
+            <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '12px' }}>
+              Bunk Successful!
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', marginBottom: '24px', lineHeight: '1.5' }}>
+              {successMessage}
+            </p>
+            
+            <button 
+              onClick={() => setShowSuccessModal(false)}
+              style={{ 
+                width: '100%', padding: '14px', 
+                background: 'linear-gradient(135deg, #8b5cf6, #ec4899)', 
+                color: 'white', border: 'none', borderRadius: '12px', 
+                cursor: 'pointer', fontWeight: 600, fontSize: '16px',
+                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+              }}
+            >
+              Awesome!
+            </button>
           </div>
         </div>
       )}
