@@ -12,45 +12,47 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { subject, type } = await req.json(); // type: 'Theory' | 'Lab'
-
-    if (!subject) {
-      return NextResponse.json({ error: 'Subject is required' }, { status: 400 });
-    }
-
-    await dbConnect();
-
-    // 1. Get current user's details and followers
-    // 1. Get current user's details and followers
-    const user = await User.findById(session.user.id).select('name followers');
-    console.log('[MassBunk] Request from User:', session.user.id);
-    
-    if (!user) {
-      console.log('[MassBunk] User not found');
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    // Ensure we have a valid array of IDs
-    const followerIds = user.followers ? user.followers.map(f => f.toString()) : [];
-    console.log('[MassBunk] Found followers:', followerIds.length);
-
-    if (followerIds.length === 0) {
-      return NextResponse.json({ message: 'No followers to notify', count: 0 });
-    }
-
     // 2. Create notifications for all followers
+    const { subject, type, subjects } = await req.json(); // Support both single and multiple
+
+    if (!subject && (!subjects || subjects.length === 0)) {
+       return NextResponse.json({ error: 'Subject is required' }, { status: 400 });
+    }
+
+    let messageStr = '';
+    let metadataObj = {};
+
+    if (subjects && subjects.length > 0) {
+        // Multiple subjects
+        const names = subjects.map(s => s.subject);
+        const subjectList = names.length > 1 
+            ? names.slice(0, -1).join(', ') + ' & ' + names.slice(-1)
+            : names[0];
+        
+        messageStr = `${user.name} is bunking ${subjectList}. Want to join?`;
+        metadataObj = {
+            subjects, // Store array
+            originalBunkerId: user._id,
+            actionUrl: '/attendance'
+        };
+    } else {
+        // Single subject (Legacy/Single Bunk)
+        messageStr = `${user.name} is bunking ${subject} (${type || 'Class'}). Want to join?`;
+        metadataObj = {
+            subject,
+            classType: type,
+            originalBunkerId: user._id,
+            actionUrl: '/attendance'
+        };
+    }
+
     const notifications = followerIds.map(followerId => ({
       userId: followerId, // Mongoose handles string -> ObjectId conversion
       type: 'mass_bunk',
       title: 'Mass Bunk Alert! 🚨',
-      message: `${user.name} is bunking ${subject} (${type || 'Class'}). Want to join?`,
+      message: messageStr,
       fromUserId: user._id,
-      metadata: {
-        subject,
-        classType: type,
-        originalBunkerId: user._id,
-        actionUrl: '/attendance' 
-      },
+      metadata: metadataObj,
       read: false,
       createdAt: new Date(),
       updatedAt: new Date()

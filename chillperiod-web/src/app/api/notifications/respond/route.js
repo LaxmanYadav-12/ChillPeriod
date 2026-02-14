@@ -25,8 +25,19 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
     }
 
-    const { subject, classType, originalBunkerId } = originalNotification.metadata || {};
+    const { subject, classType, subjects, originalBunkerId } = originalNotification.metadata || {};
     const currentUser = await User.findById(session.user.id).select('name followers');
+
+    // Helper to format subject list
+    let subjectDisplay = '';
+    if (subjects && subjects.length > 0) {
+        const names = subjects.map(s => s.subject);
+        subjectDisplay = names.length > 1 
+            ? names.slice(0, -1).join(', ') + ' & ' + names.slice(-1)
+            : names[0];
+    } else {
+        subjectDisplay = `${subject} (${classType || 'Class'})`;
+    }
 
     // 1. Notify the original bunker (User A) that Current User (User B) joined
     if (originalBunkerId) {
@@ -34,25 +45,25 @@ export async function POST(req) {
         userId: originalBunkerId,
         type: 'bunk_join',
         title: 'Bunk Buddy! 👯',
-        message: `${currentUser.name} is bunking ${subject} with you!`,
+        message: `${currentUser.name} is bunking ${subjectDisplay} with you!`,
         fromUserId: currentUser._id,
-        metadata: { subject, classType },
+        metadata: { subject, classType, subjects }, // Pass all data
         read: false
       });
     }
 
     // 2. CASCADE: Notify Current User's (User B) followers
-    // "User B is bunking [Subject]. Want to join?"
     if (currentUser.followers && currentUser.followers.length > 0) {
       const cascadeNotifications = currentUser.followers.map(followerId => ({
         userId: followerId,
         type: 'mass_bunk', // Same type to allow further cascading!
         title: 'Mass Bunk Alert! 🚨',
-        message: `${currentUser.name} is bunking ${subject} (${classType || 'Class'}). Want to join?`,
+        message: `${currentUser.name} is bunking ${subjectDisplay}. Want to join?`,
         fromUserId: currentUser._id,
         metadata: {
-          subject,
+          subject, // Keep for legacy
           classType,
+          subjects, // Pass array for new logic
           originalBunkerId: currentUser._id, // Chain continues from current user
           isCascade: true
         },

@@ -1170,31 +1170,32 @@ export default function AttendancePage() {
               >Cancel</button>
               <button 
                 onClick={async () => {
-                  // 1. Notify for selected courses
+                  // 1. Notify for selected courses (Single Request)
                   const selectedCourses = courses.filter(c => massBunkSelection.has(c.id));
-                  let notifiedCount = 0;
+                  
+                  if (selectedCourses.length > 0) {
+                      const subjectsPayload = selectedCourses.map(c => ({
+                          subject: c.name,
+                          type: c.type || 'Theory'
+                      }));
 
-                  // Notify for each selected course
-                  // We'll run these in parallel for speed
-                  await Promise.all(selectedCourses.map(async (course) => {
                       try {
                           await fetch('/api/notifications/mass-bunk', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ 
-                                  subject: course.name,
-                                  type: course.type || 'Theory' 
-                              })
+                              body: JSON.stringify({ subjects: subjectsPayload })
                           });
-                          notifiedCount++;
+                          
+                          setSuccessMessage(`Bunked & Notified followers about ${selectedCourses.length} classes! 📢`);
+                          setShowSuccessModal(true);
                       } catch (e) {
-                          console.error('Failed to notify for', course.name, e);
+                          console.error('Failed to notify', e);
                       }
-                  }));
+                  }
 
                   // 2. Update local state (existing logic)
                   setCourses(prev => prev.map(c => 
-                    massBunkSelection.has(c.id) ? { ...c, total: c.total + 1 } : c
+                    massBunkSelection.has(c.id) ? { ...c, totalClasses: c.totalClasses + 1 } : c
                   ));
                   const dateKey = `${calendarYear}-${calendarMonth}-${today.getDate()}`;
                   setAttendanceLog(prev => ({ 
@@ -1202,12 +1203,6 @@ export default function AttendancePage() {
                     [dateKey]: { ...prev[dateKey], bunked: (prev[dateKey]?.bunked || 0) + massBunkSelection.size } 
                   }));
                   
-                  // 3. Feedback
-                  if (notifiedCount > 0) {
-                      setSuccessMessage(`Bunked & Notified followers about ${notifiedCount} classes! 📢`);
-                      setShowSuccessModal(true);
-                  }
-
                   setShowMassBunkModal(false);
                   setMassBunkSelection(new Set());
                 }}
