@@ -16,9 +16,9 @@ ChillPeriod is your go-to companion for managing academic life without the stres
 
 ### 📊 Attendance Tracker
 *   **Per-Course Progress**: Visual bars show exactly where you stand.
-*   **Bunk Calculator**: Know instantly how many classes you can skip ("bunk") while staying safe (e.g., above 75%).
-*   **Mass Bunk**: Quickly mark multiple classes as bunked for those "planned sick days".
-*   **Smart Alerts**: Get warnings when you're entering the "Danger Zone".
+*   **Safety Status**: Color-coded indicators (Green/Yellow/Red) showing if you are Safe, in Caution, or in the Danger Zone.
+*   **Bunk Calculator**: Know instantly how many classes you can skip while maintaining 75%.
+*   **Mass Bunk**: Mark multiple classes as bunked and **trigger a cascading alert** to your followers. If they join, the bunk wave continues!
 
 ### 📍 Chill Spots Discovery & Voting
 *   **Crowdsourced Gems**: Find the best cafes, parks, and gaming zones near campus.
@@ -27,14 +27,14 @@ ChillPeriod is your go-to companion for managing academic life without the stres
 *   **Admin Controls**: Moderators can reset vote counts to keep the leaderboard fresh.
 
 ### 👥 Enhanced Social Profile
-*   **Social Stats**: Track your Followers and Following counts.
+*   **Social Stats**: Track your Followers and Following user counts.
 *   **Profile Sync**: Link **Google** & **Discord** to sync your data across devices.
 *   **Friends Activity**: Keep up with your squad's bunking status and current location.
 *   **Onboarding Flow**: Set your unique username and profile details seamlessly.
 
-### � Smart Notifications
+### 🔔 Smart Notifications
+*   **Cascading Mass Bunk**: When a friend bunks, you get an invite. If you join, your followers get invited too!
 *   **Bunk Alerts**: Get notified if a bunk will drop your attendance below the safe threshold.
-*   **Friend Activity**: Know when your friends are bunking or chilling.
 *   **Class Reminders**: Never miss a lecture with timely notifications.
 *   **Engagement**: Get alerts for new followers and profile interactions.
 
