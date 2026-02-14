@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import dbConnect from '@/lib/db';
+import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import Notification from '@/models/Notification';
 
