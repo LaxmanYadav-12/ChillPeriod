@@ -43,8 +43,7 @@ export async function fetchSubjects(semesterValue, branch) {
     const url = `${SYLLABUSX_API}/btech/${semesterValue}/${branch}`;
     console.log('[Syllabus] Fetching:', url);
     const res = await fetch(url, {
-      cache: 'no-store',
-      next: { revalidate: 0 },
+      next: { revalidate: 3600 },
     });
     if (!res.ok) {
         console.error('[Syllabus] Error:', res.status, res.statusText);

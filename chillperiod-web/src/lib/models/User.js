@@ -59,6 +59,11 @@ const UserSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+// Indexes for performance
+UserSchema.index({ totalBunks: -1 }); // Leaderboard sorting
+UserSchema.index({ "courses.code": 1 }); // Course lookups
+
+
 // Virtuals for computed fields
 UserSchema.virtual('attendancePercentage').get(function() {
   if (this.totalClasses === 0) return 100;
