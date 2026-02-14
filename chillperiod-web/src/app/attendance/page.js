@@ -204,6 +204,30 @@ export default function AttendancePage() {
     setShowBunkModal(true);
   };
 
+  const handleMassBunk = async (course) => {
+    // Simple confirmation or toast could be better, trying simple text for now
+    // Maybe better to put this button INSIDE the Bunk Modal? 
+    // "Bunking? [Confirm Bunk] [Mass Bunk Alert]"
+    // But user asked for "Mass Bunk" button. 
+    // Let's call API directly.
+    try {
+        const res = await fetch('/api/notifications/mass-bunk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                subject: course.name,
+                type: course.type
+            })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            alert(`Mass Bunk Alert Sent to ${data.count} followers! 🚨`);
+        }
+    } catch (err) {
+        console.error('Mass bunk failed', err);
+    }
+  };
+
   const markAttendance = async (courseId, status, spot = null) => {
     // Optimistic UI update
     setCourses(prev => prev.map(c => {
@@ -708,6 +732,20 @@ export default function AttendancePage() {
                                 }}
                               >
                                 Bunked
+                              </button>
+                              
+                              {/* Mass Bunk Trigger */}
+                              <button
+                                onClick={() => handleMassBunk(course)}
+                                title="Mass Bunk Alert"
+                                style={{
+                                  padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border-color)',
+                                  background: 'var(--bg-primary)',
+                                  color: '#f59e0b',
+                                  fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'
+                                }}
+                              >
+                                📢
                               </button>
                             </div>
                           </div>

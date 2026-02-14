@@ -4,13 +4,14 @@ const notificationSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   type: { 
     type: String, 
-    enum: ['follow', 'bunk', 'class_alert'], 
+    enum: ['follow', 'bunk', 'class_alert', 'mass_bunk', 'bunk_join'], 
     required: true 
   },
   title: { type: String, required: true },
   message: { type: String, required: true },
   fromUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   read: { type: Boolean, default: false },
+  metadata: { type: Object }, // Store subject, originalBunkerId, etc.
 }, { timestamps: true });
 
 // Compound index for efficient queries

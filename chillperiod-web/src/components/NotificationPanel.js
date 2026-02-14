@@ -129,6 +129,24 @@ export default function NotificationPanel({ isOpen, onClose }) {
     }
   };
 
+  const handleJoinBunk = async (notificationId) => {
+    try {
+        const res = await fetch('/api/notifications/respond', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notificationId, action: 'join' })
+        });
+        if (res.ok) {
+            // Mark as read and update UI
+            setNotifications(prev => prev.map(n => n._id === notificationId ? { ...n, read: true } : n));
+            setUnreadCount(prev => Math.max(0, prev - 1));
+            // You might want to show a toast here "Joined mass bunk! Followers notified."
+        }
+    } catch (err) {
+        console.error('Failed to join bunk', err);
+    }
+  };
+
   const formatTime = (dateStr) => {
     const diff = (Date.now() - new Date(dateStr)) / 1000;
     if (diff < 60) return 'Just now';
@@ -287,7 +305,63 @@ export default function NotificationPanel({ isOpen, onClose }) {
                       <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>When someone follows you, it'll show here</div>
                     </div>
                   )}
-                  {followNotifications.map(notif => (
+                  {/* Mass Bunk Notifications */}
+                  {notifications.filter(n => n.type === 'mass_bunk').map(notif => (
+                    <div
+                      key={notif._id}
+                      style={{
+                        padding: '12px', background: 'rgba(245,158,11,0.1)',
+                        border: '1px solid rgba(245,158,11,0.3)',
+                        borderRadius: '12px', marginBottom: '8px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
+                        <div style={{
+                          width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
+                          background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '15px', color: 'white', fontWeight: 600, overflow: 'hidden'
+                        }}>
+                          {notif.fromUserId?.image ? (
+                            <img src={notif.fromUserId.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (notif.fromUserId?.name?.[0] || '👤')}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '13px' }}>{notif.title}</div>
+                          <div style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '2px' }}>{notif.message}</div>
+                          <div style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '4px' }}>{formatTime(notif.createdAt)}</div>
+                        </div>
+                      </div>
+                      
+                      {!notif.read && (
+                        <div style={{ display: 'flex', gap: '8px', marginLeft: '50px' }}>
+                          <button
+                            onClick={() => handleJoinBunk(notif._id)}
+                            style={{
+                              flex: 1, padding: '8px', borderRadius: '8px', border: 'none',
+                              background: '#f59e0b', color: 'white', fontSize: '12px',
+                              fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+                            }}
+                          >
+                            <span>🏃</span> Bunk Together
+                          </button>
+                          <button
+                            onClick={() => handleMarkRead(notif._id)}
+                            style={{
+                              padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)',
+                              background: 'var(--bg-primary)', color: 'var(--text-secondary)', fontSize: '12px',
+                              fontWeight: 500, cursor: 'pointer'
+                            }}
+                          >
+                            Ignore
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Standard Follow/BunkJoin Notifications */}
+                  {notifications.filter(n => n.type === 'follow' || n.type === 'bunk_join').map(notif => (
                     <div
                       key={notif._id}
                       onClick={() => !notif.read && handleMarkRead(notif._id)}

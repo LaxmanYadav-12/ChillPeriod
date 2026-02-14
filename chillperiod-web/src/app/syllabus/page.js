@@ -127,90 +127,108 @@ function SubjectCard({ slug, semesterValue, branch, semesterShort }) {
 
           {details && !loading && (
             <>
-              {/* Tabs */}
-              {(hasTheory || hasLab) && (
-                <div style={{ display: 'flex', gap: '0', borderBottom: '1px solid var(--border-color)' }}>
-                  {hasTheory && (
-                    <button
-                      onClick={() => setActiveTab('theory')}
-                      className={`tab-btn ${activeTab === 'theory' ? 'tab-active' : ''}`}
-                    >
-                      📖 Theory ({details.theory.length} Units)
-                    </button>
-                  )}
-                  {hasLab && (
-                    <button
-                      onClick={() => setActiveTab('lab')}
-                      className={`tab-btn ${activeTab === 'lab' ? 'tab-active' : ''}`}
-                    >
-                      🧪 Lab ({details.lab.length} Experiments)
-                    </button>
-                  )}
-                </div>
-              )}
+              {/* Content Sections */}
 
               {/* Theory content */}
-              {activeTab === 'theory' && hasTheory && (
-                <div style={{ padding: '16px 20px' }}>
+              {hasTheory && (
+
+                <div style={{ padding: '0 20px' }}>
+                  {hasTheory && hasLab && <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>Theory</h3>}
+                  <div className="animate-fade-in">
                   {details.theory.map((unit) => {
                     const checkedCount = unit.topics.filter((_, i) => checkedTopics[`${unit.unit}-${i}`]).length;
+                    const progress = Math.round((checkedCount / unit.topics.length) * 100);
+                    
                     return (
-                      <div key={unit.unit} style={{ marginBottom: '20px' }}>
+                      <div key={unit.unit} style={{ marginBottom: '24px' }}>
                         <div style={{
-                          fontSize: '13px',
-                          fontWeight: 700,
-                          color: '#8b5cf6',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          marginBottom: '10px',
+                          margin: '16px 0',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
+                          padding: '0 4px',
                         }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <span style={{
-                              width: '24px', height: '24px',
-                              borderRadius: '6px',
+                              width: '28px', height: '28px',
+                              borderRadius: '8px',
                               background: 'rgba(139, 92, 246, 0.15)',
+                              color: '#8b5cf6',
                               display: 'inline-flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              fontSize: '12px',
+                              fontSize: '13px',
                               fontWeight: 700,
                             }}>
                               {unit.unit}
                             </span>
-                            Unit {unit.unit}
+                            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>Unit {unit.unit}</span>
                           </div>
-                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 500, textTransform: 'none' }}>
-                            {checkedCount}/{unit.topics.length} done
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div className="h-1.5 w-32 sm:w-60 rounded-full overflow-hidden" style={{ background: 'var(--border-color)' }}>
+                                <div style={{ 
+                                    width: `${progress}%`, 
+                                    height: '100%', 
+                                    background: '#8b5cf6', 
+                                    borderRadius: '3px',
+                                    transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)' 
+                                }} />
+                            </div>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500, minWidth: '60px', textAlign: 'right' }}>
+                              {checkedCount}/{unit.topics.length} done
+                            </span>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                           {unit.topics.map((topic, i) => {
                             const isChecked = !!checkedTopics[`${unit.unit}-${i}`];
                             return (
                               <div
                                 key={i}
-                                className={`topic-row ${isChecked ? 'topic-checked' : ''}`}
                                 onClick={() => toggleTopic(unit.unit, i)}
+                                className="relative flex w-full items-center gap-4 rounded-md p-2 text-sm transition-colors lg:text-base hover:bg-[var(--bg-secondary)]"
+                                style={{
+                                  cursor: 'pointer'
+                                }}
                               >
-                                <div className={`topic-checkbox ${isChecked ? 'checkbox-checked' : ''}`}>
-                                  {isChecked && (
-                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                      <path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <button
+                                  type="button"
+                                  role="checkbox"
+                                  aria-checked={isChecked}
+                                  data-state={isChecked ? "checked" : "unchecked"}
+                                  value="on"
+                                  className="peer h-4 w-4 shrink-0 rounded-sm border ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                  style={{
+                                    borderColor: isChecked ? '#8b5cf6' : 'var(--text-muted)',
+                                    backgroundColor: isChecked ? '#8b5cf6' : 'transparent',
+                                    color: 'white'
+                                  }}
+                                >
+                                  <span
+                                    data-state={isChecked ? "checked" : "unchecked"}
+                                    className="flex items-center justify-center text-current"
+                                    style={{ 
+                                      pointerEvents: 'none',
+                                      opacity: isChecked ? 1 : 0,
+                                      color: isChecked ? 'white' : 'currentColor'
+                                    }}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check h-3 w-3" aria-hidden="true">
+                                      <path d="M20 6 9 17l-5-5"></path>
                                     </svg>
-                                  )}
-                                </div>
-                                <span style={{
-                                  fontSize: '14px',
-                                  color: isChecked ? 'var(--text-secondary)' : 'var(--text-primary)',
-                                  textDecoration: isChecked ? 'line-through' : 'none',
-                                  transition: 'all 0.2s ease',
-                                  lineHeight: '1.5',
-                                }}>
+                                  </span>
+                                </button>
+                                <p 
+                                  className={`flex-1 ${isChecked ? 'line-through' : ''}`}
+                                  style={{
+                                    margin: 0,
+                                    color: isChecked ? 'var(--text-secondary)' : 'var(--text-primary)',
+                                    fontSize: '0.875rem',
+                                    lineHeight: '1.5'
+                                  }}
+                                >
                                   {topic}
-                                </span>
+                                </p>
                               </div>
                             );
                           })}
@@ -218,37 +236,45 @@ function SubjectCard({ slug, semesterValue, branch, semesterShort }) {
                       </div>
                     );
                   })}
+                  </div>
                 </div>
               )}
 
               {/* Lab content */}
-              {activeTab === 'lab' && hasLab && (
-                <div style={{ padding: '16px 20px' }}>
-                  {details.lab.map((exp) => (
-                    <div key={exp.experiment} style={{
-                      marginBottom: '12px',
-                      padding: '12px 16px',
-                      background: 'var(--bg-secondary)',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border-color)',
-                    }}>
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                        <span className="badge badge-blue" style={{ flexShrink: 0 }}>
-                          Exp {exp.experiment}
-                        </span>
-                        <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-primary)', lineHeight: '1.5' }}>
-                          {exp.aim?.objective || 'No description available'}
-                        </p>
+              {hasLab && (
+                <div style={{ padding: '20px' }}>
+                   {hasTheory && hasLab && <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)', borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>Lab Experiments</h3>}
+                   <div className="animate-fade-in">
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {details.lab.map((exp, i) => {
+                          const content = typeof exp === 'string' ? exp : (exp.aim?.objective || exp.aim || exp.experiment || 'Experiment');
+                          return (
+                          <div key={i} style={{
+                            padding: '16px',
+                            background: 'var(--bg-secondary)',
+                            borderRadius: '12px',
+                            border: '1px solid var(--border-color)',
+                            fontSize: '14px',
+                            color: 'var(--text-primary)',
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '12px',
+                            lineHeight: '1.5'
+                          }}>
+                            <span style={{ 
+                              color: '#8b5cf6', 
+                              fontWeight: 700, 
+                              minWidth: '24px',
+                              display: 'inline-block' 
+                            }}>
+                              {i + 1}.
+                            </span>
+                            {content}
+                          </div>
+                          );
+                        })}
                       </div>
-                      {exp.aim?.steps?.length > 0 && (
-                        <ul style={{ margin: '8px 0 0', paddingLeft: '20px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                          {exp.aim.steps.map((step, i) => (
-                            <li key={i}>{step}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  ))}
+                   </div>
                 </div>
               )}
 
@@ -462,23 +488,24 @@ export default function SyllabusPage() {
           color: var(--text-secondary);
         }
         .tab-btn {
-          flex: 1;
-          padding: 12px 16px;
+          padding: 12px 0;
           background: none;
           border: none;
           cursor: pointer;
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 500;
           color: var(--text-secondary);
           transition: all 0.2s ease;
           border-bottom: 2px solid transparent;
+          margin-bottom: -1px;
+          white-space: nowrap;
+          text-decoration: none;
         }
         .tab-btn:hover {
           color: var(--text-primary);
-          background: rgba(139, 92, 246, 0.04);
         }
         .tab-active {
-          color: #8b5cf6 !important;
+          color: var(--text-primary) !important;
           border-bottom-color: #8b5cf6 !important;
           font-weight: 600;
         }
@@ -494,41 +521,7 @@ export default function SyllabusPage() {
         .syllabusx-link:hover {
           background: rgba(139, 92, 246, 0.08);
         }
-        .topic-row {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          padding: 10px 14px;
-          border-radius: 10px;
-          border: 1px solid var(--border-color);
-          background: var(--bg-secondary);
-          cursor: pointer;
-          transition: all 0.15s ease;
-          user-select: none;
-        }
-        .topic-row:hover {
-          border-color: rgba(139, 92, 246, 0.3);
-          background: rgba(139, 92, 246, 0.04);
-        }
-        .topic-checked {
-          opacity: 0.65;
-        }
-        .topic-checkbox {
-          width: 20px;
-          height: 20px;
-          min-width: 20px;
-          border-radius: 5px;
-          border: 2px solid var(--border-color);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.15s ease;
-          margin-top: 1px;
-        }
-        .checkbox-checked {
-          background: #8b5cf6;
-          border-color: #8b5cf6;
-        }
+
         .spinner {
           width: 24px;
           height: 24px;
