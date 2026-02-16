@@ -333,7 +333,8 @@ export default function SyllabusPage() {
   }, [selectedSem, selectedBranch]);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)', color: 'var(--text-primary)', paddingTop: '80px' }}>
+      <MobileNav currentPage="syllabus" />
       {/* Header */}
       <div style={{
         padding: '28px 24px 20px',

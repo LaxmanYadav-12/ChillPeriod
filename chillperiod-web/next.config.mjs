@@ -14,11 +14,11 @@ const nextConfig = {
             // Allow self, inline styles (needed by Next.js), and common image/font CDNs
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",  // Next.js requires unsafe-eval in dev
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",  // Next.js requires unsafe-eval in dev
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://nominatim.openstreetmap.org https://*.mongodb.net https://api.syllabusx.live https://syllabusx.live",
+              "connect-src 'self' https://nominatim.openstreetmap.org https://*.mongodb.net https://api.syllabusx.live https://syllabusx.live ws: wss:",
               "frame-ancestors 'none'",
             ].join('; '),
           },

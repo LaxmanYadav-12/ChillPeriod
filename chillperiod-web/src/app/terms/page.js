@@ -1,68 +1,111 @@
-export const metadata = {
-  title: "Terms and Conditions - ChillPeriod",
-  description: "Terms and Conditions for using ChillPeriod.",
-};
+'use client';
+
+import Navbar from '@/components/Navbar';
+import MobileNav from '@/components/MobileNav';
 
 export default function TermsPage() {
   return (
-    <div style={{ 
-      maxWidth: '800px', margin: '0 auto', padding: '120px 24px 80px',
-      color: 'var(--text-primary)', fontFamily: '"Outfit", sans-serif'
-    }}>
-      <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '16px' }}>Terms and Conditions</h1>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '40px' }}>Last updated: {new Date().toLocaleDateString()}</p>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column' }}>
+      
+      <Navbar />
+      <MobileNav currentPage="profile" /> {/* Profile is closest relevant tab */}
 
-      <section style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '12px', color: '#8b5cf6' }}>1. Acceptance of Terms</h2>
-        <p style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-          By accessing and using ChillPeriod ("the Service"), you agree to be bound by these Terms and Conditions. If you do not agree to these terms, you must not use the Service.
-        </p>
-      </section>
+      <div style={{ 
+          maxWidth: '900px', margin: '0 auto', width: '100%', 
+          padding: '120px 24px 60px', 
+          flex: 1 
+      }}>
+        
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h1 style={{ 
+              fontSize: '42px', fontWeight: 'bold', marginBottom: '16px',
+              background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', 
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+          }}>
+            Terms & Conditions
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>
+            Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </p>
+        </div>
 
-      <section style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '12px', color: '#8b5cf6' }}>2. Description of Service</h2>
-        <p style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-          ChillPeriod provides attendance tracking, syllabus information, and social coordination features for students. The Service is a utility tool and is not affiliated with any educational institution.
-        </p>
-      </section>
+        {/* Glass Card Content */}
+        <div style={{ 
+            background: 'var(--card-bg)', 
+            border: '1px solid var(--border-color)',
+            borderRadius: '24px', 
+            padding: '40px',
+            boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)',
+            backdropFilter: 'blur(12px)'
+        }}>
+            
+            <Section title="1. Acceptance of Terms">
+                By accessing and using ChillPeriod ("the Service"), you agree to be bound by these Terms and Conditions. 
+                If you do not agree to these terms, you must not use the Service.
+            </Section>
 
-      <section style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '12px', color: '#8b5cf6' }}>3. User Conduct & Responsibilities</h2>
-        <ul style={{ listStyle: 'disc', paddingLeft: '20px', lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-          <li style={{ marginBottom: '8px' }}>You are responsible for the accuracy of the attendance data you enter.</li>
-          <li style={{ marginBottom: '8px' }}>You agree not to use the "Mass Bunk" features to harass others or disrupt academic activities maliciously.</li>
-          <li style={{ marginBottom: '8px' }}>You must not upload false information regarding "Chill Spots" or public locations.</li>
-          <li style={{ marginBottom: '8px' }}>I reserve the right to suspend accounts that engage in harassment, spam, or abuse.</li>
-        </ul>
-      </section>
+            <Section title="2. Description of Service">
+                ChillPeriod provides attendance tracking, syllabus information, and social coordination features for students. 
+                The Service is a utility tool and is not affiliated with any educational institution.
+            </Section>
 
-      <section style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '12px', color: '#8b5cf6' }}>4. Academic Disclaimer</h2>
-        <p style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-          <strong>ChillPeriod is not responsible for your academic performance or attendance records.</strong> The calculations provided are estimates based on your input. Always verify your official attendance with your college administration. I am not liable for any detentions, grade reductions, or academic penalties you may face.
-        </p>
-      </section>
+            <Section title="3. User Conduct & Responsibilities">
+                <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <li>You are responsible for the accuracy of the attendance data you enter.</li>
+                    <li>You agree not to use the "Mass Bunk" features to harass others or disrupt academic activities maliciously.</li>
+                    <li>You must not upload false information regarding "Chill Spots" or public locations.</li>
+                    <li>We reserve the right to suspend accounts that engage in harassment, spam, or abuse.</li>
+                </ul>
+            </Section>
 
-      <section style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '12px', color: '#8b5cf6' }}>5. Data & Privacy</h2>
-        <p style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-          I collect basic profile information (name, email, college details) to provide the Service. By using the Service, you consent to this collection. I do not sell your personal data to third parties.
-        </p>
-      </section>
+            <Section title="4. Academic Disclaimer">
+                <strong style={{ color: '#ef4444' }}>ChillPeriod is not responsible for your academic performance or attendance records.</strong> 
+                The calculations provided are estimates based on your input. Always verify your official attendance with your college administration. 
+                We are not liable for any detentions, grade reductions, or academic penalties you may face.
+            </Section>
 
-      <section style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '12px', color: '#8b5cf6' }}>6. Termination</h2>
-        <p style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-          I may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms.
-        </p>
-      </section>
+            <Section title="5. Data & Privacy">
+                We collect basic profile information (name, email, college details) to provide the Service. 
+                By using the Service, you consent to this collection. We do not sell your personal data to third parties.
+            </Section>
 
-      <section style={{ marginBottom: '32px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '12px', color: '#8b5cf6' }}>7. Contact</h2>
-        <p style={{ lineHeight: 1.6, color: 'var(--text-secondary)' }}>
-          For any questions about these Terms, please contact me on Instagram <a href="https://www.instagram.com/twokney/" target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa' }}>@twokney</a>.
-        </p>
-      </section>
+            <Section title="6. Termination">
+                We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, 
+                including without limitation if you breach the Terms.
+            </Section>
+
+            <Section title="7. Contact" last>
+                For any questions about these Terms, please contact us on Instagram{' '}
+                <a href="https://www.instagram.com/twokney/" target="_blank" rel="noopener noreferrer" style={{ color: '#8b5cf6', textDecoration: 'none', fontWeight: 600 }}>
+                    @twokney
+                </a>.
+            </Section>
+
+        </div>
+
+        {/* Footer */}
+        <div style={{ textAlign: 'center', marginTop: '48px', color: 'var(--text-muted)', fontSize: '14px' }}>
+            © {new Date().getFullYear()} ChillPeriod Engineering. All rights reserved.
+        </div>
+      </div>
     </div>
   );
+}
+
+function Section({ title, children, last }) {
+    return (
+        <div style={{ marginBottom: last ? 0 : '40px' }}>
+            <h2 style={{ 
+                fontSize: '20px', fontWeight: 'bold', marginBottom: '16px',
+                color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px'
+            }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#8b5cf6' }}></span>
+                {title}
+            </h2>
+            <div style={{ color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '16px' }}>
+                {children}
+            </div>
+        </div>
+    );
 }

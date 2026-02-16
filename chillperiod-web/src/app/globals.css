@@ -1,11 +1,31 @@
 @import "tailwindcss";
 
-/* Theme Variables */
+/* Dark Theme (Default) & Root Variables */
 :root {
   --transition-speed: 300ms;
+  
+  /* Default to Dark Mode Variables */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-tertiary: #1a1a24;
+  --border-color: #2a2a3a;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --accent-purple: #8b5cf6;
+  --accent-cyan: #06b6d4;
+  --accent-pink: #ec4899;
+  --background: #0a0a0f;
+  --foreground: #ededed;
+  --card-bg: #12121a;
+  --card-border: #2a2a3a;
+  --hover-bg: #1a1a24;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
 }
 
-/* Dark Theme (Default) */
+/* Explicit Dark Theme (overrides if needed, though identical to root default) */
 [data-theme="dark"] {
   --bg-primary: #0a0a0f;
   --bg-secondary: #12121a;

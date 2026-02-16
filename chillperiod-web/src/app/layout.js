@@ -1,10 +1,11 @@
 import "./globals.css";
-import { Inter } from 'next/font/google';
+import { Inter, Outfit } from 'next/font/google';
 import { AuthProvider } from '@/components/AuthProvider';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import NotificationManager from '@/components/NotificationManager';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 
 export const metadata = {
   title: "ChillPeriod - Find Your Chill Spot & Track Attendance",
@@ -15,10 +16,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={`${inter.variable} ${outfit.variable} font-sans`} suppressHydrationWarning>
         <AuthProvider>
           <ThemeProvider>
-            <div className="min-h-screen">
+            <div className="min-h-screen font-sans">
               <NotificationManager />
               {children}
             </div>

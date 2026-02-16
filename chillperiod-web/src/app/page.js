@@ -161,9 +161,14 @@ export default function Home() {
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '8px' }}>
           Follow me on instagram <a href="https://www.instagram.com/twokney/" target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa' }}>@twokney</a>.
         </p>
-          <Link href="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'underline', marginRight: '16px' , fontSize: '14px' }}>
-            Terms & Conditions
-          </Link>
+          <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+            <Link href="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'underline', fontSize: '14px' }}>
+              Terms & Conditions
+            </Link>
+            <Link href="/docs" style={{ color: 'var(--text-secondary)', textDecoration: 'underline', fontSize: '14px' }}>
+              Documentation
+            </Link>
+          </div>
       </footer>
 
       {/* Responsive Styles */}

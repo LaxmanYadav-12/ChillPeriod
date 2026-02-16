@@ -107,7 +107,9 @@ export default function MobileNav({ currentPage = 'home' }) {
             background: 'var(--bg-primary)', 
             backdropFilter: 'blur(12px)',
             zIndex: 40, padding: '24px',
-            display: 'none'
+            display: 'none',
+            overflowY: 'auto',
+            paddingBottom: '120px'
           }}
           className="mobile-menu"
           onClick={() => setIsOpen(false)}
