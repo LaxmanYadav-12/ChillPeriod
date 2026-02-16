@@ -3,6 +3,7 @@
 import MobileNav from '@/components/MobileNav';
 import ThemeToggle from '@/components/ThemeToggle';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useSession, signOut, signIn } from 'next-auth/react';
 import { getSemesters, getSectionsForSemester } from '@/lib/data/timetable';
@@ -457,7 +458,16 @@ export default function ProfilePage() {
                 fontSize: '48px', overflow: 'hidden'
               }}>
                 {user.image ? (
-                  <img src={user.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    <Image 
+                      src={user.image} 
+                      alt={user.name} 
+                      fill
+                      sizes="120px"
+                      priority
+                      style={{ objectFit: 'cover' }} 
+                    />
+                  </div>
                 ) : '👤'}
               </div>
             </div>

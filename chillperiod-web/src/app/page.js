@@ -158,9 +158,12 @@ export default function Home() {
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
           © 2026 ChillPeriod. Made with ❤️ by <a href="https://github.com/DarkModeTony" target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa' }}>Tony</a>.
         </p>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '8px' }}>
           Follow me on instagram <a href="https://www.instagram.com/twokney/" target="_blank" rel="noopener noreferrer" style={{ color: '#a78bfa' }}>@twokney</a>.
         </p>
+          <Link href="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'underline', marginRight: '16px' , fontSize: '14px' }}>
+            Terms & Conditions
+          </Link>
       </footer>
 
       {/* Responsive Styles */}

@@ -1,9 +1,11 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { COLLEGES } from '@/lib/data/colleges';
+import TermsModal from '@/components/TermsModal';
+import { deleteUser } from '@/app/admin/actions';
 
 // Mock data for dropdowns (in real app, could come from config)
 const SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -27,6 +29,24 @@ export default function OnboardingPage() {
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  
+  // Terms & Conditions State
+  const [showTerms, setShowTerms] = useState(true);
+
+  const handleDeclineTerms = async () => {
+    if (!session?.user?.id) return;
+    
+    try {
+      // 1. Delete the user from DB
+      await deleteUser(session.user.id);
+      // 2. Sign out and redirect
+      await signOut({ callbackUrl: '/' });
+    } catch (err) {
+      console.error("Error declining terms:", err);
+      // Fallback: just sign out if deletion fails
+      await signOut({ callbackUrl: '/' });
+    }
+  };
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -124,10 +144,20 @@ export default function OnboardingPage() {
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
       fontFamily: '"Outfit", sans-serif'
     }}>
+      {/* Terms Modal - Force user to accept first */}
+      {showTerms && (
+        <TermsModal 
+          onAccept={() => setShowTerms(false)} 
+          onDecline={handleDeclineTerms} 
+        />
+      )}
+
       <div style={{ 
         maxWidth: '500px', width: '100%', 
         background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-        borderRadius: '24px', padding: '40px'
+        borderRadius: '24px', padding: '40px',
+        filter: showTerms ? 'blur(4px)' : 'none', // Blur background when modal is open
+        pointerEvents: showTerms ? 'none' : 'auto' // Disable interaction
       }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚀</div>

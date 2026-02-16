@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function UserListModal({ isOpen, onClose, title, users, loading }) {
   if (!isOpen) return null;
@@ -63,7 +64,15 @@ export default function UserListModal({ isOpen, onClose, title, users, loading }
                     background: 'var(--bg-tertiary)', flexShrink: 0
                   }}>
                     {user.image ? (
-                      <img src={user.image} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                        <Image 
+                          src={user.image} 
+                          alt={user.name} 
+                          fill
+                          sizes="40px"
+                          style={{ objectFit: 'cover' }} 
+                        />
+                      </div>
                     ) : (
                       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
                         👤

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
 
@@ -34,12 +35,17 @@ export default function Navbar() {
                   background: 'none', border: 'none', cursor: 'pointer', padding: '4px'
                 }}
               >
-                <img 
-                  src={session.user.image || `https://cdn.discordapp.com/avatars/${session.user.discordId}/${session.user.avatar}.png`}
-                  alt="avatar"
-                  style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid #8b5cf6' }}
-                  onError={(e) => { e.target.src = 'https://cdn.discordapp.com/embed/avatars/0.png'; }}
-                />
+                <div style={{ position: 'relative', width: '32px', height: '32px' }}>
+                  <Image 
+                    src={session.user.image || `https://cdn.discordapp.com/avatars/${session.user.discordId}/${session.user.avatar}.png`}
+                    alt="avatar"
+                    fill
+                    sizes="32px"
+                    style={{ borderRadius: '50%', border: '2px solid #8b5cf6', objectFit: 'cover' }}
+                    onError={(e) => { e.currentTarget.src = 'https://cdn.discordapp.com/embed/avatars/0.png'; }}
+                    unoptimized // Use unoptimized if using external CDNs that might not be fully configured in next.config yet or for simpler fallback handling
+                  />
+                </div>
                 <span style={{ color: 'white', fontSize: '14px', fontWeight: 500 }}>
                   {session.user.name || session.user.username}
                 </span>
