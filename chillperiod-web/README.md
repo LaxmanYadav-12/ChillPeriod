@@ -30,7 +30,8 @@ ChillPeriod is your go-to companion for managing academic life without the stres
 *   **Social Stats**: Track your Followers and Following user counts.
 *   **Profile Sync**: Link **Google** & **Discord** to sync your data across devices.
 *   **Friends Activity**: Keep up with your squad's bunking status and current location.
-*   **Onboarding Flow**: Set your unique username and profile details seamlessly.
+*   **Onboarding Flow**: Set your unique username and profile details seamlessly with **Terms & Conditions** acceptance.
+*   **Profile Management**: Edit your details or permanently **Delete Account** if you wish to leave.
 
 ### 🔔 Smart Notifications
 *   **Cascading Mass Bunk**: When a friend bunks, you get an invite. If you join, your followers get invited too!
@@ -41,6 +42,15 @@ ChillPeriod is your go-to companion for managing academic life without the stres
 ### �📅 Timetable Sync
 *   **Automatic Population**: Select your Semester & Section to instantly load your schedule.
 *   **Today's View**: See your daily schedule at a glance on the dashboard.
+
+### 🛡️ Privacy & Security
+*   **Terms & Conditions**: Mandatory acceptance to ensure a safe community.
+*   **Data Control**: Full ownership of your data with immediate deletion options.
+*   **Privacy First**: Minimal data collection, focused only on essential academic features.
+
+### ⚡ Performance
+*   **Optimized Assets**: Next.js Image Optimization for lightning-fast load times.
+*   **Dynamic Loading**: Smart code-splitting for a responsive experience on any device.
 
 ---
 
