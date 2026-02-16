@@ -84,6 +84,13 @@ export default auth((req) => {
         return response;
     }
 
+    // Admin Protection
+    if (nextUrl.pathname.startsWith('/admin')) {
+        if (!isLoggedIn || req.auth.user.role !== 'admin') {
+            return NextResponse.redirect(new URL('/', nextUrl));
+        }
+    }
+
     if (isLoggedIn) {
         const hasCompletedOnboarding = req.auth.user.hasCompletedOnboarding;
 

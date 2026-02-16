@@ -41,6 +41,9 @@ export const authConfig = {
     },
     async session({ session, token }) {
         session.user.id = token.id;
+        session.user.username = token.username;
+        session.user.role = token.role;
+        session.user.group = token.group;
         session.user.hasCompletedOnboarding = token.hasCompletedOnboarding;
         session.user.semester = token.semester;
         session.user.section = token.section;

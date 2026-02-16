@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { useSession, signOut, signIn } from 'next-auth/react';
 import { getSemesters, getSectionsForSemester } from '@/lib/data/timetable';
 import UserListModal from '@/components/UserListModal';
+import { deleteUser } from '@/app/admin/actions';
 
 import { useRouter } from 'next/navigation';
 
@@ -32,6 +33,9 @@ export default function ProfilePage() {
   const [modalTitle, setModalTitle] = useState('');
   const [modalUsers, setModalUsers] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     // Safety timeout for loading state
@@ -189,6 +193,23 @@ export default function ProfilePage() {
       console.error(err);
       // Revert on error
       setUserData(prev => ({ ...prev, notificationsEnabled: previousState }));
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteUser(session.user.id);
+      if (result.success) {
+        await signOut({ callbackUrl: '/login' });
+      } else {
+        alert(result.error || "Failed to delete account");
+        setIsDeleting(false);
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert("An error occurred while deleting your account.");
+      setIsDeleting(false);
     }
   };
 
@@ -831,6 +852,34 @@ export default function ProfilePage() {
             </button>
           </div>
 
+          {/* Danger Zone */}
+          <div style={{ 
+            background: 'var(--card-bg)', border: '1px solid rgba(239, 68, 68, 0.3)', 
+            borderRadius: '20px', padding: '24px', marginBottom: '24px' 
+          }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#ef4444', marginBottom: '16px' }}>
+              🚨 Danger Zone
+            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                 <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>Delete Account</div>
+                 <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
+                   Permanently remove your account and all data.
+                 </div>
+              </div>
+              <button 
+                onClick={() => setShowDeleteConfirm(true)}
+                style={{ 
+                  padding: '10px 20px', background: 'rgba(239, 68, 68, 0.1)', 
+                  color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '10px', 
+                  cursor: 'pointer', fontWeight: 600, fontSize: '14px'
+                }}
+              >
+                Delete Account
+              </button>
+            </div>
+          </div>
+
           {/* Quick Actions */}
           <div style={{ display: 'flex', gap: '12px' }} id="profile-actions">
             <Link href="/attendance" style={{ 
@@ -910,6 +959,51 @@ export default function ProfilePage() {
         users={modalUsers} 
         loading={modalLoading}
       />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div style={{ 
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 100,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+        }} onClick={() => setShowDeleteConfirm(false)}>
+          <div style={{ 
+            background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '24px', 
+            padding: '32px', maxWidth: '400px', width: '100%', textAlign: 'center'
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+            <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '12px' }}>
+              Are you sure?
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px', lineHeight: '1.5' }}>
+              This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+            </p>
+            
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={() => setShowDeleteConfirm(false)}
+                style={{ 
+                  flex: 1, padding: '12px', background: 'var(--bg-tertiary)', 
+                  color: 'var(--text-primary)', border: '1px solid var(--border-color)', 
+                  borderRadius: '10px', cursor: 'pointer', fontWeight: 500 
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                style={{ 
+                  flex: 1, padding: '12px', background: '#ef4444', color: 'white', 
+                  border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500,
+                  opacity: isDeleting ? 0.7 : 1
+                }}
+              >
+                {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
