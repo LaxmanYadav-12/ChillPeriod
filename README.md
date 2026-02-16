@@ -28,10 +28,20 @@ When you do decide to bunk, ChillPeriod suggests the best "Chill Spots" near cam
 ### 👥 Social & Profile (NEW)
 *   **Connect**: Follow friends and track their bunking status.
 *   **Profile Sync**: Link **Google** & **Discord** accounts for seamless data access.
-*   **Leaderboard**: Compete for top spots on the global bunking leaderboard.
+*   **Onboarding Flow**: Seamless profile setup with **Terms & Conditions** acceptance.
+*   **Manage Account**: Full control over your data with **Delete Account** options.
 
 ### 📅 Timetable Sync
 *   **Auto-Sync**: Select your Semester & Section to instantly load your official schedule.
+
+### 🛡️ Privacy & Security (NEW)
+*   **Terms & Conditions**: Mandatory acceptance to ensure a safe community.
+*   **Data Control**: Full ownership of your data with immediate deletion options.
+*   **Privacy First**: Minimal data collection, focused only on essential academic features.
+
+### ⚡ Performance
+*   **Optimized Assets**: Next.js Image Optimization for lightning-fast load times.
+*   **Dynamic Loading**: Smart code-splitting for a responsive experience on any device.
 
 ---
 
