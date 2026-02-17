@@ -3,7 +3,7 @@
 /* Dark Theme (Default) & Root Variables */
 :root {
   --transition-speed: 300ms;
-  
+
   /* Default to Dark Mode Variables */
   --bg-primary: #0a0a0f;
   --bg-secondary: #12121a;
@@ -79,7 +79,7 @@ html,
 body {
   width: 100%;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {

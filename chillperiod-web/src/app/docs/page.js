@@ -2,148 +2,122 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
+import MobileNav from '@/components/MobileNav';
 import { useTheme } from '@/contexts/ThemeContext';
+
+import MermaidDiagram from '@/components/MermaidDiagram';
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState('');
   const { theme } = useTheme();
 
   useEffect(() => {
-    // Theme-specific colors for Mermaid
-    const mermaidVariables = theme === 'light' ? {
-      darkMode: false,
-      background: '#FAFBFC',
-      primaryColor: '#8b5cf6',
-      lineColor: '#D0D7DE',
-      textColor: '#1F2937',
-      mainBkg: '#FAFBFC',
-    } : {
-      darkMode: true,
-      background: '#0a0a0f',
-      primaryColor: '#8b5cf6',
-      lineColor: '#2a2a3a',
-      textColor: '#ffffff',
-      mainBkg: '#0a0a0f',
-    };
-
-    // Load Mermaid
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
-    script.async = true;
-    
-    script.onload = () => {
-      try {
-        window.mermaid.initialize({ 
-          startOnLoad: false, 
-          theme: 'base',
-          themeVariables: mermaidVariables,
-          fontFamily: 'Outfit, sans-serif'
-        });
-        window.mermaid.run({ querySelector: '.mermaid' });
-      } catch (err) { console.error(err); }
-    };
-    
-    // ScrollSpy - Manual Calculation for precision
+    // ScrollSpy
     const handleScroll = () => {
       const sections = document.querySelectorAll('section[id]');
-      const scrollPosition = window.scrollY + 150; // Offset for sticky header/padding
-
-      // Find the current section
+      const scrollPosition = window.scrollY + 150;
       let current = '';
-      
       sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.offsetHeight;
-        
-        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+        if (scrollPosition >= section.offsetTop && scrollPosition < section.offsetTop + section.offsetHeight) {
           current = section.getAttribute('id');
         }
       });
-
-      // Fallback: if we are at the bottom, highlight the last one
       if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
          current = sections[sections.length - 1]?.getAttribute('id') || '';
       }
-
       setActiveSection(current);
     };
 
     window.addEventListener('scroll', handleScroll);
-    // Initial check
     handleScroll();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      if(document.body.contains(script)) document.body.removeChild(script);
     };
-  }, [theme]); 
+  }, [theme]);
+
+ 
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', position: 'relative' }}>
       
-      <Navbar />
+      <MobileNav currentPage="docs" />
+
+      {/* Background Gradient - Matches Home Page */}
+      <div style={{
+        position: 'fixed', top: '-200px', left: '50%', transform: 'translateX(-50%)',
+        width: '800px', height: '800px', background: 'radial-gradient(circle, rgba(139,92,246,0.15) 0%, transparent 70%)',
+        pointerEvents: 'none', zIndex: 0
+      }} />
 
       {/* Main Container */}
-      <div style={{ 
-          maxWidth: '1400px', margin: '0 auto', padding: '120px 24px 60px 24px', 
-          display: 'flex', gap: '60px', alignItems: 'flex-start' /* Critical for sticky to work */
+      <div style={{
+          maxWidth: '1600px', margin: '0 auto', padding: '100px 32px 60px 32px',
+          display: 'flex', gap: '80px', position: 'relative', zIndex: 1
       }}>
-        
-        {/* Sidebar - Floating, No Borders, Clean */}
-        <aside style={{ 
-            width: '260px', flexShrink: 0, position: 'sticky', top: '140px', 
-            maxHeight: 'calc(100vh - 160px)', overflowY: 'auto'
-        }} className="hidden lg:block scrollbar-hide">
-            <h4 style={{ 
-                fontSize: '12px', fontWeight: 'bold', color: '#8b5cf6', 
-                textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px' 
-            }}>
-                Documentation
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <NavLink id="intro" label="Introduction" active={activeSection} />
-                <NavLink id="architecture" label="Architecture" active={activeSection} />
-                <NavLink id="tech-stack" label="Tech Stack Details" active={activeSection} />
-                <NavLink id="auth" label="Authentication" active={activeSection} />
-                <NavLink id="database" label="Database Schema" active={activeSection} />
-                <NavLink id="components" label="Component Library" active={activeSection} />
-            </div>
-        </aside>
+
+        {/* Sidebar Wrapper - Flex Item (Stretches to match Main height) */}
+        <div style={{ width: '260px', flexShrink: 0, alignSelf: 'stretch' }} className="hidden lg:block">
+            {/* Sticky Inner - Sticks within the Wrapper */}
+            <aside style={{
+                position: 'sticky', top: '120px', zIndex: 100,
+                height: 'calc(100vh - 140px)', overflowY: 'auto',
+                display: 'flex', flexDirection: 'column'
+            }} className="scrollbar-hide">
+                <h4 style={{
+                    fontSize: '12px', fontWeight: 'bold', color: '#8b5cf6',
+                    textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '24px'
+                }}>
+                    Documentation
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <NavLink id="intro" label="Introduction" active={activeSection} />
+                    <NavLink id="architecture" label="Architecture" active={activeSection} />
+                    <NavLink id="live-logic" label="Live Social Logic" active={activeSection} />
+                    <NavLink id="tech-stack" label="Tech Stack Details" active={activeSection} />
+                    <NavLink id="auth" label="Authentication" active={activeSection} />
+                    <NavLink id="attendance-logic" label="Attendance Algorithm" active={activeSection} />
+                    <NavLink id="database" label="Database Schema" active={activeSection} />
+                    <NavLink id="components" label="Component Library" active={activeSection} />
+                    <NavLink id="api" label="API Reference" active={activeSection} />
+                    <NavLink id="roadmap" label="Future Roadmap" active={activeSection} />
+                </div>
+            </aside>
+        </div>
 
         {/* Content Area */}
-        <main style={{ flex: 1, minWidth: 0 }}>
-            
+        <main style={{ flex: 1, minWidth: 0, maxWidth: '960px' }}>
+
             {/* Hero */}
             <section id="intro" style={{ marginBottom: '120px', scrollMarginTop: '120px' }}>
-                <div style={{ 
+                <div style={{
                     display: 'inline-flex', alignItems: 'center', gap: '8px',
-                    padding: '6px 16px', background: 'rgba(139,92,246,0.1)', 
+                    padding: '6px 16px', background: 'rgba(139,92,246,0.1)',
                     border: '1px solid rgba(139,92,246,0.2)', borderRadius: '20px', marginBottom: '24px'
                 }}>
                     <span style={{ fontSize: '12px', color: '#a78bfa', fontWeight: 600 }}>v1.0.0 Stable</span>
                 </div>
-                
-                <h1 style={{ 
+
+                <h1 style={{
                     fontSize: '64px', fontWeight: 'bold', lineHeight: 1.1, marginBottom: '24px',
                     color: 'var(--text-primary)'
                 }}>
                     Bunk <span style={{ background: 'linear-gradient(135deg, #8b5cf6, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Smarter.</span>
                 </h1>
-                
+
                 <p style={{ fontSize: '20px', color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: '800px', marginBottom: '48px' }}>
-                    ChillPeriod bridges the gap between academic responsibility and social freedom. 
+                    ChillPeriod bridges the gap between academic responsibility and social freedom.
                     The technical foundation behind the ultimate student utility platform.
                 </p>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-                    <InfoCard 
-                        icon="📱" title="Mobile First" 
-                        desc="Designed for touch. Interactions are fluid, responsive, and natural on all devices." 
+                    <InfoCard
+                        icon="📱" title="Mobile First"
+                        desc="Designed for touch. Interactions are fluid, responsive, and natural on all devices."
                     />
-                    <InfoCard 
-                        icon="⚡" title="Real-time Social" 
-                        desc="Coordinate chills and bunks instantly using live WebSocket polling." 
+                    <InfoCard
+                        icon="⚡" title="Real-time Social"
+                        desc="Coordinate chills and bunks instantly using live WebSocket polling."
                     />
                 </div>
             </section>
@@ -163,14 +137,57 @@ export default function DocsPage() {
                     borderRadius: '24px', padding: '40px', overflow: 'hidden',
                     boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)'
                 }}>
-                     <div className="mermaid" style={{ display: 'flex', justifyContent: 'center', opacity: 0.9 }}>
-                        {`graph TD
+                     <MermaidDiagram chart={`graph TD
                           Client[Client Browser] --> CDN[Vercel Edge]
                           CDN --> Static[Assets]
                           CDN --> Server[Next.js Server]
                           Server --> Page[SSR Pages]
                           Server --> API[API Routes]
-                          API --> DB[(MongoDB Atlas)]`}
+                          API --> DB[(MongoDB Atlas)]`} />
+                </div>
+
+                <div style={{ marginTop: '48px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>Deployment Pipeline</h3>
+                    <p style={{ fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '24px' }}>
+                        Automated CI/CD implementation using Vercel.
+                    </p>
+                     <div style={{ 
+                        background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
+                        borderRadius: '24px', padding: '40px', overflow: 'hidden'
+                    }}>
+                         <MermaidDiagram chart={`flowchart LR
+    Dev[Developer] -->|Git Push| Repo[GitHub]
+    Repo -->|Webhook| Vercel[Vercel Cloud]
+    Vercel -->|Build| Build[Next.js Build]
+    Build -->|Success| Edge[Edge Network]
+    Build -->|Fail| Notify[Notify Dev]`} />
+                    </div>
+                </div>
+            </section>
+
+            {/* Live Social Logic */}
+            <section id="live-logic" style={{ marginBottom: '120px', scrollMarginTop: '120px' }}>
+                <SectionTitle title="Live Social Logic" subtitle="State machine driving the real-time status system." />
+                
+                <p style={{ fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '32px', maxWidth: '800px' }}>
+                    The core of ChillPeriod's social interaction is the <strong>Status State Machine</strong>. Users transition between states based on explicit actions (marking attendance) 
+                    or passive checking-in. This logic ensures that the "Live Feed" always reflects the most current and relevant activity of your friend circle.
+                </p>
+
+                <div style={{ 
+                    background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
+                    borderRadius: '24px', padding: '40px', overflow: 'hidden',
+                    boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)'
+                }}>
+                        <div className="mermaid" style={{ display: 'flex', justifyContent: 'center', opacity: 0.9 }}>
+                        {`stateDiagram-v2
+                            [*] --> Idle
+                            Idle --> Chilling: Check-in at Spot
+                            Idle --> Bunking: Class Marked 'Mass Bunk'
+                            Chilling --> Idle: 3 Hour Timer Expiry
+                            Bunking --> Idle: End of Day Reset
+                            Chilling --> Bunking: Override Status
+                            Bunking --> Chilling: Override Status`}
                     </div>
                 </div>
             </section>
@@ -212,6 +229,26 @@ export default function DocsPage() {
                     </div>
 
                 </div>
+
+                <div style={{ marginTop: '48px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>Data Fetching Strategy</h3>
+                    <p style={{ fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '24px', maxWidth: '800px' }}>
+                        We use a hybrid data fetching model. <strong>React Server Components (RSC)</strong> handle initial data (user profile, spots list) directly from the DB on the server.
+                        <strong>Client Components</strong> use SWR for revalidation and real-time updates (like the 3-minute poll for friends activity), ensuring the UI stays fresh without heavy page reloads.
+                    </p>
+                     <div style={{ 
+                        background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
+                        borderRadius: '24px', padding: '40px', overflow: 'hidden'
+                    }}>
+                         <MermaidDiagram chart={`flowchart TD
+    RSC[Server Component] -->|Direct DB Call| DB[(MongoDB)]
+    Client[Client Component] -->|SWR Hook| API[API Route]
+    API -->|Handler| DB
+    DB -->|JSON| API
+    API -->|Update| Client
+    DB -->|Initial HTML| RSC`} />
+                    </div>
+                </div>
             </section>
 
              {/* Auth Flow */}
@@ -228,15 +265,40 @@ export default function DocsPage() {
                     background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
                     borderRadius: '24px', padding: '40px', overflow: 'hidden'
                 }}>
-                    <div className="mermaid" style={{ display: 'flex', justifyContent: 'center', opacity: 0.9 }}>
-                        {`sequenceDiagram
-                          User->>App: Login
-                          App->>NextAuth: signIn()
-                          NextAuth->>Provider: OAuth
-                          Provider-->>NextAuth: Token
-                          NextAuth->>DB: Upsert User
-                          NextAuth-->>App: Set Cookie`}
-                    </div>
+                    <MermaidDiagram chart={`    sequenceDiagram
+    User->>App: Login
+    App->>NextAuth: signIn()
+    NextAuth->>Provider: OAuth
+    Provider-->>NextAuth: Token
+    NextAuth->>DB: Upsert User
+    NextAuth-->>App: Set Cookie`} />
+                </div>
+            </section>
+            
+            {/* Attendance Logic */}
+             <section id="attendance-logic" style={{ marginBottom: '120px', scrollMarginTop: '120px' }}>
+                <SectionTitle title="Attendance Algorithm" subtitle="Logic behind the 'Safe Bunk' calculation." />
+                
+                <p style={{ fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '32px', maxWidth: '800px' }}>
+                    The system continuously evaluates your attendance percentage against the target threshold (default 75%). 
+                    It suggests whether you can safely bunk a class or if you need to attend to avoid debarment.
+                </p>
+
+                <div style={{ 
+                    background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
+                    borderRadius: '24px', padding: '40px', overflow: 'hidden'
+                }}>
+                     <MermaidDiagram chart={`    flowchart TD
+    Start[Class Scheduled] --> Check{Marked Attended?}
+    Check -->|Yes| Inc[Increment Attended & Total]
+    Check -->|No| Bunk{Marked Bunk?}
+    Bunk -->|Yes| IncTotal[Increment Total Only]
+    Bunk -->|No| Ignore[Ignore / Cancelled]
+    Inc --> Calc[Calc % = Attended / Total]
+    IncTotal --> Calc
+    Calc --> Evaluate{Is % > 75%?}
+    Evaluate -->|Yes| Safe[Status: Safe to Bunk]
+    Evaluate -->|No| Danger[Status: Must Attend]`} />
                 </div>
             </section>
             
@@ -249,6 +311,35 @@ export default function DocsPage() {
                    <strong>Spots</strong> are stored in a separate collection with geospatial indexing planned for future location-based features. 
                    <strong>Attendance</strong> records are embedded or referenced to allow for efficient aggregation of stats per semester.
                 </p>
+
+                <div style={{ 
+                    background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
+                    borderRadius: '24px', padding: '40px', overflow: 'hidden', marginBottom: '48px'
+                }}>
+                    <MermaidDiagram chart={`classDiagram
+    class User {
+        +String name
+        +String email
+        +ObjectId[] followers
+        +ObjectId[] following
+        +Preferences prefs
+    }
+    class Spot {
+        +String name
+        +GeoJson location
+        +String[] tags
+        +Int visits
+    }
+    class Attendance {
+        +String subject
+        +Int totalClasses
+        +Int attended
+        +Boolean isLab
+    }
+    User "1" --> "*" Attendance : tracks
+    User "1" --> "*" Spot : upvotes/visits
+    User "1" --> "*" User : follows`} />
+                </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
                     <InfoCard 
@@ -264,6 +355,18 @@ export default function DocsPage() {
                         desc="Static JSON structure mapped to user Semester/Section for schedule lookup." 
                     />
                 </div>
+
+                 <div style={{ marginTop: '48px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>Performance & Indexing</h3>
+                    <p style={{ fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '24px', maxWidth: '800px' }}>
+                        To ensure millisecond-level query times, we utilize specialized indexes:
+                    </p>
+                    <ul style={{ paddingLeft: '20px', marginTop: '12px', fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.8, listStyleType: 'disc' }}>
+                        <li><strong>Compound Index:</strong> <code>{'{ "email": 1, "provider": 1 }'}</code> for fast OAuth lookups.</li>
+                        <li><strong>Geospatial Index:</strong> <code>2dsphere</code> on the Spot collection to query "nearby" locations.</li>
+                        <li><strong>TTL Index:</strong> For session cleanup and temporary OTP storage (future feature).</li>
+                    </ul>
+                </div>
             </section>
 
              {/* Components */}
@@ -277,6 +380,68 @@ export default function DocsPage() {
                      <ComponentCard name="FriendsActivity" desc="A live polling component that fetches recent activity from friends. Displays their current status (Bunking/Chilling) with relative timestamps (e.g., '2 mins ago')." />
                      <ComponentCard name="NotificationManager" desc="A background service component that handles global push notifications and toast alerts. Manages the lifecycle of alerts to prevent spamming the user." />
                 </div>
+                
+                <div style={{ marginTop: '60px' }}>
+                     <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '32px' }}>Detailed Props & Usage</h3>
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                        <ComponentDetail 
+                            name="Navbar" 
+                            props={[['currentPage', 'string', 'Active page identifier'], ['user', 'UserObject', 'Auth session data']]} 
+                            usage="<Navbar currentPage='home' user={session.user} />"
+                        />
+                        <ComponentDetail 
+                            name="AttendanceCard" 
+                            props={[['subject', 'string', 'Course Name'], ['attended', 'number', 'Classes attended'], ['total', 'number', 'Total classes']]} 
+                            usage="<AttendanceCard subject='DSA' attended={12} total={15} />"
+                        />
+                     </div>
+                </div>
+            </section>
+
+            {/* API Reference */}
+            <section id="api" style={{ marginBottom: '120px', scrollMarginTop: '120px' }}>
+                <SectionTitle title="API Reference" subtitle="Key endpoints powering the ChillPeriod client." />
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
+                    <ApiEndpoint method="GET" path="/api/user" desc="Fetches the currently authenticated user's profile, including attendance stats and social graph." />
+                    <ApiEndpoint method="POST" path="/api/attendance/update" desc="Upserts attendance records for a specific subject. Recalculates aggregate percentage automatically." />
+                    <ApiEndpoint method="GET" path="/api/spots/nearby" desc="Returns a list of spots sorted by geospatial distance from the provided lat/long coordinates." />
+                    <ApiEndpoint method="POST" path="/api/friends/nudge" desc="Sends a push notification to a friend. Rate-limited to 1 nudge per hour per friend." />
+                </div>
+
+                <div style={{ marginTop: '48px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '24px' }}>Request Lifecycle</h3>
+                    <div style={{ 
+                        background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
+                        borderRadius: '24px', padding: '40px', overflow: 'hidden'
+                    }}>
+                         <MermaidDiagram chart={`sequenceDiagram
+    participant C as Client
+    participant M as Middleware
+    participant R as Route Handler
+    participant D as DB
+    C->>M: HTTP Request
+    M->>M: Verify Session (JWT)
+    M->>R: Forward Request
+    R->>R: Validate Body (Zod)
+    R->>D: Execute Query
+    D-->>R: Data
+    R-->>C: JSON Response`} />
+                    </div>
+                </div>
+            </section>
+
+            {/* Roadmap */}
+            <section id="roadmap" style={{ marginBottom: '120px', scrollMarginTop: '120px' }}>
+                 <SectionTitle title="Future Roadmap" subtitle="What's next for the platform." />
+                 
+                 <div style={{ 
+                     display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' 
+                 }}>
+                     <RoadmapCard phase="Q3 2026" title="Native Mobile App" desc="Full React Native port for iOS and Android with background location services." />
+                     <RoadmapCard phase="Q4 2026" title="AI Predictor" desc="Machine learning model to predict 'Safe Bunk' days based on historical teacher trends." />
+                     <RoadmapCard phase="Q1 2027" title="Campus Marketplace" desc="Peer-to-peer exchange for notes, books, and drafters." />
+                 </div>
             </section>
 
              {/* Footer */}
@@ -399,6 +564,79 @@ function ComponentCard({ name, desc }) {
                 <span style={{ fontSize: '10px', fontFamily: 'monospace', padding: '2px 6px', background: 'var(--bg-tertiary)', borderRadius: '4px', color: 'var(--text-muted)' }}>.js</span>
             </div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6 }}>{desc}</p>
+        </div>
+    );
+}
+
+function ApiEndpoint({ method, path, desc }) {
+    const methodColor = method === 'GET' ? '#06b6d4' : method === 'POST' ? '#8b5cf6' : '#ec4899';
+    return (
+        <div style={{ 
+            padding: '20px', background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
+            display: 'flex', flexDirection: 'column', gap: '8px'
+        }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontFamily: 'monospace' }}>
+                <span style={{ color: methodColor, fontWeight: 'bold' }}>{method}</span>
+                <span style={{ color: 'var(--text-primary)' }}>{path}</span>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>{desc}</p>
+        </div>
+    );
+}
+
+function RoadmapCard({ phase, title, desc }) {
+    return (
+        <div style={{ 
+            padding: '32px', background: 'var(--bg-secondary)', borderLeft: '4px solid #8b5cf6', borderRadius: '4px',
+            display: 'flex', flexDirection: 'column', gap: '12px'
+        }}>
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#8b5cf6', textTransform: 'uppercase' }}>{phase}</span>
+            <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)', margin: 0 }}>{title}</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0, lineHeight: 1.6 }}>{desc}</p>
+        </div>
+    );
+}
+
+function ComponentDetail({ name, props, usage }) {
+    return (
+        <div style={{ 
+            background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '32px'
+        }}>
+            <h4 style={{ fontSize: '18px', fontWeight: 'bold', color: '#8b5cf6', marginBottom: '16px' }}>{name}</h4>
+            
+            <div style={{ marginBottom: '24px' }}>
+                <h5 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '12px', textTransform: 'uppercase' }}>Props</h5>
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', textAlign: 'left' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                <th style={{ padding: '8px', color: 'var(--text-primary)' }}>Name</th>
+                                <th style={{ padding: '8px', color: '#ec4899' }}>Type</th>
+                                <th style={{ padding: '8px', color: 'var(--text-secondary)' }}>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {props.map((prop, i) => (
+                                <tr key={i} style={{ borderBottom: i === props.length - 1 ? 'none' : '1px solid var(--border-color)' }}>
+                                    <td style={{ padding: '8px', fontFamily: 'monospace', color: 'var(--text-primary)' }}>{prop[0]}</td>
+                                    <td style={{ padding: '8px', fontFamily: 'monospace', color: '#ec4899' }}>{prop[1]}</td>
+                                    <td style={{ padding: '8px', color: 'var(--text-secondary)' }}>{prop[2]}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                 <h5 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '12px', textTransform: 'uppercase' }}>Usage</h5>
+                 <div style={{ 
+                     background: 'var(--bg-secondary)', padding: '16px', borderRadius: '8px', 
+                     fontFamily: 'monospace', fontSize: '13px', color: 'var(--text-primary)', overflowX: 'auto'
+                 }}>
+                     {usage}
+                 </div>
+            </div>
         </div>
     );
 }
