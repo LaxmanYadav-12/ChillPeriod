@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import MobileNav from '@/components/MobileNav';
 import { semesters, branches, getPdfLink, fetchSubjects, fetchSubjectDetails, getSyllabusXLink } from '@/lib/data/btech-syllabus';
+import { getVideoLectures, getDotnotesVideoLink, extractYouTubeId } from '@/lib/data/video-lectures';
 
 function slugToTitle(slug) {
   return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -59,8 +60,11 @@ function SubjectCard({ slug, semesterValue, branch, semesterShort }) {
   };
 
   const syllabusXUrl = getSyllabusXLink(semesterShort, branch, slug);
+  const videoLectures = getVideoLectures(semesterValue, slug);
+  const dotnotesLink = getDotnotesVideoLink(slug);
   const hasTheory = details?.theory?.length > 0;
   const hasLab = details?.lab?.length > 0;
+  const hasVideos = videoLectures.length > 0;
 
   return (
     <div className="subject-card" style={{
@@ -278,22 +282,112 @@ function SubjectCard({ slug, semesterValue, branch, semesterShort }) {
                 </div>
               )}
 
-              {/* Footer link */}
-              <div style={{
-                padding: '12px 20px',
-                borderTop: '1px solid var(--border-color)',
-                display: 'flex',
-                justifyContent: 'flex-end',
-              }}>
-                <a
-                  href={syllabusXUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="syllabusx-link"
-                >
-                  📚 Notes, PYQs & Books on SyllabusX →
-                </a>
-              </div>
+              {/* Video Lectures */}
+              {hasVideos && (
+                <div style={{ padding: '20px' }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    marginBottom: '16px',
+                    color: 'var(--text-primary)',
+                    borderTop: '1px solid var(--border-color)',
+                    paddingTop: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}>
+                    🎬 Video Lectures
+                  </h3>
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    overflowX: 'auto',
+                    overflowY: 'hidden',
+                    paddingBottom: '8px',
+                    WebkitOverflowScrolling: 'touch',
+                  }}>
+                    {videoLectures.map((video, i) => {
+                      const videoId = extractYouTubeId(video.url);
+                      const thumbnail = videoId
+                        ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                        : null;
+                      return (
+                        <a
+                          key={i}
+                          href={video.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            flex: '0 0 200px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            background: 'var(--bg-secondary)',
+                            borderRadius: '10px',
+                            border: '1px solid var(--border-color)',
+                            overflow: 'hidden',
+                            textDecoration: 'none',
+                            color: 'inherit',
+                          }}
+                        >
+                          <div style={{
+                            width: '100%',
+                            aspectRatio: '16 / 9',
+                            background: '#111',
+                            overflow: 'hidden',
+                          }}>
+                            {thumbnail ? (
+                              <img
+                                src={thumbnail}
+                                alt={video.title}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover',
+                                  display: 'block',
+                                }}
+                                loading="lazy"
+                                referrerPolicy="no-referrer"
+                              />
+                            ) : (
+                              <div style={{
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '28px',
+                                color: '#ef4444',
+                              }}>
+                                ▶
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ padding: '8px 10px 10px' }}>
+                            <p style={{
+                              margin: '0 0 3px 0',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              color: 'var(--text-primary)',
+                              lineHeight: '1.35',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}>{video.title}</p>
+                            <p style={{
+                              margin: 0,
+                              fontSize: '10px',
+                              color: 'var(--text-secondary)',
+                              fontWeight: 500,
+                            }}>{video.author}</p>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
             </>
           )}
 
@@ -522,6 +616,7 @@ export default function SyllabusPage() {
         .syllabusx-link:hover {
           background: rgba(139, 92, 246, 0.08);
         }
+
 
         .spinner {
           width: 24px;
