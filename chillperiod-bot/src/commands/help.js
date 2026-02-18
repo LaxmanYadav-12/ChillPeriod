@@ -8,31 +8,47 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
     const embed = createEmbed({
         title: '🎯 ChillPeriod Bot',
-        description: 'Your student-centric companion for finding chill spots, tracking attendance, and connecting with peers during free periods!',
+        description: 'Your student-centric companion for tracking attendance, finding chill spots, and coordinating mass bunks!',
         color: Colors.PRIMARY,
         fields: [
             {
-                name: '📍 Chill Spots (Coming Soon)',
-                value: '`/addspot` - Add a new chill spot\n`/findspots` - Find nearby spots\n`/spotinfo` - Get details about a spot',
+                name: '📊 Attendance Tracker',
+                value: 
+                    '`/addcourse` - Add a course to track\n' +
+                    '`/removecourse` - Remove a course\n' +
+                    '`/attend` - Mark a class as attended\n' +
+                    '`/bunk` - Mark a class as bunked\n' +
+                    '`/attendance` - View your attendance dashboard\n' +
+                    '`/setattendance` - Set attendance manually',
                 inline: false,
             },
             {
-                name: '📊 Attendance Tracker (Coming Soon)',
-                value: '`/setattendance` - Set your attendance info\n`/checkattendance` - Check if safe to skip\n`/attendance` - View your stats',
+                name: '🚨 Social & Bunking',
+                value: 
+                    '`/massbunk` - Announce a mass bunk alert\n' +
+                    '`/leaderboard` - View top bunkers\n' +
+                    '`/profile` - View your or someone\'s profile\n' +
+                    '`/excuse` - Generate a random excuse',
                 inline: false,
             },
             {
-                name: '💬 Community (Coming Soon)',
-                value: '`/review` - Review a spot\n`/upvote` - Upvote a spot\n`/report` - Report inappropriate content',
+                name: '📍 Chill Spots',
+                value: 
+                    '`/addspot` - Add a new chill spot\n' +
+                    '`/findspots` - Find nearby spots\n' +
+                    '`/spotinfo` - Get details about a spot',
                 inline: false,
             },
             {
                 name: '🔧 Utility',
-                value: '`/ping` - Check bot latency\n`/help` - Show this message',
+                value: 
+                    '`/setcollege` - Set your college\n' +
+                    '`/ping` - Check bot latency\n' +
+                    '`/help` - Show this message',
                 inline: false,
             },
         ],
-        footer: 'ChillPeriod • Making free periods count!',
+        footer: 'ChillPeriod • Making free periods count! • chillperiod.in',
     });
     
     await interaction.reply({ embeds: [embed] });

@@ -8,6 +8,7 @@ const spotSchema = new mongoose.Schema({
   address: { type: String, trim: true },
   coordinates: { lat: Number, lng: Number },
   distance: { type: String, trim: true },
+  googleMapsUrl: { type: String, trim: true },
   category: { 
     type: String, 
     required: true, 

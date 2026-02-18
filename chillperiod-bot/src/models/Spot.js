@@ -32,24 +32,28 @@ const spotSchema = new mongoose.Schema({
         type: String,  // e.g., "5 min walk", "500m"
         trim: true
     },
+    googleMapsUrl: {
+        type: String,
+        trim: true
+    },
     
-    // Categories
+    // Categories (synced with web)
     category: {
         type: String,
         required: true,
-        enum: ['cafe', 'restaurant', 'library', 'park', 'arcade', 'mall', 'other'],
+        enum: ['cafe', 'restaurant', 'street_food', 'park', 'shopping', 'gaming', 'sweet_shop', 'library', 'arcade', 'mall', 'other'],
         index: true
     },
     
-    // Attributes
+    // Attributes (synced with web)
     vibe: {
         type: String,
-        enum: ['quiet', 'social', 'both'],
+        enum: ['quiet', 'social', 'productive', 'romantic', 'late_night', 'nature', 'both'],
         default: 'both'
     },
     budget: {
         type: String,
-        enum: ['free', 'cheap', 'moderate', 'expensive'],
+        enum: ['free', 'broke', 'cheap', 'moderate', 'expensive', 'luxury'],
         default: 'moderate'
     },
     bestFor: {
@@ -92,7 +96,7 @@ const spotSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Index for efficient queries
+// Indexes for efficient queries
 spotSchema.index({ college: 1, category: 1 });
 spotSchema.index({ college: 1, vibe: 1 });
 spotSchema.index({ college: 1, budget: 1 });

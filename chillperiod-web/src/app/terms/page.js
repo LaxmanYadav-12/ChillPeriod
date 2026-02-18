@@ -2,6 +2,7 @@
 
 import Navbar from '@/components/Navbar';
 import MobileNav from '@/components/MobileNav';
+import Link from 'next/link';
 
 export default function TermsPage() {
   return (
@@ -82,6 +83,26 @@ export default function TermsPage() {
                 </a>.
             </Section>
 
+        </div>
+
+        {/* Related Links */}
+        <div style={{ 
+          display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '32px', flexWrap: 'wrap'
+        }}>
+          <Link href="/privacy" style={{ 
+            color: '#8b5cf6', textDecoration: 'none', fontSize: '14px', fontWeight: 500,
+            padding: '10px 20px', borderRadius: '12px', border: '1px solid rgba(139,92,246,0.2)',
+            background: 'rgba(139,92,246,0.05)', transition: 'all 0.2s'
+          }}>
+            🔒 Privacy Policy
+          </Link>
+          <Link href="/docs" style={{ 
+            color: '#06b6d4', textDecoration: 'none', fontSize: '14px', fontWeight: 500,
+            padding: '10px 20px', borderRadius: '12px', border: '1px solid rgba(6,182,212,0.2)',
+            background: 'rgba(6,182,212,0.05)', transition: 'all 0.2s'
+          }}>
+            📖 Documentation
+          </Link>
         </div>
 
         {/* Footer */}

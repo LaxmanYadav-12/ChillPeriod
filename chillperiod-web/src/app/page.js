@@ -73,7 +73,7 @@ export default function Home() {
                 Find Spots
               </Link>
             </div>
-            <a href={`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || 'YOUR_CLIENT_ID'}&permissions=8&scope=bot`} target="_blank" rel="noopener noreferrer" style={{ 
+            <a href="https://discord.com/oauth2/authorize?client_id=1468284051839520848&permissions=8&scope=bot+applications.commands" target="_blank" rel="noopener noreferrer" style={{ 
               width: '100%', padding: '16px 32px', background: '#5865F2', 
               color: 'white', borderRadius: '14px', fontWeight: 600, fontSize: '16px',
               textDecoration: 'none', boxShadow: '0 8px 32px rgba(88,101,242,0.3)',
@@ -164,6 +164,9 @@ export default function Home() {
           <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
             <Link href="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'underline', fontSize: '14px' }}>
               Terms & Conditions
+            </Link>
+            <Link href="/privacy" style={{ color: 'var(--text-secondary)', textDecoration: 'underline', fontSize: '14px' }}>
+              Privacy Policy
             </Link>
             <Link href="/docs" style={{ color: 'var(--text-secondary)', textDecoration: 'underline', fontSize: '14px' }}>
               Documentation
