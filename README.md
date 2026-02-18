@@ -4,7 +4,7 @@
 
 ChillPeriod is a student-centric platform for managing attendance, discovering chill spots, and coordinating bunks with your squad — available as both a **web app** and a **Discord bot**.
 
-[![Live Site](https://img.shields.io/badge/🌐_Live-chillperiod.in-8b5cf6?style=for-the-badge)](https://chillperiod.in)
+[![Live Site](https://img.shields.io/badge/🌐_Live-chillperiod.in-8b5cf6?style=for-the-badge)](https://https://chill-period.vercel.app/)
 [![Discord Bot](https://img.shields.io/badge/🤖_Discord-Add_Bot-5865F2?style=for-the-badge)](https://discord.com/oauth2/authorize?client_id=1468284051839520848&permissions=8&scope=bot+applications.commands)
 
 ---
