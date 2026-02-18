@@ -1170,9 +1170,15 @@ export default function AttendancePage() {
               >Cancel</button>
               <button 
                 onClick={async () => {
-                  // 1. Notify for selected courses (Single Request)
+                  // 1. Mark attendance as bunked for each selected course
                   const selectedCourses = courses.filter(c => massBunkSelection.has(c.id));
                   
+                  // Mark each selected course as bunked (this calls the /api/attendance/mark API)
+                  for (const course of selectedCourses) {
+                    await markAttendance(course.id, 'bunked');
+                  }
+
+                  // 2. Notify followers about mass bunk
                   if (selectedCourses.length > 0) {
                       const subjectsPayload = selectedCourses.map(c => ({
                           subject: c.name,
@@ -1186,22 +1192,14 @@ export default function AttendancePage() {
                               body: JSON.stringify({ subjects: subjectsPayload })
                           });
                           
-                          setSuccessMessage(`Bunked & Notified followers about ${selectedCourses.length} classes! 📢`);
+                          setSuccessMessage(`Bunked ${selectedCourses.length} classes & notified your followers! 📢`);
                           setShowSuccessModal(true);
                       } catch (e) {
                           console.error('Failed to notify', e);
+                          setSuccessMessage(`Bunked ${selectedCourses.length} classes! (Notification failed)`);
+                          setShowSuccessModal(true);
                       }
                   }
-
-                  // 2. Update local state (existing logic)
-                  setCourses(prev => prev.map(c => 
-                    massBunkSelection.has(c.id) ? { ...c, totalClasses: c.totalClasses + 1 } : c
-                  ));
-                  const dateKey = `${calendarYear}-${calendarMonth}-${today.getDate()}`;
-                  setAttendanceLog(prev => ({ 
-                    ...prev, 
-                    [dateKey]: { ...prev[dateKey], bunked: (prev[dateKey]?.bunked || 0) + massBunkSelection.size } 
-                  }));
                   
                   setShowMassBunkModal(false);
                   setMassBunkSelection(new Set());

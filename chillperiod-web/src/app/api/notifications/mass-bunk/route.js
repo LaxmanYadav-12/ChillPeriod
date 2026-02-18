@@ -12,18 +12,36 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 2. Create notifications for all followers
-    const { subject, type, subjects } = await req.json(); // Support both single and multiple
+    await dbConnect();
+
+    // Fetch the current user from DB
+    const user = await User.findById(session.user.id);
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const { subject, type, subjects } = await req.json();
 
     if (!subject && (!subjects || subjects.length === 0)) {
        return NextResponse.json({ error: 'Subject is required' }, { status: 400 });
+    }
+
+    // Get follower IDs from the user's followers array
+    const followerIds = user.followers || [];
+
+    if (followerIds.length === 0) {
+      return NextResponse.json({ 
+        success: true, 
+        count: 0, 
+        message: 'No followers to notify' 
+      });
     }
 
     let messageStr = '';
     let metadataObj = {};
 
     if (subjects && subjects.length > 0) {
-        // Multiple subjects
+        // Multiple subjects (Mass Bunk)
         const names = subjects.map(s => s.subject);
         const subjectList = names.length > 1 
             ? names.slice(0, -1).join(', ') + ' & ' + names.slice(-1)
@@ -31,12 +49,12 @@ export async function POST(req) {
         
         messageStr = `${user.name} is bunking ${subjectList}. Want to join?`;
         metadataObj = {
-            subjects, // Store array
+            subjects,
             originalBunkerId: user._id,
             actionUrl: '/attendance'
         };
     } else {
-        // Single subject (Legacy/Single Bunk)
+        // Single subject
         messageStr = `${user.name} is bunking ${subject} (${type || 'Class'}). Want to join?`;
         metadataObj = {
             subject,
@@ -47,7 +65,7 @@ export async function POST(req) {
     }
 
     const notifications = followerIds.map(followerId => ({
-      userId: followerId, // Mongoose handles string -> ObjectId conversion
+      userId: followerId,
       type: 'mass_bunk',
       title: 'Mass Bunk Alert! 🚨',
       message: messageStr,
