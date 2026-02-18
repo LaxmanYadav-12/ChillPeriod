@@ -1,84 +1,163 @@
-# 🎯 ChillPeriod Discord Bot
+# ChillPeriod Discord Bot 🤖
 
-A student-centric Discord bot that helps college students make smarter use of their free time—especially during skipped or free classes—without losing track of their academics.
+A Discord bot with **16 slash commands** for tracking attendance, finding chill spots, generating excuses, and coordinating mass bunks — synced with the [ChillPeriod web app](https://chillperiod.in).
 
-## Features
+[![Add to Discord](https://img.shields.io/badge/Add_to_Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/oauth2/authorize?client_id=1468284051839520848&permissions=8&scope=bot+applications.commands)
 
-### Current (Phase 1)
-- ✅ Basic bot structure with slash commands
-- ✅ MongoDB integration
-- ✅ `/ping` - Check bot latency
-- ✅ `/help` - View all commands
+---
 
-### Coming Soon
-- 📍 **Chill Spots** - Find nearby cafés, libraries, and hangout spots
-- 📊 **Attendance Tracker** - Know when it's safe to skip class
-- 💬 **Community Reviews** - Student-submitted spot ratings
-- 📢 **Chill Feed** - Social updates for free periods
+## 🎮 All 16 Commands
 
-## Quick Start
+### 📊 Attendance
+| Command | Description |
+|---------|-------------|
+| `/addcourse` | Add a course to track |
+| `/removecourse` | Remove a course |
+| `/attend` | Mark a class as attended |
+| `/bunk` | Mark a class as bunked |
+| `/attendance` | View your attendance dashboard |
+| `/setattendance` | Set attendance manually |
 
-### Prerequisites
-- Node.js 18+
-- MongoDB (local or Atlas)
-- Discord Bot Token
+### 🚨 Social & Bunking
+| Command | Description |
+|---------|-------------|
+| `/massbunk` | Announce a mass bunk with join buttons |
+| `/leaderboard` | View top bunkers at your college |
+| `/profile` | View your or someone's profile |
+| `/excuse` | Generate a random Hinglish excuse |
 
-### Installation
+### 📍 Chill Spots
+| Command | Description |
+|---------|-------------|
+| `/addspot` | Add a new chill spot |
+| `/findspots` | Find spots near campus |
+| `/spotinfo` | Get details about a spot |
 
-1. **Clone and install dependencies**
-   ```bash
-   cd chillperiod-bot
-   npm install
-   ```
+### 🔧 Utility
+| Command | Description |
+|---------|-------------|
+| `/setcollege` | Set your college |
+| `/ping` | Check bot latency |
+| `/help` | Show all commands |
 
-2. **Configure environment**
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` with your values:
-   - `DISCORD_TOKEN` - Your bot token
-   - `CLIENT_ID` - Your application client ID
-   - `GUILD_ID` - Your test server ID (for dev)
-   - `MONGODB_URI` - MongoDB connection string
+---
 
-3. **Deploy slash commands**
-   ```bash
-   npm run deploy
-   ```
+## ✨ Highlights
 
-4. **Start the bot**
-   ```bash
-   npm run dev
-   ```
+- **🚨 Mass Bunk Alerts** — Announce bunks with interactive "I'm In!" buttons. Followers also get notified on the web app
+- **😂 Excuse Generator** — Random excuses in 5 tones: funny, serious, medical, professional, dramatic (Hinglish)
+- **🏆 Bunk Leaderboard** — Top 10 bunkers at your college with bunk titles (Rookie → Bunk Legend 👑)
+- **👤 Rich Profiles** — Visual progress bar, course breakdown, streaks, social stats
+- **🔄 Synced with Web** — Same database as [chillperiod.in](https://chillperiod.in), data flows both ways
 
-## Project Structure
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Runtime** | Node.js 18+ |
+| **Framework** | [Discord.js 14](https://discord.js.org/) |
+| **Database** | [MongoDB Atlas](https://www.mongodb.com/atlas) (Mongoose) |
+| **Commands** | Slash Commands (Application Commands API) |
+
+---
+
+## 📁 Project Structure
 
 ```
 chillperiod-bot/
 ├── src/
-│   ├── commands/         # Slash commands
-│   ├── events/           # Discord event handlers
-│   ├── models/           # MongoDB schemas
-│   ├── utils/            # Helper functions
-│   ├── deploy-commands.js
-│   └── index.js
+│   ├── commands/          # 16 slash commands
+│   │   ├── addcourse.js
+│   │   ├── attend.js
+│   │   ├── attendance.js
+│   │   ├── bunk.js
+│   │   ├── excuse.js
+│   │   ├── findspots.js
+│   │   ├── help.js
+│   │   ├── leaderboard.js
+│   │   ├── massbunk.js
+│   │   ├── ping.js
+│   │   ├── profile.js
+│   │   ├── removecourse.js
+│   │   ├── setattendance.js
+│   │   ├── setcollege.js
+│   │   ├── spotinfo.js
+│   │   └── addspot.js
+│   ├── data/
+│   │   └── excuses.js     # Excuse database (Hinglish)
+│   ├── events/            # Discord event handlers
+│   ├── models/            # MongoDB schemas (synced with web)
+│   │   ├── User.js
+│   │   ├── Spot.js
+│   │   └── Notification.js
+│   ├── utils/
+│   │   └── embed.js       # Embed builder utilities
+│   ├── deploy-commands.js # Register commands with Discord
+│   └── index.js           # Bot entry point
 ├── config/
-│   └── colleges.json     # Pre-defined colleges
-├── .env
+│   └── colleges.json
+├── .env.example
 └── package.json
 ```
 
-## Commands
+---
 
-| Command | Description |
-|---------|-------------|
-| `/ping` | Check bot latency |
-| `/help` | View all commands and features |
+## ⚡ Quick Start
 
-## Contributing
+### 1. Install Dependencies
+```bash
+cd chillperiod-bot
+npm install
+```
 
-This bot is built for students, by students. Feel free to contribute!
+### 2. Configure Environment
+```bash
+cp .env.example .env
+```
 
-## License
+Edit `.env`:
+```env
+DISCORD_TOKEN=your_bot_token
+CLIENT_ID=your_application_client_id
+GUILD_ID=your_test_server_id
+MONGODB_URI=your_mongodb_uri
+```
 
-MIT
+### 3. Deploy Commands
+```bash
+npm run deploy
+```
+
+### 4. Start the Bot
+```bash
+npm run dev
+```
+
+---
+
+## 🌐 Hosting
+
+| Platform | Cost | Best For |
+|----------|------|----------|
+| [Railway.app](https://railway.app) | Free $5/mo | Easiest setup, auto-deploy |
+| [Render.com](https://render.com) | Free tier | Background workers |
+| [Oracle Cloud](https://cloud.oracle.com) | Free forever | Always-on VM |
+| Your PC | Free | Development only |
+
+> **Note:** Discord bots need to run 24/7 — they can't be deployed to serverless platforms like Vercel.
+
+---
+
+## 🤝 Contributing
+
+PRs welcome! Fork → Branch → Commit → PR.
+
+## 📄 License
+
+MIT — see [LICENSE](../LICENSE)
+
+---
+
+*Built with ❤️ by [Tony](https://github.com/DarkModeTony)*

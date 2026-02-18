@@ -1,141 +1,129 @@
-# ChillPeriod 🎓
+# ChillPeriod Web 🌐
 
-### The Ultimate Campus Life Assistant
+The web application for ChillPeriod — track attendance, discover chill spots, manage your academic life.
 
-ChillPeriod is your go-to companion for managing academic life without the stress. Track attendance, calculate safe bunks, sync your timetable, and discover the best chill spots near campus—all in one place.
+[![Live](https://img.shields.io/badge/Live-chillperiod.in-8b5cf6)](https://chillperiod.in)
 
-![ChillPeriod Dashboard](https://via.placeholder.com/800x400.png?text=ChillPeriod+Dashboard+Preview)
+---
 
-## 🚀 Key Features
-
-### 📚 SyllabusX Integration
-*   **Real-time Syllabus**: Access the latest B.Tech syllabus directly from [SyllabusX](https://syllabusx.live).
-*   **Progress Tracking**: Mark topics as completed with interactive checkboxes that persist across sessions.
-*   **Unit-wise Breakdown**: View theory and lab subjects organized by units for structured study.
-*   **Study Materials**: One-click access to notes, PYQs, and books for each subject.
+## ✨ Features
 
 ### 📊 Attendance Tracker
-*   **Per-Course Progress**: Visual bars show exactly where you stand.
-*   **Safety Status**: Color-coded indicators (Green/Yellow/Red) showing if you are Safe, in Caution, or in the Danger Zone.
-*   **Bunk Calculator**: Know instantly how many classes you can skip while maintaining 75%.
-*   **Mass Bunk**: Mark multiple classes as bunked and **trigger a cascading alert** to your followers. If they join, the bunk wave continues!
+- **Per-course tracking** with visual progress bars
+- **Safety status**: 🟢 Safe / 🟡 Caution / 🔴 Danger zones
+- **Bunk calculator**: Know exactly how many classes you can skip
+- **Mass Bunk**: One-click bunk + cascading alerts to followers
 
-### 📍 Chill Spots Discovery & Voting
-*   **Crowdsourced Gems**: Find the best cafes, parks, and gaming zones near campus.
-*   **Vote System**: Upvote (🔥) or Downvote (👎) spots to highlight the best places to chill.
-*   **Live Activity**: See where your friends are chilling right now.
-*   **Admin Controls**: Moderators can reset vote counts to keep the leaderboard fresh.
+### 📚 SyllabusX Integration
+- Real-time B.Tech syllabus from [SyllabusX](https://syllabusx.live)
+- Interactive progress checkboxes (persisted via localStorage)
+- Unit-wise Theory & Lab breakdown
+- Direct links to notes, PYQs, and books
 
-### 👥 Enhanced Social Profile
-*   **Social Stats**: Track your Followers and Following user counts.
-*   **Profile Sync**: Link **Google** & **Discord** to sync your data across devices.
-*   **Friends Activity**: Keep up with your squad's bunking status and current location.
-*   **Onboarding Flow**: Set your unique username and profile details seamlessly with **Terms & Conditions** acceptance.
-*   **Profile Management**: Edit your details or permanently **Delete Account** if you wish to leave.
+### 📍 Chill Spots
+- Crowdsourced cafes, parks, gaming zones near campus
+- Upvote (🔥) / Downvote (👎) system
+- Google Maps integration
+- Admin controls for moderation
 
-### 🔔 Smart Notifications
-*   **Cascading Mass Bunk**: When a friend bunks, you get an invite. If you join, your followers get invited too!
-*   **Bunk Alerts**: Get notified if a bunk will drop your attendance below the safe threshold.
-*   **Class Reminders**: Never miss a lecture with timely notifications.
-*   **Engagement**: Get alerts for new followers and profile interactions.
+### 👥 Social & Profiles
+- Follow friends, track their bunk activity
+- Public/private profile toggle
+- Bunk titles: Rookie 🌱 → Bunk Legend 👑
+- Account management with Delete Account option
 
-### �📅 Timetable Sync
-*   **Automatic Population**: Select your Semester & Section to instantly load your schedule.
-*   **Today's View**: See your daily schedule at a glance on the dashboard.
+### 🔔 Notifications
+- Mass bunk cascade alerts
+- New follower notifications
+- Bunk join notifications
+- Slide-out notification panel
+
+### 📅 Timetable
+- Auto-populated by selecting Semester & Section
+- Today's schedule at a glance
 
 ### 🛡️ Privacy & Security
-*   **Terms & Conditions**: Mandatory acceptance to ensure a safe community.
-*   **Data Control**: Full ownership of your data with immediate deletion options.
-*   **Privacy First**: Minimal data collection, focused only on essential academic features.
-
-### ⚡ Performance
-*   **Optimized Assets**: Next.js Image Optimization for lightning-fast load times.
-*   **Dynamic Loading**: Smart code-splitting for a responsive experience on any device.
+- Terms & Conditions + Privacy Policy
+- Full data ownership with deletion options
+- Minimal data collection
 
 ---
 
-## � Project Structure
+## 🛠️ Tech Stack
 
-```bash
-src/
-├── app/              # Next.js App Router pages & API
-│   ├── api/          # Backend API routes (Auth, Proxy, Users)
-│   ├── syllabus/     # Syllabus page with proxy integration
-│   └── ...
-├── components/       # Reusable UI components
-├── lib/              # Utilities, DB models, & validators
-│   ├── data/         # Static data & API clients
-│   └── models/       # Mongoose schemas
-└── ...
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | [Next.js 16](https://nextjs.org/) (App Router) |
+| **UI** | React 19, Vanilla CSS with CSS Variables |
+| **Database** | [MongoDB Atlas](https://www.mongodb.com/atlas) (Mongoose) |
+| **Auth** | [Auth.js v5](https://authjs.dev/) (Google + Discord OAuth) |
+| **Deployment** | [Vercel](https://vercel.com/) |
+
+---
+
+## 📁 Project Structure
+
 ```
-
----
-
-## �🛠️ Tech Stack
-
-*   **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS
-*   **Backend**: Next.js API Routes, Node.js
-*   **Database**: MongoDB (Mongoose)
-*   **Auth**: NextAuth.js v5 (Google & Discord)
-*   **Styling**: CSS Modules & Vanilla CSS Variables
-*   **Deployment**: Vercel
+src/
+├── app/                # Next.js App Router pages & API
+│   ├── api/            # REST API routes
+│   │   ├── attendance/ # Mark, fetch attendance
+│   │   ├── notifications/ # Mass bunk, follow alerts
+│   │   ├── spots/      # CRUD + voting
+│   │   └── users/      # Profile, social
+│   ├── attendance/     # Attendance dashboard
+│   ├── spots/          # Spots discovery page
+│   ├── profile/        # User profile
+│   ├── syllabus/       # SyllabusX integration
+│   ├── docs/           # Documentation page
+│   ├── privacy/        # Privacy policy
+│   └── terms/          # Terms & conditions
+├── components/         # Reusable UI components
+├── lib/                # Utilities & DB
+│   ├── data/           # Static data (excuses, timetable)
+│   └── models/         # Mongoose schemas
+└── models/             # Additional models (Spot, Notification)
+```
 
 ---
 
 ## ⚡ Getting Started
 
-Follow these steps to run ChillPeriod locally:
-
-### 1. Clone the Repository
+### 1. Install Dependencies
 ```bash
-git clone https://github.com/Start-End-404/ChillPeriod.git
-cd ChillPeriod/chillperiod-web
-```
-
-### 2. Install Dependencies
-```bash
+cd chillperiod-web
 npm install
 ```
 
-### 3. Configure Environment
-Create a `.env.local` file in the root directory and add your credentials:
-
+### 2. Configure Environment
+Create `.env.local`:
 ```env
-# Database
-MONGODB_URI=your_mongodb_connection_string
-
-# Authentication
-NEXTAUTH_SECRET=your_random_secret_key
+MONGODB_URI=your_mongodb_uri
+NEXTAUTH_SECRET=your_random_secret
 NEXTAUTH_URL=http://localhost:3000
-
-# Providers
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-DISCORD_CLIENT_ID=your_discord_client_id
-DISCORD_CLIENT_SECRET=your_discord_client_secret
+GOOGLE_CLIENT_ID=your_google_id
+GOOGLE_CLIENT_SECRET=your_google_secret
+DISCORD_CLIENT_ID=your_discord_id
+DISCORD_CLIENT_SECRET=your_discord_secret
 ```
 
-### 4. Run Development Server
+### 3. Run Development Server
 ```bash
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to start chilling! 😎
+Open [http://localhost:3000](http://localhost:3000) 🚀
 
 ---
 
 ## 🤝 Contributing
-Have an idea to make bunking even more efficient? PRs are welcome!
-1.  Fork the repo
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+
+PRs are welcome! Fork → Branch → Commit → PR.
+
+## 📄 License
+
+MIT — see [LICENSE](../LICENSE)
 
 ---
 
-## 📝 License
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-*Built with ❤️ (and a few bunks) by [Tony](https://github.com/DarkModeTony)*
+*Built with ❤️ by [Tony](https://github.com/DarkModeTony)*
