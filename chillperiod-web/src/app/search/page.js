@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import MobileNav from '../../components/MobileNav';
+import PeopleYouMayKnow from '../../components/PeopleYouMayKnow';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -45,6 +46,9 @@ export default function SearchPage() {
         }}>
             Find Friends 🕵️‍♂️
         </h1>
+
+        {/* People You May Know Suggestions */}
+        <PeopleYouMayKnow />
 
         <div style={{ position: 'relative', marginBottom: '32px' }}>
           <input

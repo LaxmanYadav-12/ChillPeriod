@@ -205,7 +205,7 @@ export default function OnboardingPage() {
                     >
                         <option value="">Select College</option>
                         {COLLEGES.map(college => (
-                            <option key={college} value={college}>{college}</option>
+                            <option key={college.key} value={college.key}>{college.name}</option>
                         ))}
                     </select>
                 </div>

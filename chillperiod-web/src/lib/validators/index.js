@@ -14,25 +14,38 @@ export const mongoIdSchema = z.string().regex(/^[a-fA-F0-9]{24}$/, 'Invalid ID f
 export const spotCreateSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
   description: z.string().max(500).optional().default(''),
-  category: z.enum(['cafe', 'park', 'restaurant', 'library', 'shopping', 'other']),
-  vibe: z.enum(['quiet', 'social', 'both']).optional(),
+  category: z.enum(['cafe', 'park', 'restaurant', 'library', 'shopping', 'street_food', 'sweet_shop', 'gaming', 'mall', 'other']),
+  vibe: z.enum(['quiet', 'social', 'both', 'productive', 'romantic', 'late_night', 'nature']).optional(),
   budget: z.enum(['free', 'cheap', 'moderate', 'expensive']).optional(),
   distance: z.string().max(50).optional().default(''),
   address: z.string().max(200).optional().default(''),
-  googleMapsUrl: z.string().url().max(500).optional().or(z.literal('')),
+  googleMapsUrl: z.string().max(500).optional().default(''),
+  lat: z.number().min(-90).max(90).optional(),
+  lng: z.number().min(-180).max(180).optional(),
   coordinates: z.object({
     lat: z.number().min(-90).max(90),
     lng: z.number().min(-180).max(180),
   }).optional(),
-}).strict();
+});
 
 export const spotImportSchema = z.object({
-  spots: z.array(spotCreateSchema.omit({ googleMapsUrl: true })).min(1).max(50),
-}).strict();
+  spots: z.array(spotCreateSchema).min(1).max(100),
+  college: z.string().max(100).optional(),
+});
 
 // ============================================================
 // Votes
 // ============================================================
+
+export const spotReportSchema = z.object({
+  reason: z.enum(['closed', 'inaccurate', 'spam', 'inappropriate', 'other']),
+  detail: z.string().max(300).optional().default(''),
+}).strict();
+
+export const spotReviewSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  text: z.string().max(300).optional().default(''),
+}).strict();
 
 export const voteSchema = z.object({
   spotId: z.string().min(1),

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import MobileNav from '@/components/MobileNav';
 import { useState, useEffect } from 'react';
+import { COLLEGES, findCollege } from '@/lib/data/colleges';
 
 // Demo data removed - using real API data
 
@@ -16,14 +17,47 @@ export default function SpotsPage() {
   const [spots, setSpots] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportData, setReportData] = useState({ reason: 'inaccurate', detail: '' });
+  const [reportingSpotId, setReportingSpotId] = useState(null);
+  const [reportSuccess, setReportSuccess] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewHover, setReviewHover] = useState(0);
+  const [spotReviews, setSpotReviews] = useState([]);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [newSpot, setNewSpot] = useState({
     name: '', description: '', category: 'cafe', vibe: 'social', budget: 'moderate', 
     address: '', googleMapsUrl: '', distance: ''
   });
 
+  // User college state
+  const [userCollege, setUserCollege] = useState(null);
+  const [collegeCoords, setCollegeCoords] = useState(null);
+
   useEffect(() => {
     fetchSpots();
+    fetchUserCollege();
   }, []);
+
+  const fetchUserCollege = async () => {
+    try {
+      const res = await fetch('/api/users/me');
+      if (res.ok) {
+        const user = await res.json();
+        if (user.college) {
+          const college = findCollege(user.college);
+          if (college) {
+            setUserCollege(college);
+            setCollegeCoords({ lat: college.lat, lng: college.lng });
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch user college', err);
+    }
+  };
 
   const fetchSpots = async () => {
     try {
@@ -132,87 +166,153 @@ export default function SpotsPage() {
     }
   };
 
+  const handleCheckin = async (spotId, e) => {
+    if (e) e.stopPropagation();
+
+    // Optimistic update
+    setSpots(prev => prev.map(s => {
+      if (s._id === spotId) {
+        const wasCheckedIn = s.isCheckedIn;
+        return {
+          ...s,
+          isCheckedIn: !wasCheckedIn,
+          activeCheckinCount: wasCheckedIn
+            ? Math.max(0, (s.activeCheckinCount || 1) - 1)
+            : (s.activeCheckinCount || 0) + 1
+        };
+      }
+      // If checking IN to this spot, check OUT from others
+      if (!spots.find(sp => sp._id === spotId)?.isCheckedIn && s.isCheckedIn) {
+        return { ...s, isCheckedIn: false, activeCheckinCount: Math.max(0, (s.activeCheckinCount || 1) - 1) };
+      }
+      return s;
+    }));
+
+    if (selectedSpot && selectedSpot._id === spotId) {
+      setSelectedSpot(prev => ({
+        ...prev,
+        isCheckedIn: !prev.isCheckedIn,
+        activeCheckinCount: prev.isCheckedIn
+          ? Math.max(0, (prev.activeCheckinCount || 1) - 1)
+          : (prev.activeCheckinCount || 0) + 1
+      }));
+    }
+
+    try {
+      await fetch(`/api/spots/${spotId}/checkin`, { method: 'POST' });
+    } catch (error) {
+      console.error('Check-in error', error);
+    }
+  };
+
+  const handleReport = async () => {
+    if (!reportingSpotId) return;
+    try {
+      const res = await fetch(`/api/spots/${reportingSpotId}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reportData)
+      });
+      if (res.ok) {
+        setReportSuccess(true);
+        setTimeout(() => {
+          setShowReportModal(false);
+          setReportSuccess(false);
+          setReportData({ reason: 'inaccurate', detail: '' });
+          setReportingSpotId(null);
+        }, 1500);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to report');
+      }
+    } catch (error) {
+      console.error('Report error', error);
+    }
+  };
+
   const [isMapLoading, setIsMapLoading] = useState(false);
 
   const fetchSpotsFromMap = async () => {
+    if (!collegeCoords) {
+      alert('Please set your college in your profile first!');
+      return;
+    }
+
     setIsMapLoading(true);
-    // BPIT Coordinates: 28.7362, 77.1127
-    const queries = [
-        { type: 'cafe', cat: 'cafe' },
-        { type: 'restaurant', cat: 'restaurant' },
-        { type: 'fast_food', cat: 'street_food' },
-        { type: 'park', cat: 'park' },
-        { type: 'mall', cat: 'shopping' },
-        { type: 'cinema', cat: 'gaming' },
-        { type: 'library', cat: 'library' }
-    ];
 
     try {
-      const results = [];
-      for (const q of queries) {
-        try {
-          const res = await fetch(`/api/spots/search?q=${encodeURIComponent(q.type + ' near Sector 17 Rohini')}`);
-          
-          if (!res.ok) {
-             const errorText = await res.text();
-             console.error(`Failed to fetch ${q.type}:`, errorText);
-             continue; // Skip failed requests
-          }
+      // Single Overpass query — fetches all categories at once within 7km
+      const res = await fetch(
+        `/api/spots/search?lat=${collegeCoords.lat}&lng=${collegeCoords.lng}&radius=7000`
+      );
 
-          const items = await res.json();
-          results.push(items.map(item => ({ ...item, mappedCat: q.cat })));
-          
-          // Respect Nominatim Usage Policy (1 request per second)
-          await new Promise(resolve => setTimeout(resolve, 1200));
-
-        } catch (err) {
-          console.error(`Error querying ${q.type}`, err);
-        }
+      if (!res.ok) {
+        const err = await res.json();
+        console.error('Search failed:', err);
+        alert('Failed to fetch spots from map.');
+        return;
       }
-      const flatness = results.flat();
-      const vibesList = ['quiet', 'social', 'productive', 'romantic', 'late_night', 'nature'];
-      const budgetsList = ['free', 'cheap', 'moderate']; // removed broke/expensive/luxury to keep it simple for auto-generated
 
-      const rawSpots = flatness
-        .filter(item => item.name || item.display_name)
-        .map((item) => ({
-            name: item.name || item.display_name.split(',')[0],
-            description: '📍 Discovered via OpenStreetMap',
-            category: item.mappedCat || 'other',
-            vibe: vibesList[Math.floor(Math.random() * vibesList.length)],
-            budget: budgetsList[Math.floor(Math.random() * budgetsList.length)],
-            distance: 'Nearby',
-            address: item.display_name.split(',').slice(1, 4).join(', '),
-            upvotes: 0,
-            downvotes: 0,
-            isUpvoted: false,
-            isDownvoted: false,
-            googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name || item.display_name)}`
-        }));
-      
-      // Persist to DB
-      const res = await fetch('/api/spots/import', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ spots: rawSpots })
+      const overpassSpots = await res.json();
+
+      if (overpassSpots.length === 0) {
+        alert('No spots found near your college. Try adding manually!');
+        return;
+      }
+
+      // Smart vibe/budget assignment based on category
+      const vibeMap = {
+        cafe: 'social', restaurant: 'social', street_food: 'social',
+        park: 'nature', library: 'productive', gaming: 'social',
+        sweet_shop: 'social', shopping: 'social'
+      };
+      const budgetMap = {
+        park: 'free', library: 'free', street_food: 'cheap',
+        cafe: 'moderate', restaurant: 'moderate', gaming: 'moderate',
+        sweet_shop: 'cheap', shopping: 'moderate'
+      };
+
+      const rawSpots = overpassSpots.map(item => ({
+        name: item.name,
+        description: `📍 Discovered via OpenStreetMap${item.cuisine ? ' • ' + item.cuisine : ''}`,
+        category: item.category,
+        vibe: vibeMap[item.category] || 'social',
+        budget: budgetMap[item.category] || 'moderate',
+        distance: item.distance,
+        address: item.address,
+        lat: item.lat,
+        lng: item.lng,
+        googleMapsUrl: item.googleMapsUrl
+      }));
+
+      // Persist to DB with college tag
+      const importRes = await fetch('/api/spots/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ spots: rawSpots, college: userCollege?.key || 'BPIT' })
       });
 
-      if (res.ok) {
-          const { savedSpots } = await res.json();
-          setSpots(prev => {
-            const existingIds = new Set(prev.map(s => s._id));
-            const newSpots = savedSpots.filter(s => !existingIds.has(s._id));
-            if (newSpots.length === 0) {
-                 alert("No new spots found!");
-                 return prev;
-            }
-            return [...prev, ...newSpots];
-          });
+      if (importRes.ok) {
+        const { savedSpots } = await importRes.json();
+        setSpots(prev => {
+          const existingIds = new Set(prev.map(s => s._id));
+          const newSpots = savedSpots.filter(s => !existingIds.has(s._id));
+          if (newSpots.length === 0) {
+            alert('No new spots found — all already in database!');
+            return prev;
+          }
+          alert(`🎉 Added ${newSpots.length} new spots near your college!`);
+          return [...prev, ...newSpots];
+        });
+      } else {
+        const errData = await importRes.json().catch(() => ({}));
+        console.error('Import failed:', errData);
+        alert('Failed to save spots. Admin access required.');
       }
 
     } catch (error) {
-      console.error("Map fetch failed", error);
-      alert("Failed to fetch from maps.");
+      console.error('Map fetch failed', error);
+      alert('Failed to fetch from maps.');
     } finally {
       setIsMapLoading(false);
     }
@@ -225,7 +325,7 @@ export default function SpotsPage() {
       const res = await fetch('/api/spots', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newSpot, college: 'BPIT' })
+        body: JSON.stringify({ ...newSpot, college: userCollege?.key || 'BPIT' })
       });
 
       if (res.ok) {
@@ -254,6 +354,62 @@ export default function SpotsPage() {
   });
 
   const [selectedSpot, setSelectedSpot] = useState(null);
+
+  const fetchReviews = async (spotId) => {
+    setIsLoadingReviews(true);
+    try {
+      const res = await fetch(`/api/spots/${spotId}/review`);
+      if (res.ok) {
+        const data = await res.json();
+        setSpotReviews(data.reviews || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch reviews', err);
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  };
+
+  const handleSelectSpot = (spot) => {
+    setSelectedSpot(spot);
+    setReviewRating(0);
+    setReviewText('');
+    setReviewHover(0);
+    fetchReviews(spot._id);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!selectedSpot || !reviewRating) return;
+    setReviewSubmitting(true);
+    try {
+      const res = await fetch(`/api/spots/${selectedSpot._id}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: reviewRating, text: reviewText })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Update spot avgRating/reviewCount in local state
+        setSpots(prev => prev.map(s =>
+          s._id === selectedSpot._id ? { ...s, avgRating: data.avgRating, reviewCount: data.reviewCount } : s
+        ));
+        setSelectedSpot(prev => ({ ...prev, avgRating: data.avgRating, reviewCount: data.reviewCount }));
+        setReviewRating(0);
+        setReviewText('');
+        fetchReviews(selectedSpot._id);
+      }
+    } catch (err) {
+      console.error('Submit review failed', err);
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const renderStars = (rating, size = '14px') => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <span key={i} style={{ color: i < Math.round(rating) ? '#f59e0b' : 'var(--text-secondary)', fontSize: size }}>★</span>
+    ));
+  };
 
   const openGoogleMaps = (spot) => {
     if (spot.googleMapsUrl) {
@@ -358,7 +514,7 @@ export default function SpotsPage() {
             {filteredSpots.map(spot => (
               <div 
                 key={spot._id} 
-                onClick={() => setSelectedSpot(spot)}
+                onClick={() => handleSelectSpot(spot)}
                 style={{ 
                   background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '20px',
                   transition: 'all 0.3s', cursor: 'pointer'
@@ -374,7 +530,16 @@ export default function SpotsPage() {
                       <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{spot.distance}</p>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {spot.activeCheckinCount > 0 && (
+                      <span style={{
+                        fontSize: '11px', padding: '4px 10px', borderRadius: '20px',
+                        background: 'rgba(16,185,129,0.15)', color: '#10b981', fontWeight: 600,
+                        animation: 'pulse 2s infinite'
+                      }}>
+                        📍 {spot.activeCheckinCount} here
+                      </span>
+                    )}
                     <button
                         onClick={(e) => handleVote(spot._id, 'upvote', e)}
                         style={{ 
@@ -412,6 +577,14 @@ export default function SpotsPage() {
                     💰 {spot.budget}
                   </span>
                 </div>
+                {/* Star rating */}
+                {spot.avgRating > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex' }}>{renderStars(spot.avgRating, '13px')}</div>
+                    <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 600 }}>{spot.avgRating}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>({spot.reviewCount})</span>
+                  </div>
+                )}
                 <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>📍 {spot.address}</p>
               </div>
             ))}
@@ -565,7 +738,7 @@ export default function SpotsPage() {
             }} onClick={() => setSelectedSpot(null)}>
               <div style={{
                 background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '20px',
-                padding: '32px', maxWidth: '500px', width: '100%', position: 'relative',
+                padding: '32px', maxWidth: '500px', width: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative',
                 animation: 'fadeIn 0.2s ease-out'
               }} onClick={e => e.stopPropagation()}>
                 
@@ -614,45 +787,233 @@ export default function SpotsPage() {
                         <span>📍 {selectedSpot.address}</span>
                     </div>
 
+                    {/* Check-in badge */}
+                    {selectedSpot.activeCheckinCount > 0 && (
+                      <div style={{ textAlign: 'center', padding: '8px', background: 'rgba(16,185,129,0.1)', borderRadius: '10px', border: '1px solid rgba(16,185,129,0.2)' }}>
+                        <span style={{ color: '#10b981', fontSize: '14px', fontWeight: 600 }}>
+                          📍 {selectedSpot.activeCheckinCount} {selectedSpot.activeCheckinCount === 1 ? 'person' : 'people'} here now
+                        </span>
+                      </div>
+                    )}
+
+                    {/* I'm Here button */}
                     <button
-                        onClick={(e) => handleVote(selectedSpot._id, 'upvote', e)}
-                        style={{ 
-                          display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px',
-                          background: selectedSpot.isUpvoted ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)',
-                          border: selectedSpot.isUpvoted ? '1px solid rgba(16,185,129,0.4)' : '1px solid #2a2a3a',
-                          borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
+                        onClick={(e) => handleCheckin(selectedSpot._id, e)}
+                        style={{
+                          width: '100%', padding: '12px', borderRadius: '12px', fontWeight: 600, fontSize: '14px',
+                          cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                          background: selectedSpot.isCheckedIn ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)',
+                          border: selectedSpot.isCheckedIn ? '2px solid #10b981' : '1px solid var(--border-color)',
+                          color: selectedSpot.isCheckedIn ? '#10b981' : 'var(--text-primary)',
                         }}
                     >
-                        <span style={{ fontSize: '14px' }}>{selectedSpot.isUpvoted ? '💚' : '👍'}</span>
-                        <span style={{ color: selectedSpot.isUpvoted ? '#10b981' : '#9ca3af', fontSize: '13px', fontWeight: 500 }}>{selectedSpot.upvotes || 0}</span>
+                        {selectedSpot.isCheckedIn ? '✓ Checked In' : '📍 I\'m Here'}
                     </button>
 
-                    <button
-                        onClick={(e) => handleVote(selectedSpot._id, 'downvote', e)}
-                        style={{ 
-                          display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px',
-                          background: selectedSpot.isDownvoted ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)',
-                          border: selectedSpot.isDownvoted ? '1px solid rgba(239,68,68,0.4)' : '1px solid #2a2a3a',
-                          borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
-                        }}
-                    >
-                        <span style={{ fontSize: '14px' }}>👎</span>
-                        <span style={{ color: selectedSpot.isDownvoted ? '#ef4444' : '#9ca3af', fontSize: '13px', fontWeight: 500 }}>{selectedSpot.downvotes || 0}</span>
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                          onClick={(e) => handleVote(selectedSpot._id, 'upvote', e)}
+                          style={{ 
+                            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', padding: '10px',
+                            background: selectedSpot.isUpvoted ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)',
+                            border: selectedSpot.isUpvoted ? '1px solid rgba(16,185,129,0.4)' : '1px solid var(--border-color)',
+                            borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s'
+                          }}
+                      >
+                          <span style={{ fontSize: '14px' }}>{selectedSpot.isUpvoted ? '💚' : '👍'}</span>
+                          <span style={{ color: selectedSpot.isUpvoted ? '#10b981' : 'var(--text-secondary)', fontSize: '13px', fontWeight: 500 }}>{selectedSpot.upvotes || 0}</span>
+                      </button>
+                      <button
+                          onClick={(e) => handleVote(selectedSpot._id, 'downvote', e)}
+                          style={{ 
+                            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', padding: '10px',
+                            background: selectedSpot.isDownvoted ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)',
+                            border: selectedSpot.isDownvoted ? '1px solid rgba(239,68,68,0.4)' : '1px solid var(--border-color)',
+                            borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s'
+                          }}
+                      >
+                          <span style={{ fontSize: '14px' }}>👎</span>
+                          <span style={{ color: selectedSpot.isDownvoted ? '#ef4444' : 'var(--text-secondary)', fontSize: '13px', fontWeight: 500 }}>{selectedSpot.downvotes || 0}</span>
+                      </button>
+                    </div>
+
                     <button 
                         onClick={() => openGoogleMaps(selectedSpot)}
                         style={{
                             width: '100%', padding: '14px', background: '#8b5cf6', color: 'white',
                             border: 'none', borderRadius: '12px', fontWeight: 600, fontSize: '16px',
                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                            marginTop: '8px', transition: 'transform 0.2s'
+                            transition: 'transform 0.2s'
                         }}
                         onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
                         onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                     >
                         <span>🗺️</span> Open in Google Maps
                     </button>
+
+                    {/* Reviews Section */}
+                    <div style={{ marginTop: '8px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
+                      <h4 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '12px' }}>
+                        ⭐ Reviews {selectedSpot.reviewCount > 0 && <span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--text-secondary)' }}>({selectedSpot.avgRating} avg · {selectedSpot.reviewCount} reviews)</span>}
+                      </h4>
+
+                      {/* Write a Review */}
+                      <div style={{
+                        background: 'var(--bg-tertiary)', borderRadius: '12px', padding: '16px', marginBottom: '16px'
+                      }}>
+                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '10px' }}>Rate this spot</p>
+                        <div style={{ display: 'flex', gap: '4px', marginBottom: '12px' }}>
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <button
+                              key={star}
+                              onClick={() => setReviewRating(star)}
+                              onMouseEnter={() => setReviewHover(star)}
+                              onMouseLeave={() => setReviewHover(0)}
+                              style={{
+                                background: 'none', border: 'none', cursor: 'pointer', padding: '2px',
+                                fontSize: '24px', transition: 'transform 0.1s',
+                                color: star <= (reviewHover || reviewRating) ? '#f59e0b' : 'var(--text-secondary)',
+                                transform: star <= (reviewHover || reviewRating) ? 'scale(1.2)' : 'scale(1)'
+                              }}
+                            >
+                              ★
+                            </button>
+                          ))}
+                        </div>
+                        <textarea
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          placeholder="Share your experience... (optional)"
+                          maxLength={300}
+                          style={{
+                            width: '100%', padding: '10px', background: 'var(--bg-primary)',
+                            border: '1px solid var(--border-color)', borderRadius: '8px',
+                            color: 'var(--text-primary)', fontSize: '13px', minHeight: '60px', resize: 'vertical'
+                          }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{reviewText.length}/300</span>
+                          <button
+                            onClick={handleSubmitReview}
+                            disabled={!reviewRating || reviewSubmitting}
+                            style={{
+                              padding: '8px 20px', borderRadius: '8px', border: 'none',
+                              background: reviewRating ? '#f59e0b' : 'var(--bg-tertiary)',
+                              color: reviewRating ? '#000' : 'var(--text-secondary)',
+                              fontWeight: 600, fontSize: '13px', cursor: reviewRating ? 'pointer' : 'default',
+                              opacity: reviewSubmitting ? 0.6 : 1
+                            }}
+                          >
+                            {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Review List */}
+                      {isLoadingReviews ? (
+                        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '12px' }}>Loading reviews...</p>
+                      ) : spotReviews.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                          {spotReviews.map((review, idx) => (
+                            <div key={idx} style={{
+                              padding: '12px', borderRadius: '10px', background: 'var(--bg-secondary)',
+                              border: '1px solid var(--border-color)'
+                            }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  {review.userImage && (
+                                    <img src={review.userImage} alt="" style={{ width: '20px', height: '20px', borderRadius: '50%' }} />
+                                  )}
+                                  <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)' }}>{review.userName}</span>
+                                </div>
+                                <div style={{ display: 'flex' }}>{renderStars(review.rating, '12px')}</div>
+                              </div>
+                              {review.text && (
+                                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{review.text}</p>
+                              )}
+                              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', opacity: 0.6 }}>
+                                {new Date(review.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '8px' }}>No reviews yet. Be the first!</p>
+                      )}
+                    </div>
+
+                    {/* Report button */}
+                    <button
+                        onClick={() => {
+                          setReportingSpotId(selectedSpot._id);
+                          setShowReportModal(true);
+                        }}
+                        style={{
+                          width: '100%', padding: '10px', background: 'transparent',
+                          border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px',
+                          color: '#ef4444', fontSize: '13px', cursor: 'pointer',
+                          opacity: 0.7, transition: 'opacity 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '0.7'}
+                    >
+                        ⚠️ Report this spot
+                    </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Report Modal */}
+          {showReportModal && (
+            <div style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 120,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
+            }} onClick={() => { setShowReportModal(false); setReportSuccess(false); }}>
+              <div style={{
+                background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '20px',
+                padding: '32px', maxWidth: '420px', width: '100%', animation: 'fadeIn 0.2s ease-out'
+              }} onClick={e => e.stopPropagation()}>
+                {reportSuccess ? (
+                  <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+                    <h3 style={{ color: '#10b981', fontSize: '20px', fontWeight: 600 }}>Report Submitted</h3>
+                    <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>Thanks for helping keep spots accurate!</p>
+                  </div>
+                ) : (
+                  <>
+                    <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '20px', textAlign: 'center' }}>
+                      ⚠️ Report Spot
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div>
+                        <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Reason</label>
+                        <select value={reportData.reason} onChange={e => setReportData({ ...reportData, reason: e.target.value })}
+                          style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)' }}
+                        >
+                          <option value="closed">🚫 Permanently Closed</option>
+                          <option value="inaccurate">📍 Inaccurate Info</option>
+                          <option value="spam">🗑️ Spam / Fake</option>
+                          <option value="inappropriate">⛔ Inappropriate</option>
+                          <option value="other">📝 Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>Details (optional)</label>
+                        <textarea value={reportData.detail} onChange={e => setReportData({ ...reportData, detail: e.target.value })}
+                          placeholder="Tell us more..."
+                          maxLength={300}
+                          style={{ width: '100%', padding: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: '10px', color: 'var(--text-primary)', minHeight: '80px', resize: 'vertical' }}
+                        />
+                        <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', textAlign: 'right' }}>{reportData.detail.length}/300</p>
+                      </div>
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <button onClick={() => setShowReportModal(false)} style={{ flex: 1, padding: '12px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500 }}>Cancel</button>
+                        <button onClick={handleReport} style={{ flex: 1, padding: '12px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 500 }}>Submit Report</button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -665,6 +1026,10 @@ export default function SpotsPage() {
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
         @media (max-width: 768px) {
           #filters {

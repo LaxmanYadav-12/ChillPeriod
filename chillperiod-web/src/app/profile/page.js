@@ -11,6 +11,7 @@ import UserListModal from '@/components/UserListModal';
 import { deleteUser } from '@/app/admin/actions';
 
 import { useRouter } from 'next/navigation';
+import { COLLEGES, findCollege } from '@/lib/data/colleges';
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -78,7 +79,11 @@ export default function ProfilePage() {
         // Initialize edit states
         setEditName(data.name || '');
         setEditUsername(data.username || '');
-        setEditCollege(data.college || '');
+        
+        // Normalize college to key if it's a full name
+        const collegeObj = findCollege(data.college);
+        setEditCollege(collegeObj ? collegeObj.key : '');
+        
         setEditSemester(data.semester || 4);
         setEditSection(data.section || 'CSE-A');
         setEditGroup(data.group || 'G1');
@@ -345,17 +350,20 @@ export default function ProfilePage() {
 
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '6px' }}>College</label>
-                <input 
-                  type="text" 
+                <select 
                   value={editCollege} 
                   onChange={e => setEditCollege(e.target.value)}
-                  placeholder="Your college name"
                   style={{ 
-                    width: '100%', padding: '12px 16px', background: 'var(--bg-tertiary)', 
+                    width: '100%', padding: '12px', background: 'var(--bg-tertiary)', 
                     border: '1px solid var(--border-color)', borderRadius: '10px', 
-                    color: 'var(--text-primary)', fontSize: '14px' 
+                    color: 'var(--text-primary)', fontSize: '14px', outline: 'none'
                   }}
-                />
+                >
+                  <option value="">Select College</option>
+                  {COLLEGES.map(college => (
+                    <option key={college.key} value={college.key}>{college.name}</option>
+                  ))}
+                </select>
               </div>
 
             <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>

@@ -2,17 +2,47 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Spot from '@/models/Spot';
 import UserInteraction from '@/models/UserInteraction';
+import User from '@/lib/models/User';
 import { auth } from '@/auth';
 import { withApi } from '@/lib/security/apiHandler';
 import { spotCreateSchema } from '@/lib/validators';
+import { findCollege } from '@/lib/data/colleges';
 
-// GET /api/spots — list all spots (public, rate-limited)
+// GET /api/spots — list spots scoped to user's college
 export async function GET() {
   try {
     await dbConnect();
     const session = await auth();
     
-    const spots = await Spot.find({}).sort({ upvotes: -1 }).lean();
+    // Build college filter from user profile
+    let filter = {};
+    if (session) {
+      const user = await User.findById(session.user.id).select('college').lean();
+      if (user?.college) {
+        const college = findCollege(user.college);
+        // Match by college key or legacy college string
+        if (college) {
+          filter.college = { $in: [college.key, college.name, user.college] };
+        } else {
+          filter.college = user.college;
+        }
+      }
+    }
+
+    const spots = await Spot.find(filter).sort({ upvotes: -1 }).lean();
+    const now = new Date();
+    const cutoff = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+
+    // Compute active check-in counts for all spots
+    const spotsWithCheckins = spots.map(spot => {
+      const activeCheckins = (spot.checkins || []).filter(c => new Date(c.checkedInAt) > cutoff);
+      return {
+        ...spot,
+        checkins: undefined, // Don't send full checkins array to client
+        activeCheckinCount: activeCheckins.length,
+        isCheckedIn: session ? activeCheckins.some(c => c.userId.toString() === session.user.id) : false,
+      };
+    });
 
     if (session) {
       const interactions = await UserInteraction.find({
@@ -23,7 +53,7 @@ export async function GET() {
       const upvotedIds = new Set(interactions.filter(i => i.type === 'upvote').map(i => i.spotId.toString()));
       const downvotedIds = new Set(interactions.filter(i => i.type === 'downvote').map(i => i.spotId.toString()));
 
-      const enrichedSpots = spots.map(spot => ({
+      const enrichedSpots = spotsWithCheckins.map(spot => ({
         ...spot,
         isUpvoted: upvotedIds.has(spot._id.toString()),
         isDownvoted: downvotedIds.has(spot._id.toString())
@@ -32,7 +62,7 @@ export async function GET() {
       return NextResponse.json(enrichedSpots);
     }
 
-    return NextResponse.json(spots);
+    return NextResponse.json(spotsWithCheckins);
   } catch (error) {
     console.error('[spots GET]', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

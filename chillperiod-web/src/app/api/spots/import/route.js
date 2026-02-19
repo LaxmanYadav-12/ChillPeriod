@@ -10,7 +10,7 @@ import { escapeRegex } from '@/lib/security/sanitize';
 export const POST = withApi(
   async (req, { validatedData }) => {
     await dbConnect();
-    const { spots } = validatedData;
+    const { spots, college } = validatedData;
 
     const savedSpots = [];
     
@@ -31,8 +31,9 @@ export const POST = withApi(
           budget: spotData.budget,
           distance: spotData.distance || '',
           address: spotData.address || '',
-          coordinates: spotData.coordinates,
-          college: 'BPIT',
+          coordinates: spotData.coordinates || { lat: spotData.lat, lng: spotData.lng },
+          googleMapsUrl: spotData.googleMapsUrl || '',
+          college: college || 'BPIT',
           verified: true,
           upvotes: 0,
           downvotes: 0,
@@ -47,3 +48,4 @@ export const POST = withApi(
   },
   { auth: true, role: 'admin', schema: spotImportSchema, rateLimit: 'write' }
 );
+

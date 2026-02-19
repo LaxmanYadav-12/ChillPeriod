@@ -3,6 +3,7 @@ import User from "@/lib/models/User";
 import dbConnect from "@/lib/mongodb";
 import { redirect } from "next/navigation";
 import UserTable from "./UserTable";
+import ReportedSpots from "./ReportedSpots";
 import MobileNav from "@/components/MobileNav";
 
 export const metadata = {
@@ -73,6 +74,14 @@ export default async function AdminPage() {
         </div>
 
         <UserTable initialUsers={serializedUsers} />
+
+        {/* Reported Spots Section */}
+        <div style={{ marginTop: '40px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '16px' }}>
+            ⚠️ Reported Spots
+          </h2>
+          <ReportedSpots />
+        </div>
       </div>
     </div>
   );

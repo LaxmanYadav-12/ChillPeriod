@@ -138,12 +138,12 @@ export default function DocsPage() {
                     boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)'
                 }}>
                      <MermaidDiagram chart={`graph TD
-                          Client[Client Browser] --> CDN[Vercel Edge]
-                          CDN --> Static[Assets]
-                          CDN --> Server[Next.js Server]
-                          Server --> Page[SSR Pages]
-                          Server --> API[API Routes]
-                          API --> DB[(MongoDB Atlas)]`} />
+Client[Client Browser] --> CDN[Vercel Edge]
+CDN --> Static[Assets]
+CDN --> Server[Next.js Server]
+Server --> Page[SSR Pages]
+Server --> API[API Routes]
+API --> DB[(MongoDB Atlas)]`} />
                 </div>
 
                 <div style={{ marginTop: '48px' }}>
@@ -179,16 +179,14 @@ export default function DocsPage() {
                     borderRadius: '24px', padding: '40px', overflow: 'hidden',
                     boxShadow: '0 20px 40px -10px rgba(0,0,0,0.3)'
                 }}>
-                        <div className="mermaid" style={{ display: 'flex', justifyContent: 'center', opacity: 0.9 }}>
-                        {`stateDiagram-v2
-                            [*] --> Idle
-                            Idle --> Chilling: Check-in at Spot
-                            Idle --> Bunking: Class Marked 'Mass Bunk'
-                            Chilling --> Idle: 3 Hour Timer Expiry
-                            Bunking --> Idle: End of Day Reset
-                            Chilling --> Bunking: Override Status
-                            Bunking --> Chilling: Override Status`}
-                    </div>
+                        <MermaidDiagram chart={`stateDiagram-v2
+[*] --> Idle
+Idle --> Chilling : Check-in at Spot
+Idle --> Bunking : Class Marked Mass Bunk
+Chilling --> Idle : 3 Hour Timer Expiry
+Bunking --> Idle : End of Day Reset
+Chilling --> Bunking : Override Status
+Bunking --> Chilling : Override Status`} />
                 </div>
             </section>
 
@@ -241,12 +239,12 @@ export default function DocsPage() {
                         borderRadius: '24px', padding: '40px', overflow: 'hidden'
                     }}>
                          <MermaidDiagram chart={`flowchart TD
-    RSC[Server Component] -->|Direct DB Call| DB[(MongoDB)]
-    Client[Client Component] -->|SWR Hook| API[API Route]
-    API -->|Handler| DB
-    DB -->|JSON| API
-    API -->|Update| Client
-    DB -->|Initial HTML| RSC`} />
+RSC[Server Component] -->|Direct DB Call| DB[(MongoDB)]
+Client[Client Component] -->|SWR Hook| API[API Route]
+API -->|Handler| DB
+DB -->|JSON| API
+API -->|Update| Client
+DB -->|Initial HTML| RSC`} />
                     </div>
                 </div>
             </section>
@@ -265,13 +263,13 @@ export default function DocsPage() {
                     background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
                     borderRadius: '24px', padding: '40px', overflow: 'hidden'
                 }}>
-                    <MermaidDiagram chart={`    sequenceDiagram
-    User->>App: Login
-    App->>NextAuth: signIn()
-    NextAuth->>Provider: OAuth
-    Provider-->>NextAuth: Token
-    NextAuth->>DB: Upsert User
-    NextAuth-->>App: Set Cookie`} />
+                    <MermaidDiagram chart={`sequenceDiagram
+User->>App: Login
+App->>NextAuth: signIn()
+NextAuth->>Provider: OAuth
+Provider-->>NextAuth: Token
+NextAuth->>DB: Upsert User
+NextAuth-->>App: Set Cookie`} />
                 </div>
             </section>
             
@@ -288,17 +286,17 @@ export default function DocsPage() {
                     background: 'var(--card-bg)', border: '1px solid var(--border-color)', 
                     borderRadius: '24px', padding: '40px', overflow: 'hidden'
                 }}>
-                     <MermaidDiagram chart={`    flowchart TD
-    Start[Class Scheduled] --> Check{Marked Attended?}
-    Check -->|Yes| Inc[Increment Attended & Total]
-    Check -->|No| Bunk{Marked Bunk?}
-    Bunk -->|Yes| IncTotal[Increment Total Only]
-    Bunk -->|No| Ignore[Ignore / Cancelled]
-    Inc --> Calc[Calc % = Attended / Total]
-    IncTotal --> Calc
-    Calc --> Evaluate{Is % > 75%?}
-    Evaluate -->|Yes| Safe[Status: Safe to Bunk]
-    Evaluate -->|No| Danger[Status: Must Attend]`} />
+                     <MermaidDiagram chart={`flowchart TD
+Start[Class Scheduled] --> Check{Marked Attended?}
+Check -->|Yes| Inc[Increment Attended and Total]
+Check -->|No| Bunk{Marked Bunk?}
+Bunk -->|Yes| IncTotal[Increment Total Only]
+Bunk -->|No| Ignore[Ignore / Cancelled]
+Inc --> Calc[Calc Percent = Attended / Total]
+IncTotal --> Calc
+Calc --> Evaluate{Is Percent > 75?}
+Evaluate -->|Yes| Safe[Status: Safe to Bunk]
+Evaluate -->|No| Danger[Status: Must Attend]`} />
                 </div>
             </section>
             
@@ -317,28 +315,28 @@ export default function DocsPage() {
                     borderRadius: '24px', padding: '40px', overflow: 'hidden', marginBottom: '48px'
                 }}>
                     <MermaidDiagram chart={`classDiagram
-    class User {
-        +String name
-        +String email
-        +ObjectId[] followers
-        +ObjectId[] following
-        +Preferences prefs
-    }
-    class Spot {
-        +String name
-        +GeoJson location
-        +String[] tags
-        +Int visits
-    }
-    class Attendance {
-        +String subject
-        +Int totalClasses
-        +Int attended
-        +Boolean isLab
-    }
-    User "1" --> "*" Attendance : tracks
-    User "1" --> "*" Spot : upvotes/visits
-    User "1" --> "*" User : follows`} />
+class User {
+  +String name
+  +String email
+  +ObjectId[] followers
+  +ObjectId[] following
+  +Preferences prefs
+}
+class Spot {
+  +String name
+  +GeoJson location
+  +String[] tags
+  +Int visits
+}
+class Attendance {
+  +String subject
+  +Int totalClasses
+  +Int attended
+  +Boolean isLab
+}
+User "1" --> "*" Attendance : tracks
+User "1" --> "*" Spot : upvotes/visits
+User "1" --> "*" User : follows`} />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
@@ -416,17 +414,17 @@ export default function DocsPage() {
                         borderRadius: '24px', padding: '40px', overflow: 'hidden'
                     }}>
                          <MermaidDiagram chart={`sequenceDiagram
-    participant C as Client
-    participant M as Middleware
-    participant R as Route Handler
-    participant D as DB
-    C->>M: HTTP Request
-    M->>M: Verify Session (JWT)
-    M->>R: Forward Request
-    R->>R: Validate Body (Zod)
-    R->>D: Execute Query
-    D-->>R: Data
-    R-->>C: JSON Response`} />
+participant C as Client
+participant M as Middleware
+participant R as Route Handler
+participant D as DB
+C->>M: HTTP Request
+M->>M: Verify Session JWT
+M->>R: Forward Request
+R->>R: Validate Body Zod
+R->>D: Execute Query
+D-->>R: Data
+R-->>C: JSON Response`} />
                     </div>
                 </div>
             </section>
