@@ -38,6 +38,15 @@ const UserSchema = new mongoose.Schema({
   targetPercentage: { type: Number, default: 75 },
   hasCompletedOnboarding: { type: Boolean, default: false },
   
+  // Push Notifications
+  pushSubscriptions: [{
+    endpoint: String,
+    keys: {
+      p256dh: String,
+      auth: String
+    }
+  }],
+  
   // Courses & Attendance
   courses: [{
     name: { type: String, required: true },

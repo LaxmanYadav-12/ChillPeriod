@@ -5,13 +5,85 @@ import { useSession } from 'next-auth/react';
 import { TIMETABLE_DATA, getSchedule } from '@/lib/data/timetable';
 import { playNotificationSound } from '@/lib/notification-sound';
 
+// Hardcoded public key to perfectly guarantee it is available on the client side without Next.js env bugs
+const vapidPublicKey = "BLDPhz7dgPNdOJHFIswQNjD2RhLt3lQ5U2HpUlVle14EZ3mR3w4RFkzvOLOVmyaGlUJmsEtgl4xxZrz1gI40QDI";
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+  
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 export default function NotificationManager() {
   const { data: session } = useSession();
   const lastUnreadCount = useRef(0);
 
   useEffect(() => {
-    // Poll for new in-app notifications and play sound
-    const pollNotifications = async () => {
+    // 1. Web Push Subscription Setup
+    const setupWebPush = async () => {
+      if (!session?.user?.id || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+      if (Notification.permission === 'denied') return;
+
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js', {
+          scope: '/'
+        });
+        
+        // Wait for SW to be ready
+        await navigator.serviceWorker.ready;
+
+        // If permission isn't granted yet, request it
+        if (Notification.permission === 'default') {
+           const permission = await Notification.requestPermission();
+           if (permission !== 'granted') return;
+        }
+
+        // Check if already subscribed
+        let subscription = await registration.pushManager.getSubscription();
+        
+        if (!subscription && vapidPublicKey) {
+           console.log('Attempting to subscribe to Web Push...');
+           const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+           
+           try {
+             subscription = await registration.pushManager.subscribe({
+               userVisibleOnly: true,
+               applicationServerKey: applicationServerKey
+             });
+             console.log('Push subscription successful:', subscription);
+           } catch (subErr) {
+             console.error('Failed to subscribe PushManager (this is common in local/dev without HTTPS or due to browser blocks):', subErr);
+             return;
+           }
+
+           // Send subscription to backend
+           const backendRes = await fetch('/api/notifications/subscribe', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify(subscription)
+           });
+           
+           if (!backendRes.ok) {
+               console.error('Failed to save push subscription to backend');
+           }
+        }
+      } catch (e) {
+        console.error('Web Push setup failed (Service Worker Error):', e);
+      }
+    };
+
+    setupWebPush();
+    // Poll for new in-app notifications and play sound (called initially and via SSE)
+    const fetchNotifications = async () => {
       if (!session?.user?.id) return;
       try {
         const res = await fetch('/api/notifications?unread=true');
@@ -28,10 +100,26 @@ export default function NotificationManager() {
       }
     };
 
-    // Initial poll
-    pollNotifications();
-    // Poll every 30 seconds
-    const pollInterval = setInterval(pollNotifications, 30000);
+    // Initial fetch
+    fetchNotifications();
+
+    // Setup Server-Sent Events (SSE) for instant real-time updates
+    const eventSource = new EventSource('/api/notifications/stream');
+    
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.newNotification) {
+           fetchNotifications();
+           // Optionally dispatch a custom event if other components (like Navbar badge) need updating instantly
+           window.dispatchEvent(new Event('new_notification'));
+        }
+      } catch (err) {}
+    };
+
+    eventSource.onerror = () => {
+      // Reconnect handled automatically by browser EventSource
+    };
 
     // Class schedule notifications
     const checkSchedule = async () => {
@@ -107,7 +195,7 @@ export default function NotificationManager() {
     checkSchedule();
 
     return () => {
-      clearInterval(pollInterval);
+      eventSource.close();
       clearInterval(scheduleInterval);
     };
   }, [session]);

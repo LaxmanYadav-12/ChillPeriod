@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import Notification from '@/models/Notification';
+import { sendNotificationToUser } from '@/lib/push';
 
 export async function POST(req) {
   try {
@@ -79,6 +80,18 @@ export async function POST(req) {
     if (notifications.length > 0) {
       const result = await Notification.insertMany(notifications);
       console.log('[MassBunk] Notifications inserted:', result.length);
+
+      // Dispatch Web Push Notifications in the background asynchronously
+      Promise.allSettled(
+        notifications.map(notification => 
+          sendNotificationToUser(notification.userId, {
+            title: notification.title,
+            body: notification.message,
+            url: notification.metadata.actionUrl,
+            icon: '/icon-192x192.png'
+          })
+        )
+      ).catch(err => console.error('[Push Dispatch Error]', err));
     }
 
     return NextResponse.json({ 
