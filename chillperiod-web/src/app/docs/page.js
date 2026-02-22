@@ -72,6 +72,7 @@ export default function DocsPage() {
                 </h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <NavLink id="intro" label="Introduction" active={activeSection} />
+                    <NavLink id="tutorial" label="User Guide & Tutorial" active={activeSection} />
                     <NavLink id="architecture" label="Architecture" active={activeSection} />
                     <NavLink id="live-logic" label="Live Social Logic" active={activeSection} />
                     <NavLink id="tech-stack" label="Tech Stack Details" active={activeSection} />
@@ -119,6 +120,95 @@ export default function DocsPage() {
                         icon="⚡" title="Real-time Social"
                         desc="Coordinate chills and bunks instantly using live WebSocket polling."
                     />
+                </div>
+            </section>
+
+             {/* Tutorial Section */}
+            <section id="tutorial" style={{ marginBottom: '120px', scrollMarginTop: '120px' }}>
+                <SectionTitle title="User Guide & Tutorial" subtitle="A comprehensive guide to everything you can do on ChillPeriod." />
+                
+                <p style={{ fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.8, marginBottom: '32px', maxWidth: '800px' }}>
+                    Welcome to the ultimate student utility app. This guide walks you through every major feature, showing you how to set up your profile, track your attendance, manage your studies, and use the social features seamlessly.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+                    
+                    {/* 1. Account Setup */}
+                    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '32px' }}>
+                        <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#8b5cf6', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '28px' }}>1️⃣</span> Profile & Onboarding
+                        </h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '16px' }}>
+                            When you first log in through Google or Discord, you will go through our Onboarding process. Make sure to:
+                        </p>
+                        <ul style={{ paddingLeft: '24px', color: 'var(--text-secondary)', lineHeight: 1.7, listStyleType: 'disc' }}>
+                            <li><strong>Select your College, Semester, Section, and Group:</strong> This is crucial. ChillPeriod uses this information to dynamically construct your custom daily timetable and calculate your attendance limits accurately.</li>
+                            <li><strong>Choose a unique Username:</strong> This allows friends to find and follow you efficiently.</li>
+                            <li><strong>Discord Link:</strong> If you use Discord, connecting it via the Profile <span style={{fontFamily: 'monospace'}}>⚙️ Settings</span> allows you to trigger attendance and spot commands directly through the ChillPeriod Discord Bot in your community servers.</li>
+                        </ul>
+                    </div>
+
+                    {/* 2. Attendance & Tracking */}
+                    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '32px' }}>
+                        <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#06b6d4', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '28px' }}>2️⃣</span> Attendance & Daily Routine
+                        </h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '16px' }}>
+                            The <span style={{fontWeight: 'bold', color: 'var(--text-primary)'}}>Attendance Page</span> is your main dashboard. Once your timetable is set:
+                        </p>
+                         <ul style={{ paddingLeft: '24px', color: 'var(--text-secondary)', lineHeight: 1.7, listStyleType: 'disc' }}>
+                            <li><strong>Calendar View:</strong> Click any past date on the calendar to log retroactive attendance for subjects scheduled on that day.</li>
+                            <li><strong>Today's Classes:</strong> Your daily schedule is automatically populated. You can mark "Present" or "Bunked" with a single click.</li>
+                            <li><strong>"Safe to Bunk" Indicator:</strong> ChillPeriod constantly measures your current attendance against the target threshold (e.g., 75%). It will visibly show if you are in the "Safe", "Caution" (close to dropping), or "Danger" (already below) zone.</li>
+                            <li><strong>Automatic Sync:</strong> Your stats (Target%, Bunks saved, and Total Attendance) update in real-time based on your clicks.</li>
+                        </ul>
+                    </div>
+
+                     {/* 3. Social & Mass Bunk */}
+                    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '32px' }}>
+                        <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#f59e0b', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '28px' }}>3️⃣</span> Live Status & Cascading Mass Bunks
+                        </h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '16px' }}>
+                            ChillPeriod brings your peer network directly into your routine planning.
+                        </p>
+                         <ul style={{ paddingLeft: '24px', color: 'var(--text-secondary)', lineHeight: 1.7, listStyleType: 'disc' }}>
+                            <li><strong>Live Status:</strong> When you mark a class as "Bunked", your status goes live. Friends following you instantly see that you're "Bunking" or "Chilling" in their Friends Activity feed.</li>
+                            <li><strong>Mass Bunk Alert 📢:</strong> Next to your classes on the Attendance page, there is a megaphone icon. Clicking this sends a global push notification to everyone following you, asking if they want to join the bunk. If they accept, the alert cascades to their followers, organizing a mass bunk effortlessly.</li>
+                            <li><strong>Search & Follow:</strong> Navigate to the 🔍 Find Friends page to search for usernames and build your follower network. <em>Leaderboard</em> points are awarded to the most legendary "bunkers."</li>
+                        </ul>
+                    </div>
+                    
+                    {/* 4. Utilities */}
+                    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '32px' }}>
+                        <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#10b981', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '28px' }}>4️⃣</span> Utilities: Syllabus & Spots
+                        </h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '16px' }}>
+                            Beyond attendance, the app provides essential tools for the chill but responsible student:
+                        </p>
+                         <ul style={{ paddingLeft: '24px', color: 'var(--text-secondary)', lineHeight: 1.7, listStyleType: 'disc' }}>
+                            <li><strong>Chill Spots 📍:</strong> A crowdsourced feed of the best local cafes, parks, and gaming lounges near your campus. When bunking, you can select a Spot, opening Google Maps routing automatically. You can also "Upvote" spots to influence their ranking.</li>
+                            <li><strong>Smart Syllabus 📚:</strong> Powered by SyllabusX APIs, you can check off topics you've covered in class. It features one-click links to specific study notes, previous year question papers (PYQs), and required lab experiments.</li>
+                            <li><strong>Class Timetable 📅:</strong> A dedicated, easy-to-read view of your week's schedule, segmented by Theory and Lab blocks.</li>
+                        </ul>
+                    </div>
+                    
+                     {/* 5. Discord Integration */}
+                    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '32px' }}>
+                        <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#6366f1', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '28px' }}>5️⃣</span> The Discord Bot
+                        </h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '16px' }}>
+                            You don't even need the website open to log your day. Invite the ChillPeriod bot to your Discord server:
+                        </p>
+                         <ul style={{ paddingLeft: '24px', color: 'var(--text-secondary)', lineHeight: 1.7, listStyleType: 'disc' }}>
+                            <li><strong>Slash Commands:</strong> Type <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/bunk</span>, <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/attendance</span>, or <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/spots</span> anywhere in a server.</li>
+                            <li><strong>Seamless Syncing:</strong> As long as your profile is linked with Discord, taking action in your server immediately updates the web database.</li>
+                            <li><strong>Excuse Generator:</strong> Use <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/excuse [tone]</span> in Discord to generate a funny, professional, or dramatic excuse for missing class.</li>
+                        </ul>
+                    </div>
+
                 </div>
             </section>
 

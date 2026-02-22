@@ -87,23 +87,7 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', margin: '24px 0' }}>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
-          <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>or</span>
-          <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }} />
-        </div>
 
-        {/* Continue without login */}
-        <Link href="/attendance" style={{ 
-          display: 'block', padding: '14px 24px', 
-          background: 'var(--bg-tertiary)', color: 'var(--text-secondary)', 
-          border: '1px solid var(--border-color)', borderRadius: '14px', 
-          fontWeight: 500, fontSize: '15px', textDecoration: 'none',
-          transition: 'all 0.2s'
-        }}>
-          Continue without login
-        </Link>
 
         <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginTop: '24px' }}>
           By logging in, you agree to our Terms of Service
