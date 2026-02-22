@@ -10,7 +10,7 @@ export default function Home() {
   const [currentEmoji, setCurrentEmoji] = useState(0);
   const emojis = ['😎', '🎉', '🔥', '✨', '🚀'];
 
-  const getStartedLink = status === 'authenticated' ? '/attendance' : '/login';
+  const getStartedLink = status === 'unauthenticated' ? '/login' : '/attendance';
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentEmoji(prev => (prev + 1) % emojis.length), 2000);

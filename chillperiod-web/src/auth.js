@@ -69,12 +69,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             });
 
             // Create if not exists
-            if (!dbUser && token.email) {
+            if (!dbUser && (token.email || token.discordId || token.googleId)) {
                const newUser = {
-                 email: token.email,
                  name: token.name || token.username || 'User',
                  image: token.picture || token.avatar,
                };
+               if (token.email) newUser.email = token.email;
                if (token.discordId) newUser.discordId = token.discordId;
                if (token.googleId) newUser.googleId = token.googleId;
                
