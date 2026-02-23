@@ -20,6 +20,7 @@ export default function Navbar() {
         <div className="flex items-center gap-6">
           <Link href="/spots" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Spots</Link>
           <Link href="/attendance" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Attendance</Link>
+          <Link href="/tasks" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Tasks</Link>
           
           <ThemeToggle />
 

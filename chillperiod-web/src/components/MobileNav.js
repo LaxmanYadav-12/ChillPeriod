@@ -52,6 +52,7 @@ export default function MobileNav({ currentPage = 'home' }) {
                 <ThemeToggle />
                 <Link href="/spots" style={{ color: currentPage === 'spots' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'spots' ? 500 : 400, textDecoration: 'none' }}>Spots</Link>
                 <Link href="/attendance" style={{ color: currentPage === 'attendance' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'attendance' ? 500 : 400, textDecoration: 'none' }}>Attendance</Link>
+                <Link href="/tasks" style={{ color: currentPage === 'tasks' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'tasks' ? 500 : 400, textDecoration: 'none' }}>Tasks</Link>
                 <Link href="/timetable" style={{ color: currentPage === 'timetable' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'timetable' ? 500 : 400, textDecoration: 'none' }}>Timetable</Link>
                 <Link href="/syllabus" style={{ color: currentPage === 'syllabus' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'syllabus' ? 500 : 400, textDecoration: 'none' }}>Syllabus</Link>
                 <Link href="/leaderboard" style={{ color: currentPage === 'leaderboard' ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: currentPage === 'leaderboard' ? 500 : 400, textDecoration: 'none' }}>🏆</Link>
@@ -147,6 +148,17 @@ export default function MobileNav({ currentPage = 'home' }) {
               }}
             >
               📊 Attendance
+            </Link>
+            <Link 
+              href="/tasks" 
+              style={{ 
+                color: currentPage === 'tasks' ? '#8b5cf6' : 'var(--text-primary)', 
+                fontSize: '20px', fontWeight: 600, textDecoration: 'none',
+                padding: '16px', background: 'var(--bg-tertiary)',
+                borderRadius: '12px', textAlign: 'center'
+              }}
+            >
+              ✅ Tasks
             </Link>
             <Link 
               href="/timetable" 
