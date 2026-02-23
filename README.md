@@ -53,9 +53,15 @@ Both share the **same MongoDB database** with synchronized schemas.
 - Cascading mass bunk notifications
 - Public/private profile controls
 
+### 📋 Tasks & Productivity
+- Manage to-do lists specifically tied to courses
+- Focus mode with built-in **Pomodoro Timer**
+- Weekly productivity analytics and completion rates
+
 ### 🔔 Smart Notifications
-- Follower alerts, bunk invites, class reminders
-- Cross-platform: web ↔ Discord
+- Push Notifications for follower alerts and bunk invites
+- Cross-platform alerts: web ↔ Discord
+- In-app notification center
 
 ---
 

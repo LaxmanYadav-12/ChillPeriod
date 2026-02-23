@@ -61,7 +61,7 @@ export default function NotificationManager() {
              });
              console.log('Push subscription successful:', subscription);
            } catch (subErr) {
-             console.error('Failed to subscribe PushManager (this is common in local/dev without HTTPS or due to browser blocks):', subErr);
+             console.warn('Failed to subscribe PushManager (this is common in local/dev without HTTPS or due to browser blocks):', subErr);
              return;
            }
 
@@ -73,11 +73,11 @@ export default function NotificationManager() {
            });
            
            if (!backendRes.ok) {
-               console.error('Failed to save push subscription to backend');
+               console.warn('Failed to save push subscription to backend');
            }
         }
       } catch (e) {
-        console.error('Web Push setup failed (Service Worker Error):', e);
+        console.warn('Web Push setup failed (Service Worker Error):', e);
       }
     };
 

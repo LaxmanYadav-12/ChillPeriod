@@ -32,11 +32,15 @@ The web application for ChillPeriod — track attendance, discover chill spots, 
 - Bunk titles: Rookie 🌱 → Bunk Legend 👑
 - Account management with Delete Account option
 
+### 📋 Tasks & Productivity
+- Manage to-do lists specifically tied to courses
+- Focus mode with built-in **Pomodoro Timer**
+- Weekly productivity analytics and completion rates
+
 ### 🔔 Notifications
+- Push Notifications for follower alerts and bunk invites
 - Mass bunk cascade alerts
-- New follower notifications
-- Bunk join notifications
-- Slide-out notification panel
+- In-app slide-out notification panel
 
 ### 📅 Timetable
 - Auto-populated by selecting Semester & Section
