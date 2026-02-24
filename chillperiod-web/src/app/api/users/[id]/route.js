@@ -5,6 +5,8 @@ import { auth } from '@/auth';
 import { isValidObjectId } from '@/lib/security/sanitize';
 import { userUpdateSchema } from '@/lib/validators';
 
+export const dynamic = 'force-dynamic'; // Prevent Next.js from caching this API route
+
 // GET /api/users/[id] — Get user profile (public)
 export async function GET(request, { params }) {
   try {
@@ -39,7 +41,13 @@ export async function GET(request, { params }) {
       : 0;
     user.followerCount = user.followers?.length || 0;
     user.followingCount = user.following?.length || 0;
+
+    // We keep user.followers array so the frontend can check `data.followers.some(f => f._id === session.user.id)`
     
+    // lean() bypasses Mongoose defaults, so old users might have undefined XP/Level
+    user.xp = user.xp || 0;
+    user.level = user.level || 1;
+
     return NextResponse.json(user);
   } catch (error) {
     console.error('[user GET]', error);

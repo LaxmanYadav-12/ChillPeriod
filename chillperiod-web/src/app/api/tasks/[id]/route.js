@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import connectMongo from '@/lib/mongodb';
 import Task from '@/models/Task';
+import User from '@/lib/models/User';
 
 // Helper to verify task ownership
 async function getTaskIfOwner(taskId, sessionUserId) {
@@ -52,8 +53,22 @@ export async function PUT(request, { params }) {
       task.dueDate = updateData.dueDate ? new Date(updateData.dueDate) : null;
     }
 
+    // Check if task is newly completed to award XP
+    const wasCompleted = task.completed;
+    const isNowCompleted = updateData.completed === true;
+
     const updatedTask = await task.save();
     
+    // Award XP if task was just marked as completed
+    if (!wasCompleted && isNowCompleted) {
+      const user = await User.findById(session.user.id);
+      if (user) {
+        user.xp += 15;
+        user.level = Math.floor(Math.sqrt(user.xp / 10)) + 1;
+        await user.save();
+      }
+    }
+
     const populatedTask = await Task.findById(updatedTask._id)
       .populate('collaborators', 'name username image discordId avatar');
 

@@ -15,8 +15,11 @@ export default function UserProfilePage() {
   const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
-    fetchUser();
-  }, [id]);
+    // Only fetch user when session loading is finished (either authenticated or null)
+    if (session !== undefined) {
+      fetchUser();
+    }
+  }, [id, session]);
 
   const fetchUser = async () => {
     setLoading(true);
@@ -27,7 +30,7 @@ export default function UserProfilePage() {
         setUser(data);
         // Check if current user follows this user
         if (session?.user?.id && data.followers) {
-          setIsFollowing(data.followers.some(f => f._id === session.user.id));
+          setIsFollowing(data.followers.some(f => String(f._id) === String(session.user.id)));
         }
       }
     } catch (error) {
@@ -72,11 +75,25 @@ export default function UserProfilePage() {
     followerCount: 23,
     followingCount: 15,
     favoriteSpot: { name: 'Central Park', emoji: '🌳' },
-    isPublic: true
+    isPublic: true,
+    xp: 0,
+    level: 1
   };
 
   const displayUser = user || mockUser;
   const isOwnProfile = session?.user?.id === id;
+
+  // Calculate Progress to next level
+  const xp = displayUser.xp || 0;
+  const level = displayUser.level || 1;
+  const currentLevelXp = Math.pow(level - 1, 2) * 10;
+  const nextLevelXp = Math.pow(level, 2) * 10;
+  const xpIntoLevel = xp - currentLevelXp;
+  const xpNeededForLevel = nextLevelXp - currentLevelXp;
+  const progressPercentage = xpNeededForLevel > 0 
+    ? Math.min(100, Math.max(0, (xpIntoLevel / xpNeededForLevel) * 100))
+    : 0;
+
 
   // Bunk title logic
   const getBunkTitle = (bunks) => {
@@ -126,9 +143,11 @@ export default function UserProfilePage() {
               </div>
             </div>
 
-            <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>
-              {displayUser.name}
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                {displayUser.name}
+              </h1>
+            </div>
             
             {displayUser.username && (
               <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '8px' }}>
@@ -137,10 +156,34 @@ export default function UserProfilePage() {
             )}
 
             {displayUser.college && (
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '12px' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>
                 📍 {displayUser.college}
               </p>
             )}
+
+            {/* XP Progress Bar */}
+            <div style={{ maxWidth: '300px', margin: '0 auto 20px auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ 
+                    background: 'linear-gradient(135deg, #f59e0b, #ef4444)', color: 'white', 
+                    padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold',
+                    boxShadow: '0 2px 4px rgba(245, 158, 11, 0.3)'
+                  }}>
+                    Lv {level}
+                  </div>
+                  <span>XP: {xp} / {nextLevelXp}</span>
+                </div>
+                <span>{Math.round(progressPercentage)}%</span>
+              </div>
+              <div style={{ width: '100%', height: '8px', background: 'var(--bg-tertiary)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ 
+                  width: `${progressPercentage}%`, height: '100%', 
+                  background: 'linear-gradient(90deg, #8b5cf6, #06b6d4)',
+                  borderRadius: '4px', transition: 'width 0.5s ease-out'
+                }} />
+              </div>
+            </div>
 
             {/* Bunk Title Badge */}
             <div style={{ 

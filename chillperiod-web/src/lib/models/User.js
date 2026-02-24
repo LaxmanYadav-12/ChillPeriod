@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   
+  // Progression
+  xp: { type: Number, default: 0 },
+  level: { type: Number, default: 1 },
+  
   // Stats
   totalClasses: { type: Number, default: 0 },
   attendedClasses: { type: Number, default: 0 },

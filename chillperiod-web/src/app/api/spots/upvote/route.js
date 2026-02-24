@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Spot from '@/models/Spot';
 import UserInteraction from '@/models/UserInteraction';
+import User from '@/lib/models/User';
 import { withApi } from '@/lib/security/apiHandler';
 import { voteActionSchema } from '@/lib/validators';
 
@@ -57,6 +58,14 @@ export const POST = withApi(
         { new: true }
       );
       newInteractionType = action;
+
+      // Award XP for voting the first time
+      const user = await User.findById(userId);
+      if (user) {
+        user.xp += 2;
+        user.level = Math.floor(Math.sqrt(user.xp / 10)) + 1;
+        await user.save();
+      }
     }
 
     if (!spot) {

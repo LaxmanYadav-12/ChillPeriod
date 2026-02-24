@@ -27,6 +27,10 @@ export const POST = withApi(
     user.totalClasses += 1;
     if (status === 'attended') {
       user.attendedClasses += 1;
+      
+      // Award XP for attending
+      user.xp += 10;
+      user.level = Math.floor(Math.sqrt(user.xp / 10)) + 1;
     } else {
       user.totalBunks += 1;
     }
@@ -121,6 +125,10 @@ export const PATCH = withApi(
            if (status === 'attended') {
              course.attendedClasses += 1;
              user.attendedClasses += 1;
+
+             // Award XP for attending
+             user.xp += 10;
+             user.level = Math.floor(Math.sqrt(user.xp / 10)) + 1;
            } else {
              user.totalBunks += 1;
            }
@@ -145,6 +153,10 @@ export const PATCH = withApi(
           if (status === 'attended') {
             course.attendedClasses += 1;
             user.attendedClasses += 1;
+
+            // Award XP for attending
+            user.xp += 10;
+            user.level = Math.floor(Math.sqrt(user.xp / 10)) + 1;
           } else {
             user.totalBunks += 1;
           }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import connectMongo from '@/lib/mongodb';
 import Task from '@/models/Task';
+import User from '@/lib/models/User';
 
 // GET all tasks for the logged in user
 export async function GET(request) {
@@ -73,6 +74,14 @@ export async function POST(request) {
     // Populate before returning so frontend gets populated ref
     const populatedTask = await Task.findById(savedTask._id)
       .populate('collaborators', 'name username image discordId avatar');
+
+    // Award XP to the creator
+    const user = await User.findById(session.user.id);
+    if (user) {
+      user.xp += 5;
+      user.level = Math.floor(Math.sqrt(user.xp / 10)) + 1;
+      await user.save();
+    }
 
     return NextResponse.json(populatedTask, { status: 201 });
   } catch (error) {

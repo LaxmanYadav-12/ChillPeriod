@@ -281,8 +281,22 @@ export default function ProfilePage() {
     followerCount: 0,
     followingCount: 0,
     semester: session?.user?.semester || 4,
-    section: session?.user?.section || 'CSE-A'
+    section: session?.user?.section || 'CSE-A',
+    xp: 0,
+    level: 1
   };
+  
+  // Calculate Progress to next level
+  const xp = user.xp || 0;
+  const level = user.level || 1;
+  const currentLevelXp = Math.pow(level - 1, 2) * 10;
+  const nextLevelXp = Math.pow(level, 2) * 10;
+  const xpIntoLevel = xp - currentLevelXp;
+  const xpNeededForLevel = nextLevelXp - currentLevelXp;
+  // Prevent NaN if xpNeededForLevel is 0
+  const progressPercentage = xpNeededForLevel > 0 
+    ? Math.min(100, Math.max(0, (xpIntoLevel / xpNeededForLevel) * 100))
+    : 0;
 
   const achievements = [
     { id: 1, emoji: '🔥', title: 'On Fire!', desc: '5-day streak', unlocked: (user.currentStreak || 0) >= 5 },
@@ -480,9 +494,11 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '4px' }}>
-              {user.name}
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+              <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                {user.name}
+              </h1>
+            </div>
             {user.username && (
               <p style={{ color: '#a78bfa', fontSize: '15px', marginBottom: '8px' }}>
                 @{user.username}
@@ -491,6 +507,30 @@ export default function ProfilePage() {
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>
               📍 {user.college || 'No college set'} • {user.semester ? `${user.semester}th Sem` : ''} {user.section ? `(${user.section})` : ''} {user.group ? `• ${user.group}` : ''}
             </p>
+
+            {/* XP Progress Bar */}
+            <div style={{ maxWidth: '300px', margin: '0 auto 24px auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 500 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ 
+                    background: 'linear-gradient(135deg, #f59e0b, #ef4444)', color: 'white', 
+                    padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold',
+                    boxShadow: '0 2px 4px rgba(245, 158, 11, 0.3)'
+                  }}>
+                    Lv {user.level || 1}
+                  </div>
+                  <span>XP: {user.xp || 0} / {nextLevelXp}</span>
+                </div>
+                <span>{Math.round(progressPercentage)}%</span>
+              </div>
+              <div style={{ width: '100%', height: '8px', background: 'var(--bg-tertiary)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ 
+                  width: `${progressPercentage}%`, height: '100%', 
+                  background: 'linear-gradient(90deg, #8b5cf6, #06b6d4)',
+                  borderRadius: '4px', transition: 'width 0.5s ease-out'
+                }} />
+              </div>
+            </div>
 
             {/* Follower/Following Counts - Real Data */}
             <div style={{ 

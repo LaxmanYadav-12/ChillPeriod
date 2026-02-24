@@ -84,7 +84,7 @@ export async function execute(interaction) {
 
     const embed = createEmbed({
         title: `${statusEmoji} ${isSelf ? 'Your' : targetDiscordUser.username + "'s"} Profile`,
-        description: `**${user.name || user.username}**\n${bunkTitle.emoji} ${bunkTitle.title}\n\n**Attendance: ${percentage}%**\n${bar}`,
+        description: `**${user.name || user.username}** • Lv ${user.level || 1} (${user.xp || 0} XP)\n${bunkTitle.emoji} ${bunkTitle.title}\n\n**Attendance: ${percentage}%**\n${bar}`,
         color: statusColor,
         thumbnail: targetDiscordUser.displayAvatarURL({ dynamic: true }),
         fields: [
