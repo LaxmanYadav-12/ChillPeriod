@@ -94,6 +94,23 @@ export const courseUpdateSchema = z.object({
 // Users
 // ============================================================
 
+const customTimetableSlotSchema = z.object({
+  slot: z.number().int().min(1).max(12),
+  type: z.enum(['THEORY', 'LAB', 'BREAK', 'ACTIVITY']),
+  subject: z.string().max(100).optional().default(''),
+});
+
+const customTimetableSchema = z.object({
+  timeSlots: z.array(z.object({
+    slot: z.number().int().min(1).max(12),
+    time: z.string().max(20),
+  })).min(1).max(12),
+  schedule: z.record(
+    z.enum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']),
+    z.array(customTimetableSlotSchema).max(12)
+  ),
+});
+
 export const userUpdateSchema = z.object({
   username: z.string().min(3).max(20).regex(/^[a-z0-9_]+$/, 'Lowercase letters, numbers, underscores only').optional(),
   name: z.string().min(1).max(50).optional(),
@@ -108,6 +125,7 @@ export const userUpdateSchema = z.object({
   isPublic: z.boolean().optional(),
   notificationsEnabled: z.boolean().optional(),
   targetPercentage: z.number().int().min(0).max(100).optional(),
+  customTimetable: customTimetableSchema.optional().nullable(),
 }).strict();
 
 export const userProfileSchema = z.object({

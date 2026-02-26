@@ -103,15 +103,25 @@ export async function PATCH(request, { params }) {
     }
     
     // Only allow updating whitelisted fields
-    const allowedFields = ['name', 'college', 'semester', 'section', 'group', 'favoriteSpot', 'isPublic', 'notificationsEnabled', 'targetPercentage'];
+    const allowedFields = ['name', 'college', 'semester', 'section', 'group', 'favoriteSpot', 'isPublic', 'notificationsEnabled', 'targetPercentage', 'customTimetable'];
     
     for (const field of allowedFields) {
       if (validatedData[field] !== undefined) {
         updates[field] = validatedData[field];
       }
     }
+
+    // Handle customTimetable null (delete) vs object (set)
+    const updateQuery = {};
+    if (validatedData.customTimetable === null) {
+      updateQuery.$unset = { customTimetable: 1 };
+      delete updates.customTimetable;
+    }
+    if (Object.keys(updates).length > 0) {
+      updateQuery.$set = updates;
+    }
     
-    const user = await User.findByIdAndUpdate(id, updates, { new: true });
+    const user = await User.findByIdAndUpdate(id, updateQuery, { new: true });
     
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });

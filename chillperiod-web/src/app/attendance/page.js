@@ -91,21 +91,45 @@ export default function AttendancePage() {
   const [successMessage, setSuccessMessage] = useState('');
 
   const [todaysClasses, setTodaysClasses] = useState([]);
+  const [userCustomTimetable, setUserCustomTimetable] = useState(null);
+
+  // Fetch custom timetable if available
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch(`/api/users/${session.user.id}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.customTimetable?.schedule) {
+            const schedule = data.customTimetable.schedule instanceof Map
+              ? Object.fromEntries(data.customTimetable.schedule)
+              : data.customTimetable.schedule;
+            setUserCustomTimetable({ ...data.customTimetable, schedule });
+          }
+        })
+        .catch(err => console.error('Failed to fetch custom timetable', err));
+    }
+  }, [session]);
 
   useEffect(() => {
+    const dayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+
+    // Prefer custom timetable
+    if (userCustomTimetable?.schedule?.[dayName]) {
+      setTodaysClasses(userCustomTimetable.schedule[dayName]);
+      return;
+    }
+
+    // Fallback to official timetable
     if (session?.user?.semester && session?.user?.section) {
         const { semester, section } = session.user;
-        const dayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-        
         const sectionData = TIMETABLE_DATA.sections.find(
             s => s.semester === semester && s.section === section
         );
-
         if (sectionData && sectionData.schedule[dayName]) {
             setTodaysClasses(sectionData.schedule[dayName]);
         }
     }
-  }, [session]);
+  }, [session, userCustomTimetable]);
 
   const generateExcuse = () => {
     const tones = excusesData.tones[excuseTone];
@@ -618,9 +642,11 @@ export default function AttendancePage() {
                   const dateObj = new Date(selectedDate.year, selectedDate.month, selectedDate.day);
                   const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
                   
-                  // Get schedule for user's semester/section
+                  // Get schedule: prefer custom timetable, fallback to official
                   let schedule = [];
-                  if (session?.user?.semester && session?.user?.section) {
+                  if (userCustomTimetable?.schedule?.[dayName]) {
+                    schedule = userCustomTimetable.schedule[dayName].filter(slot => slot.subject);
+                  } else if (session?.user?.semester && session?.user?.section) {
                       const sectionData = TIMETABLE_DATA.sections.find(
                           s => s.semester === session.user.semester && s.section === session.user.section
                       );

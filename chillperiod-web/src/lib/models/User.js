@@ -70,6 +70,22 @@ const UserSchema = new mongoose.Schema({
     }]
   }],
 
+  // Custom Timetable (user-defined schedule overriding the hardcoded one)
+  customTimetable: {
+    timeSlots: [{
+      slot: { type: Number },
+      time: { type: String }
+    }],
+    schedule: {
+      type: Map,
+      of: [{
+        slot: { type: Number },
+        type: { type: String, enum: ['THEORY', 'LAB', 'BREAK', 'ACTIVITY'] },
+        subject: { type: String }
+      }]
+    }
+  },
+
 }, { timestamps: true });
 
 // Indexes for performance

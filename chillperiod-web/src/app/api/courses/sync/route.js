@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import User from '@/lib/models/User';
-import { getSubjectsForSection } from '@/lib/utils/timetableUtils';
+import { getSubjectsForSection, getSubjectsFromCustomTimetable } from '@/lib/utils/timetableUtils';
 
 export async function POST(req) {
   try {
@@ -19,12 +19,17 @@ export async function POST(req) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const { semester, section, group } = user;
-    if (!semester || !section) {
+    // Prefer custom timetable subjects over hardcoded ones
+    let subjects = [];
+    if (user.customTimetable?.schedule) {
+      subjects = getSubjectsFromCustomTimetable(user.customTimetable);
+    } else {
+      const { semester, section, group } = user;
+      if (!semester || !section) {
         return NextResponse.json({ error: 'Profile incomplete' }, { status: 400 });
+      }
+      subjects = getSubjectsForSection(semester, section, group);
     }
-
-    const subjects = getSubjectsForSection(semester, section, group);
     
     if (subjects.length === 0) {
          return NextResponse.json({ message: 'No subjects found in timetable', count: 0 });

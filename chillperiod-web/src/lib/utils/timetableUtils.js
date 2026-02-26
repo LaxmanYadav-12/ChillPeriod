@@ -43,3 +43,31 @@ export function getSubjectsForSection(semester, section, group = null) {
 
   return uniqueSubjects;
 }
+
+// Extract subjects from a custom timetable (user-defined schedule)
+export function getSubjectsFromCustomTimetable(customTimetable) {
+  if (!customTimetable?.schedule) return [];
+
+  const seenNames = new Set();
+  const uniqueSubjects = [];
+
+  // customTimetable.schedule can be a Map or plain object
+  const schedule = customTimetable.schedule instanceof Map 
+    ? Object.fromEntries(customTimetable.schedule) 
+    : customTimetable.schedule;
+
+  Object.values(schedule).forEach(daySlots => {
+    if (!Array.isArray(daySlots)) return;
+    daySlots.forEach(slot => {
+      if (slot.subject && slot.type !== 'BREAK' && slot.type !== 'ACTIVITY' && !seenNames.has(slot.subject)) {
+        seenNames.add(slot.subject);
+        uniqueSubjects.push({
+          name: slot.subject,
+          type: slot.type === 'LAB' ? 'Lab' : 'Theory'
+        });
+      }
+    });
+  });
+
+  return uniqueSubjects;
+}
