@@ -21,7 +21,7 @@ export async function POST(req) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const { subject, type, subjects } = await req.json();
+    const { subject, type, slot, subjects } = await req.json();
 
     if (!subject && (!subjects || subjects.length === 0)) {
        return NextResponse.json({ error: 'Subject is required' }, { status: 400 });
@@ -51,6 +51,7 @@ export async function POST(req) {
         messageStr = `${user.name} is bunking ${subjectList}. Want to join?`;
         metadataObj = {
             subjects,
+            slots: subjects.map(s => s.slot).filter(Boolean),
             originalBunkerId: user._id,
             actionUrl: '/attendance'
         };
@@ -60,6 +61,7 @@ export async function POST(req) {
         metadataObj = {
             subject,
             classType: type,
+            slot: slot || null,
             originalBunkerId: user._id,
             actionUrl: '/attendance'
         };

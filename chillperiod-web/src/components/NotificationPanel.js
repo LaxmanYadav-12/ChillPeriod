@@ -137,10 +137,13 @@ export default function NotificationPanel({ isOpen, onClose }) {
             body: JSON.stringify({ notificationId, action: 'join' })
         });
         if (res.ok) {
+            const data = await res.json();
             // Mark as read and update UI
-            setNotifications(prev => prev.map(n => n._id === notificationId ? { ...n, read: true } : n));
+            setNotifications(prev => prev.map(n => n._id === notificationId 
+              ? { ...n, read: true, joinResult: data } 
+              : n
+            ));
             setUnreadCount(prev => Math.max(0, prev - 1));
-            // You might want to show a toast here "Joined mass bunk! Followers notified."
         }
     } catch (err) {
         console.error('Failed to join bunk', err);
@@ -333,7 +336,23 @@ export default function NotificationPanel({ isOpen, onClose }) {
                         </div>
                       </div>
                       
-                      {!notif.read && (
+                      {notif.joinResult ? (
+                        <div style={{ 
+                          marginLeft: '50px', padding: '10px', borderRadius: '8px',
+                          background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)'
+                        }}>
+                          <div style={{ color: '#10b981', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>✅</span>
+                            {notif.joinResult.bunkedCount > 0 
+                              ? `Bunked ${notif.joinResult.bunkedCount} class${notif.joinResult.bunkedCount > 1 ? 'es' : ''}: ${notif.joinResult.bunkedSubjects?.join(', ')}`
+                              : 'Joined! No overlapping classes in your schedule.'
+                            }
+                          </div>
+                          <div style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '4px' }}>
+                            Followers notified 📢
+                          </div>
+                        </div>
+                      ) : !notif.read && (
                         <div style={{ display: 'flex', gap: '8px', marginLeft: '50px' }}>
                           <button
                             onClick={() => handleJoinBunk(notif._id)}

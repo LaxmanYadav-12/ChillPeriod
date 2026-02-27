@@ -1206,10 +1206,21 @@ export default function AttendancePage() {
 
                   // 2. Notify followers about mass bunk
                   if (selectedCourses.length > 0) {
-                      const subjectsPayload = selectedCourses.map(c => ({
-                          subject: c.name,
-                          type: c.type || 'Theory'
-                      }));
+                      const subjectsPayload = selectedCourses.map(c => {
+                          // Find matching time slot from today's schedule
+                          const matchedClass = todaysClasses.find(cls => 
+                            cls.subject && c.name && (
+                              cls.subject.toLowerCase().includes(c.name.toLowerCase()) ||
+                              c.name.toLowerCase().includes(cls.subject.toLowerCase()) ||
+                              (c.code && cls.subject.toLowerCase().includes(c.code.toLowerCase()))
+                            )
+                          );
+                          return {
+                              subject: c.name,
+                              type: c.type || 'Theory',
+                              slot: matchedClass?.slot || null
+                          };
+                      });
 
                       try {
                           await fetch('/api/notifications/mass-bunk', {
