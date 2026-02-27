@@ -81,6 +81,7 @@ export default function DocsPage() {
                     <NavLink id="database" label="Database Schema" active={activeSection} />
                     <NavLink id="components" label="Component Library" active={activeSection} />
                     <NavLink id="api" label="API Reference" active={activeSection} />
+                    <NavLink id="new-features" label="Recent Features" active={activeSection} />
                     <NavLink id="roadmap" label="Future Roadmap" active={activeSection} />
                 </div>
             </aside>
@@ -96,7 +97,7 @@ export default function DocsPage() {
                     padding: '6px 16px', background: 'rgba(139,92,246,0.1)',
                     border: '1px solid rgba(139,92,246,0.2)', borderRadius: '20px', marginBottom: '24px'
                 }}>
-                    <span style={{ fontSize: '12px', color: '#a78bfa', fontWeight: 600 }}>v1.0.0 Stable</span>
+                    <span style={{ fontSize: '12px', color: '#a78bfa', fontWeight: 600 }}>v2.0.0 — Heatmap + Bunk Together</span>
                 </div>
 
                 <h1 style={{
@@ -161,6 +162,7 @@ export default function DocsPage() {
                             <li><strong>Today's Classes:</strong> Your daily schedule is automatically populated. You can mark "Present" or "Bunked" with a single click.</li>
                             <li><strong>"Safe to Bunk" Indicator:</strong> ChillPeriod constantly measures your current attendance against the target threshold (e.g., 75%). It will visibly show if you are in the "Safe", "Caution" (close to dropping), or "Danger" (already below) zone.</li>
                             <li><strong>Automatic Sync:</strong> Your stats (Target%, Bunks saved, and Total Attendance) update in real-time based on your clicks.</li>
+                            <li><strong>GitHub-Style Heatmap 📊:</strong> A full-year contribution graph right on your dashboard. Green for attended, red for bunked, amber for mixed days. Shows your current streak, best streak, and active days — also visible on friend profiles.</li>
                         </ul>
                     </div>
 
@@ -175,6 +177,7 @@ export default function DocsPage() {
                          <ul style={{ paddingLeft: '24px', color: 'var(--text-secondary)', lineHeight: 1.7, listStyleType: 'disc' }}>
                             <li><strong>Live Status:</strong> When you mark a class as "Bunked", your status goes live. Friends following you instantly see that you're "Bunking" or "Chilling" in their Friends Activity feed.</li>
                             <li><strong>Mass Bunk Alert 📢:</strong> Next to your classes on the Attendance page, there is a megaphone icon. Clicking this sends a global push notification to everyone following you, asking if they want to join the bunk. If they accept, the alert cascades to their followers, organizing a mass bunk effortlessly.</li>
+                            <li><strong>Bunk Together 🤝:</strong> When a friend mass bunks, clicking "Bunk Together" doesn't blindly copy their subjects — it detects the <em>time slots</em> they're bunking and marks <strong>your own classes</strong> that overlap with those time slots. Different timetables? No problem. The system maps friend slots → your schedule automatically.</li>
                             <li><strong>Search & Follow:</strong> Navigate to the 🔍 Find Friends page to search for usernames and build your follower network. <em>Leaderboard</em> points are awarded to the most legendary "bunkers."</li>
                         </ul>
                     </div>
@@ -190,7 +193,7 @@ export default function DocsPage() {
                          <ul style={{ paddingLeft: '24px', color: 'var(--text-secondary)', lineHeight: 1.7, listStyleType: 'disc' }}>
                             <li><strong>Chill Spots 📍:</strong> A crowdsourced feed of the best local cafes, parks, and gaming lounges near your campus. When bunking, you can select a Spot, opening Google Maps routing automatically. You can also "Upvote" spots to influence their ranking.</li>
                             <li><strong>Smart Syllabus 📚:</strong> Powered by SyllabusX APIs, you can check off topics you've covered in class. It features one-click links to specific study notes, previous year question papers (PYQs), and required lab experiments.</li>
-                            <li><strong>Class Timetable 📅:</strong> A dedicated, easy-to-read view of your week's schedule, segmented by Theory and Lab blocks.</li>
+                            <li><strong>Class Timetable 📅:</strong> A dedicated, easy-to-read view of your week's schedule, segmented by Theory and Lab blocks. Auto-populated by Semester & Section, with support for lab groups (G1/G2) and custom timetable overrides.</li>
                         </ul>
                     </div>
                     
@@ -206,6 +209,23 @@ export default function DocsPage() {
                             <li><strong>Slash Commands:</strong> Type <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/bunk</span>, <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/attendance</span>, or <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/spots</span> anywhere in a server.</li>
                             <li><strong>Seamless Syncing:</strong> As long as your profile is linked with Discord, taking action in your server immediately updates the web database.</li>
                             <li><strong>Excuse Generator:</strong> Use <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/excuse [tone]</span> in Discord to generate a funny, professional, or dramatic excuse for missing class.</li>
+                            <li><strong>Task Commands:</strong> Use <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/tasks</span>, <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/addtask</span>, and <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/donetask</span> to manage your to-do list without leaving Discord.</li>
+                        </ul>
+                    </div>
+
+                    {/* 6. Tasks & Productivity */}
+                    <div style={{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '24px', padding: '32px' }}>
+                        <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#ec4899', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '28px' }}>6️⃣</span> Tasks & Pomodoro
+                        </h3>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '16px' }}>
+                            Stay productive beyond the classroom with built-in task management and focus tools:
+                        </p>
+                         <ul style={{ paddingLeft: '24px', color: 'var(--text-secondary)', lineHeight: 1.7, listStyleType: 'disc' }}>
+                            <li><strong>Task Lists:</strong> Create and manage to-do items tied to your courses. Mark them complete as you go.</li>
+                            <li><strong>Pomodoro Timer:</strong> Built-in study timer with customizable work/break intervals to boost focus.</li>
+                            <li><strong>Weekly Analytics:</strong> Track your productivity over time with completion rates and study patterns.</li>
+                            <li><strong>Discord Sync:</strong> Tasks created on the web appear in Discord and vice versa — use <span style={{fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '2px 4px', borderRadius: '4px'}}>/tasks</span> to see them anywhere.</li>
                         </ul>
                     </div>
 
@@ -296,7 +316,8 @@ Bunking --> Chilling : Override Status`} />
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <TechRow name="Next.js 16" desc="App Router architecture using React Server Components for optimal performance and SEO." />
                             <TechRow name="React 19" desc="Leveraging the latest features like Actions and simplified hooks for state management." />
-                            <TechRow name="Tailwind CSS" desc="Utility-first styling system enabling rapid UI development with a custom design system." />
+                            <TechRow name="Vanilla CSS" desc="Custom design system with CSS Variables for seamless light/dark mode theming." />
+                            <TechRow name="SVG Charts" desc="Custom-built attendance heatmap using SVG for pixel-perfect GitHub-style contribution graphs." />
                             <TechRow name="Framer Motion" desc="Declarative animations for smooth transitions and interactive micro-interactions." />
                         </div>
                     </div>
@@ -466,6 +487,7 @@ User "1" --> "*" User : follows`} />
                      <ComponentCard name="Navbar" desc="Responsive navigation bar that adapts to mobile and desktop views. Features a hamburger menu, dynamic route highlighting, and a user profile dropdown with theme toggling." />
                      <ComponentCard name="UserListModal" desc="A versatile modal for displaying lists of users (Followers/Following). Includes a real-time search bar to filter users and quick-action buttons for visiting profiles." />
                      <ComponentCard name="FriendsActivity" desc="A live polling component that fetches recent activity from friends. Displays their current status (Bunking/Chilling) with relative timestamps (e.g., '2 mins ago')." />
+                     <ComponentCard name="AttendanceHeatmap" desc="A GitHub-style contribution graph for attendance. Renders a 52-week SVG grid with color-coded cells (green=attended, red=bunked, amber=mixed). Features auto-scroll to recent data, streaks, and hover tooltips." />
                      <ComponentCard name="NotificationManager" desc="A background service component that handles global push notifications and toast alerts. Manages the lifecycle of alerts to prevent spamming the user." />
                 </div>
                 
@@ -482,6 +504,11 @@ User "1" --> "*" User : follows`} />
                             props={[['subject', 'string', 'Course Name'], ['attended', 'number', 'Classes attended'], ['total', 'number', 'Total classes']]} 
                             usage="<AttendanceCard subject='DSA' attended={12} total={15} />"
                         />
+                        <ComponentDetail 
+                            name="AttendanceHeatmap" 
+                            props={[['attendanceLog', 'object', 'Date-keyed map: { "YYYY-MM-DD": { attended, bunked } }']]} 
+                            usage="<AttendanceHeatmap attendanceLog={attendanceLog} />"
+                        />
                      </div>
                 </div>
             </section>
@@ -495,6 +522,10 @@ User "1" --> "*" User : follows`} />
                     <ApiEndpoint method="POST" path="/api/attendance/update" desc="Upserts attendance records for a specific subject. Recalculates aggregate percentage automatically." />
                     <ApiEndpoint method="GET" path="/api/spots/nearby" desc="Returns a list of spots sorted by geospatial distance from the provided lat/long coordinates." />
                     <ApiEndpoint method="POST" path="/api/friends/nudge" desc="Sends a push notification to a friend. Rate-limited to 1 nudge per hour per friend." />
+                    <ApiEndpoint method="POST" path="/api/notifications/mass-bunk" desc="Creates a mass bunk alert with time slot metadata. Notifies all followers with 'Bunk Together' option." />
+                    <ApiEndpoint method="POST" path="/api/notifications/respond" desc="Handles 'Bunk Together' response. Maps friend's bunked time slots to your timetable, marks overlapping classes, cascades to your followers." />
+                    <ApiEndpoint method="GET" path="/api/users/:id" desc="Fetches a user's public profile including attendanceLog, followers, following, courses, and stats." />
+                    <ApiEndpoint method="GET" path="/api/tasks" desc="Fetches all tasks for the authenticated user. Synced between web and Discord bot." />
                 </div>
 
                 <div style={{ marginTop: '48px' }}>
@@ -516,6 +547,30 @@ R->>D: Execute Query
 D-->>R: Data
 R-->>C: JSON Response`} />
                     </div>
+                </div>
+            </section>
+
+            {/* Recent Features */}
+            <section id="new-features" style={{ marginBottom: '120px', scrollMarginTop: '120px' }}>
+                <SectionTitle title="Recent Features" subtitle="Latest additions to the platform (v2.0.0)." />
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+                    <InfoCard
+                        icon="📊" title="GitHub-Style Heatmap"
+                        desc="A full-year contribution graph on your attendance dashboard and friend profiles. Green for attended, red for bunked, amber for mixed. Shows streaks, active days, and auto-scrolls to recent data."
+                    />
+                    <InfoCard
+                        icon="🤝" title="Bunk Together"
+                        desc="Timeframe-aware bunking — when a friend mass bunks, it maps their time slots to YOUR timetable and marks only your overlapping classes. Cascades to your followers with your own subjects."
+                    />
+                    <InfoCard
+                        icon="📅" title="Custom Timetable"
+                        desc="Override the auto-generated timetable with your own schedule. Supports lab groups (G1/G2) and custom time slots."
+                    />
+                    <InfoCard
+                        icon="📋" title="Tasks & Pomodoro"
+                        desc="Course-linked to-do lists with a built-in Pomodoro timer. Synced between web and Discord with weekly analytics."
+                    />
                 </div>
             </section>
 
