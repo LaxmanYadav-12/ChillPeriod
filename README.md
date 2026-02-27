@@ -50,7 +50,7 @@ Both share the **same MongoDB database** with synchronized schemas.
 ### 🤖 Discord Bot (16 Commands)
 - `/attendance` `/attend` `/bunk` — Track from Discord
 - `/massbunk` — Alert the whole server with join buttons
-- `/excuse` — Generate random Hinglish excuses 😂
+- `/excuse` — Generate random Hinglish excuses 
 - `/leaderboard` — Top bunkers at your college
 - `/profile` — View rich attendance profiles
 - `/tasks` `/addtask` `/donetask` — Manage tasks from Discord
