@@ -10,9 +10,17 @@ The web application for ChillPeriod — track attendance, discover chill spots, 
 
 ### 📊 Attendance Tracker
 - **Per-course tracking** with visual progress bars
+- **GitHub-style heatmap** — full-year contribution graph with green (attended), red (bunked), amber (mixed)
 - **Safety status**: 🟢 Safe / 🟡 Caution / 🔴 Danger zones
 - **Bunk calculator**: Know exactly how many classes you can skip
 - **Mass Bunk**: One-click bunk + cascading alerts to followers
+- **Bunk Together**: Timeframe-aware — marks YOUR overlapping classes when joining a friend's bunk, not theirs
+
+### 📅 Custom Timetable
+- Auto-populated by selecting Semester & Section
+- Support for lab groups (G1/G2)
+- Custom timetable override for personalized schedules
+- Today's schedule at a glance
 
 ### 📚 SyllabusX Integration
 - Real-time B.Tech syllabus from [SyllabusX](https://syllabusx.live)
@@ -22,29 +30,30 @@ The web application for ChillPeriod — track attendance, discover chill spots, 
 
 ### 📍 Chill Spots
 - Crowdsourced cafes, parks, gaming zones near campus
+- College-aware spot discovery using Overpass API
 - Upvote (🔥) / Downvote (👎) system
 - Google Maps integration
 - Admin controls for moderation
 
 ### 👥 Social & Profiles
 - Follow friends, track their bunk activity
+- **Attendance heatmap on friend profiles** — see their year at a glance
 - Public/private profile toggle
 - Bunk titles: Rookie 🌱 → Bunk Legend 👑
+- Achievements system
 - Account management with Delete Account option
 
 ### 📋 Tasks & Productivity
 - Manage to-do lists specifically tied to courses
 - Focus mode with built-in **Pomodoro Timer**
 - Weekly productivity analytics and completion rates
+- Synced with Discord bot (`/tasks` `/addtask` `/donetask`)
 
 ### 🔔 Notifications
 - Push Notifications for follower alerts and bunk invites
 - Mass bunk cascade alerts
+- Bunk Together result feedback (shows which classes were bunked)
 - In-app slide-out notification panel
-
-### 📅 Timetable
-- Auto-populated by selecting Semester & Section
-- Today's schedule at a glance
 
 ### 🛡️ Privacy & Security
 - Terms & Conditions + Privacy Policy
@@ -72,19 +81,23 @@ src/
 ├── app/                # Next.js App Router pages & API
 │   ├── api/            # REST API routes
 │   │   ├── attendance/ # Mark, fetch attendance
-│   │   ├── notifications/ # Mass bunk, follow alerts
+│   │   ├── notifications/ # Mass bunk, follow alerts, bunk together
 │   │   ├── spots/      # CRUD + voting
 │   │   └── users/      # Profile, social
-│   ├── attendance/     # Attendance dashboard
+│   ├── attendance/     # Attendance dashboard + heatmap
 │   ├── spots/          # Spots discovery page
-│   ├── profile/        # User profile
+│   ├── profile/        # User profile + friend profiles with heatmap
 │   ├── syllabus/       # SyllabusX integration
+│   ├── tasks/          # Task management + Pomodoro
 │   ├── docs/           # Documentation page
 │   ├── privacy/        # Privacy policy
 │   └── terms/          # Terms & conditions
 ├── components/         # Reusable UI components
+│   ├── AttendanceHeatmap.js  # GitHub-style contribution graph
+│   ├── NotificationPanel.js  # Slide-out notifications
+│   └── ...
 ├── lib/                # Utilities & DB
-│   ├── data/           # Static data (excuses, timetable)
+│   ├── data/           # Static data (excuses, timetable, colleges)
 │   └── models/         # Mongoose schemas
 └── models/             # Additional models (Spot, Notification)
 ```

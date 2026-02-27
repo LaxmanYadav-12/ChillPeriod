@@ -4,7 +4,7 @@
 
 ChillPeriod is a student-centric platform for managing attendance, discovering chill spots, and coordinating bunks with your squad — available as both a **web app** and a **Discord bot**.
 
-[![Live Site](https://img.shields.io/badge/🌐_Live-chillperiod.in-8b5cf6?style=for-the-badge)](https://https://chill-period.vercel.app/)
+[![Live Site](https://img.shields.io/badge/🌐_Live-chillperiod.in-8b5cf6?style=for-the-badge)](https://chill-period.vercel.app/)
 [![Discord Bot](https://img.shields.io/badge/🤖_Discord-Add_Bot-5865F2?style=for-the-badge)](https://discord.com/oauth2/authorize?client_id=1468284051839520848&permissions=8&scope=bot+applications.commands)
 
 ---
@@ -26,8 +26,15 @@ Both share the **same MongoDB database** with synchronized schemas.
 
 ### 📊 Smart Attendance
 - Per-course tracking with **Safe / Caution / Danger** zones
+- **GitHub-style heatmap** — full-year contribution graph showing attendance activity
 - **Mass Bunk** mode with cascading notifications to followers
+- **Bunk Together** — timeframe-aware bunking that marks YOUR overlapping classes when a friend mass bunks
 - Automatic bunk titles (Rookie → Bunk Legend 👑)
+
+### 📅 Custom Timetable
+- Auto-populated by selecting Semester & Section
+- Support for lab groups (G1/G2)
+- Custom timetable override for personalized schedules
 
 ### 📚 SyllabusX Integration
 - Real-time B.Tech syllabus from [SyllabusX](https://syllabusx.live)
@@ -37,6 +44,7 @@ Both share the **same MongoDB database** with synchronized schemas.
 ### 📍 Chill Spots
 - Crowdsourced cafes, parks, and gaming zones near campus
 - Upvote/downvote system to highlight the best places
+- College-aware spot discovery with Overpass API
 - Google Maps integration
 
 ### 🤖 Discord Bot (16 Commands)
@@ -45,11 +53,13 @@ Both share the **same MongoDB database** with synchronized schemas.
 - `/excuse` — Generate random Hinglish excuses 😂
 - `/leaderboard` — Top bunkers at your college
 - `/profile` — View rich attendance profiles
+- `/tasks` `/addtask` `/donetask` — Manage tasks from Discord
 - `/findspots` `/addspot` `/spotinfo` — Spots system
 - And more! Use `/help` to see all commands
 
 ### 👥 Social Features
 - Follow friends, see their bunk activity
+- GitHub-style attendance heatmap on friend profiles
 - Cascading mass bunk notifications
 - Public/private profile controls
 
@@ -57,6 +67,7 @@ Both share the **same MongoDB database** with synchronized schemas.
 - Manage to-do lists specifically tied to courses
 - Focus mode with built-in **Pomodoro Timer**
 - Weekly productivity analytics and completion rates
+- Discord integration with `/tasks` commands
 
 ### 🔔 Smart Notifications
 - Push Notifications for follower alerts and bunk invites

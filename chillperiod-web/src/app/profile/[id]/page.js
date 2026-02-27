@@ -1,6 +1,7 @@
 'use client';
 
 import MobileNav from '@/components/MobileNav';
+import AttendanceHeatmap from '@/components/AttendanceHeatmap';
 import { useState, useEffect, use } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -37,8 +38,14 @@ export default function UserProfile({ params }) {
       if (res.ok) {
         const data = await res.json();
         setUserData(data);
-        if (session?.user?.id && data.followers) {
-          setIsFollowing(data.followers.includes(session.user.id));
+        if (session?.user?.id && data.followers && Array.isArray(data.followers)) {
+          const myId = String(session.user.id).trim();
+          const alreadyFollowing = data.followers.some(f => {
+            const rawId = f?._id || f?.id || f;
+            const fId = typeof rawId === 'object' ? String(rawId.$oid || rawId._id || rawId) : String(rawId);
+            return fId.trim() === myId;
+          });
+          setIsFollowing(alreadyFollowing);
         }
       } else {
         if (res.status === 404) setError('User not found.');
@@ -228,6 +235,26 @@ export default function UserProfile({ params }) {
                 </div>
                 </div>
             </div>
+
+            {/* Attendance Heatmap */}
+            {(() => {
+              const logMap = {};
+              const rawLog = user.attendanceLog || [];
+              if (Array.isArray(rawLog)) {
+                rawLog.forEach(day => {
+                  if (!day.date || !day.actions) return;
+                  let attended = 0, bunked = 0;
+                  day.actions.forEach(a => {
+                    if (a.status === 'attended') attended++;
+                    if (a.status === 'bunked') bunked++;
+                  });
+                  if (attended > 0 || bunked > 0) {
+                    logMap[day.date] = { attended, bunked };
+                  }
+                });
+              }
+              return <AttendanceHeatmap attendanceLog={logMap} />;
+            })()}
 
             {/* Achievements */}
             <div style={{ marginBottom: '32px' }}>

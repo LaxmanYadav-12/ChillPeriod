@@ -1,12 +1,12 @@
 # ChillPeriod Discord Bot 🤖
 
-A Discord bot with **16 slash commands** for tracking attendance, finding chill spots, generating excuses, and coordinating mass bunks — synced with the [ChillPeriod web app](https://chillperiod.in).
+A Discord bot with **19 slash commands** for tracking attendance, finding chill spots, generating excuses, managing tasks, and coordinating mass bunks — synced with the [ChillPeriod web app](https://chillperiod.in).
 
 [![Add to Discord](https://img.shields.io/badge/Add_to_Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/oauth2/authorize?client_id=1468284051839520848&permissions=8&scope=bot+applications.commands)
 
 ---
 
-## 🎮 All 16 Commands
+## 🎮 All 19 Commands
 
 ### 📊 Attendance
 | Command | Description |
@@ -25,6 +25,13 @@ A Discord bot with **16 slash commands** for tracking attendance, finding chill 
 | `/leaderboard` | View top bunkers at your college |
 | `/profile` | View your or someone's profile |
 | `/excuse` | Generate a random Hinglish excuse |
+
+### 📋 Tasks
+| Command | Description |
+|---------|-------------|
+| `/tasks` | View your task list |
+| `/addtask` | Add a new task |
+| `/donetask` | Mark a task as complete |
 
 ### 📍 Chill Spots
 | Command | Description |
@@ -49,6 +56,7 @@ A Discord bot with **16 slash commands** for tracking attendance, finding chill 
 - **🏆 Bunk Leaderboard** — Top 10 bunkers at your college with bunk titles (Rookie → Bunk Legend 👑)
 - **👤 Rich Profiles** — Visual progress bar, course breakdown, streaks, social stats
 - **🔄 Synced with Web** — Same database as [chillperiod.in](https://chillperiod.in), data flows both ways
+- **📋 Task Management** — Add, view, and complete tasks right from Discord
 
 ---
 
@@ -85,6 +93,9 @@ chillperiod-bot/
 │   │   ├── setcollege.js
 │   │   ├── spotinfo.js
 │   │   └── addspot.js
+│   │   ├── tasks.js
+│   │   ├── addtask.js
+│   │   └── donetask.js
 │   ├── data/
 │   │   └── excuses.js     # Excuse database (Hinglish)
 │   ├── events/            # Discord event handlers

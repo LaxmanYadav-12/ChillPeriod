@@ -40,7 +40,7 @@ export default function Home() {
             border: '1px solid rgba(139,92,246,0.2)', borderRadius: '20px', marginBottom: '32px'
           }}>
             <span style={{ fontSize: '20px' }}>{emojis[currentEmoji]}</span>
-            <span id="badge-text" style={{ color: '#a78bfa', fontSize: '14px' }}>Tasks + Pomodoro + Mass Bunk + Syllabus!</span>
+            <span id="badge-text" style={{ color: '#a78bfa', fontSize: '14px' }}>Heatmap + Bunk Together + Custom Timetable!</span>
           </div>
 
           {/* Heading */}
@@ -114,15 +114,18 @@ export default function Home() {
 
         <div id="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
           {[
+            { icon: '📊', title: 'GitHub-Style Heatmap', desc: 'A full-year contribution graph for attendance. Green for attended, red for bunked, streaks and stats at a glance.' },
+            { icon: '🤝', title: 'Bunk Together', desc: 'When a friend mass bunks, click Bunk Together — it auto-marks YOUR overlapping classes, not theirs.' },
             { icon: '✅', title: 'Tasks & Pomodoro', desc: 'Stay productive with a sleek to-do list, study timer, and weekly analytics.' },
             { icon: '🤖', title: 'Discord Bot', desc: '16 slash commands — track attendance, find spots, and mass bunk right from Discord.' },
             { icon: '📚', title: 'SyllabusX Integration', desc: 'Real-time B.Tech syllabus with progress tracking, notes, and PYQs.' },
             { icon: '🚨', title: 'Cascading Mass Bunk', desc: 'One-click alert to followers. If they join, their friends get invited too!' },
+            { icon: '📅', title: 'Custom Timetable', desc: 'Auto-populated by semester & section, or build your own. Lab groups (G1/G2) supported.' },
             { icon: '🛡️', title: 'Safety Status', desc: 'Know your "Safe", "Caution", and "Danger" attendance zones instantly.' },
             { icon: '😂', title: 'Excuse Generator', desc: 'Random Hinglish excuses in 5 tones — funny, serious, medical, professional, dramatic.' },
             { icon: '📍', title: 'Chill Spots', desc: 'Discover cafes, parks, and gaming zones crowdsourced by students.' },
             { icon: '🏆', title: 'Bunk Leaderboard', desc: 'Compete for the top bunker spot at your college. Rookie to Bunk Legend!' },
-            { icon: '👥', title: 'Social Profiles', desc: 'Follow friends, view their stats, and track their bunk activity.' },
+            { icon: '👥', title: 'Social Profiles', desc: 'Follow friends, view their heatmap, and track their bunk activity.' },
             { icon: '🔔', title: 'Smart Alerts', desc: 'Get notified before you drop below 75%. Cross-platform web + Push Notifications.' },
           ].map((f, i) => (
             <div key={i} style={{ 

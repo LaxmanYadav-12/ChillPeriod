@@ -1,8 +1,9 @@
 'use client';
 
 import MobileNav from '@/components/MobileNav';
+import AttendanceHeatmap from '@/components/AttendanceHeatmap';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams } from 'next/navigation';
 
@@ -29,8 +30,15 @@ export default function UserProfilePage() {
         const data = await res.json();
         setUser(data);
         // Check if current user follows this user
-        if (session?.user?.id && data.followers) {
-          setIsFollowing(data.followers.some(f => String(f._id) === String(session.user.id)));
+        if (session?.user?.id && data.followers && Array.isArray(data.followers)) {
+          const myId = String(session.user.id).trim();
+          const alreadyFollowing = data.followers.some(f => {
+            // Handle all possible formats: populated object, raw ObjectId, plain string
+            const rawId = f?._id || f?.id || f;
+            const fId = typeof rawId === 'object' ? String(rawId.$oid || rawId._id || rawId) : String(rawId);
+            return fId.trim() === myId;
+          });
+          setIsFollowing(alreadyFollowing);
         }
       }
     } catch (error) {
@@ -278,6 +286,27 @@ export default function UserProfilePage() {
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Attended</div>
             </div>
           </div>
+
+          {/* Attendance Heatmap */}
+          {(() => {
+            // Transform array format to object format for the heatmap
+            const logMap = {};
+            const rawLog = displayUser.attendanceLog || [];
+            if (Array.isArray(rawLog)) {
+              rawLog.forEach(day => {
+                if (!day.date || !day.actions) return;
+                let attended = 0, bunked = 0;
+                day.actions.forEach(a => {
+                  if (a.status === 'attended') attended++;
+                  if (a.status === 'bunked') bunked++;
+                });
+                if (attended > 0 || bunked > 0) {
+                  logMap[day.date] = { attended, bunked };
+                }
+              });
+            }
+            return <AttendanceHeatmap attendanceLog={logMap} />;
+          })()}
 
           {/* Favorite Spot */}
           {displayUser.favoriteSpot?.name && (

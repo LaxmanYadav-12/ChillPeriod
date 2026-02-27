@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import AttendanceTrendChart from '@/components/charts/AttendanceTrendChart';
+import AttendanceHeatmap from '@/components/AttendanceHeatmap';
 import SubjectPieChart from '@/components/charts/SubjectPieChart';
 import MonthlyBarChart from '@/components/charts/MonthlyBarChart';
 import { excusesData } from '@/lib/data/excuses';
@@ -1339,6 +1340,9 @@ export default function AttendancePage() {
 
           {/* Friends Activity */}
           <FriendsActivity />
+
+          {/* GitHub-style Attendance Heatmap */}
+          <AttendanceHeatmap attendanceLog={attendanceLog} />
 
           {/* Two Column Layout */}
           <div id="attendance-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '32px' }}>
